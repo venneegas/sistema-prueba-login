@@ -78,7 +78,7 @@ const LoginForm = ({ onLoginSuccess }) => {
             <span className="text-blue-300">Propios</span>
           </h1>
           <p className="text-blue-100/90 text-lg leading-relaxed font-medium">
-            Plataforma oficial para la declaración de sustentos, ingresos y egresos de las Instituciones Educativas de la jurisdicción.
+            Plataforma oficial para la declaración de ingresos y egresos de las Instituciones Educativas de la jurisdicción.
           </p>
           
           <div className="mt-16 flex items-center gap-4 text-xs text-blue-200/60 font-semibold uppercase tracking-widest">

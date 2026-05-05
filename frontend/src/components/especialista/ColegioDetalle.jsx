@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, FileText, DollarSign, Download, Eye, Building2, CheckCircle, XCircle, AlertCircle, X, Loader2 } from 'lucide-react';
 
-const ColegioDetalle = ({ colegio, onBack, trimestre }) => {
+const ColegioDetalle = ({ colegio, onBack, trimestre, anio }) => {
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
   const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
   const [rejectComment, setRejectComment] = useState('');
@@ -17,7 +17,6 @@ const ColegioDetalle = ({ colegio, onBack, trimestre }) => {
     const fetchFinanzas = async () => {
       setLoadingFinanzas(true);
       try {
-        const anio = new Date().getFullYear();
         // Nota: colegio.id equivale al directorId en nuestra consulta SQL
         const response = await fetch(`http://localhost:5000/api/especialista/colegio/${colegio.id}/finanzas?trimestre=${trimestre}&anio=${anio}`);
         const data = await response.json();
@@ -37,14 +36,13 @@ const ColegioDetalle = ({ colegio, onBack, trimestre }) => {
     };
 
     if (colegio?.id) fetchFinanzas();
-  }, [colegio.id, trimestre]);
+  }, [colegio.id, trimestre, anio]);
 
   // Efecto para traer los PDFs subidos
   useEffect(() => {
     const fetchPdfs = async () => {
       setLoadingPdfs(true);
       try {
-        const anio = new Date().getFullYear();
         const response = await fetch(`http://localhost:5000/api/especialista/colegio/${colegio.id}/pdfs?trimestre=${trimestre}&anio=${anio}`);
         const data = await response.json();
         
@@ -59,7 +57,7 @@ const ColegioDetalle = ({ colegio, onBack, trimestre }) => {
     };
 
     if (colegio?.id) fetchPdfs();
-  }, [colegio.id, trimestre]);
+  }, [colegio.id, trimestre, anio]);
 
   const formatearMoneda = (monto) => {
     return `S/ ${Number(monto || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -96,7 +94,6 @@ const ColegioDetalle = ({ colegio, onBack, trimestre }) => {
     }
     
     try {
-      const anio = new Date().getFullYear();
       const response = await fetch('http://localhost:5000/api/especialista/auditar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -125,7 +122,6 @@ const ColegioDetalle = ({ colegio, onBack, trimestre }) => {
 
   const handleApproveSubmit = async () => {
     try {
-      const anio = new Date().getFullYear();
       const response = await fetch('http://localhost:5000/api/especialista/auditar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

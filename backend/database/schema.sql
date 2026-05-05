@@ -1,390 +1,348 @@
 -- ============================================
--- UGEL: Schema SQL Normalizado para MySQL
--- Sistema de Gestión Financiera Educativa
+-- UGEL: Schema SQL limpio para MySQL
+-- Sistema de Gestion Financiera Educativa
+-- Estructura actualizada desde el backup 2026-05-05
 -- ============================================
 
--- 1. Crear la base de datos (ejecutar solo una vez)
 CREATE DATABASE IF NOT EXISTS ugel_db;
 USE ugel_db;
 
 -- ============================================
 -- TABLA 1: instituciones_educativas
--- Descripción: Almacena datos de colegios/institutos
 -- ============================================
 CREATE TABLE IF NOT EXISTS instituciones_educativas (
-  id                      INT AUTO_INCREMENT PRIMARY KEY,
-  codigo_modular          VARCHAR(20) UNIQUE NOT NULL COMMENT 'Código MINEDU único',
-  nombre_ie               VARCHAR(200) NOT NULL COMMENT 'Nombre completo de la institución',
-  nivel_educativo         ENUM('inicial', 'primaria', 'secundaria', 'técnico', 'superior') NOT NULL,
-  modalidad               ENUM('regular', 'especial', 'alternativa') NOT NULL,
-  provincia               VARCHAR(100) NOT NULL,
-  distrito                VARCHAR(100) NOT NULL,
-  creado_en               TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  actualizado_en          TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  
-  INDEX idx_codigo_modular (codigo_modular),
-  INDEX idx_provincia_distrito (provincia, distrito)
+  id                 INT AUTO_INCREMENT PRIMARY KEY,
+  codigo_modular     VARCHAR(20) NOT NULL COMMENT 'Codigo MINEDU unico',
+  nombre_ie          VARCHAR(200) NOT NULL COMMENT 'Nombre completo de la institucion',
+  nivel_educativo    ENUM('inicial', 'primaria', 'secundaria', 'tecnico', 'superior') NOT NULL,
+  modalidad          ENUM('regular', 'especial', 'alternativa') NOT NULL,
+  provincia          VARCHAR(100) NOT NULL,
+  distrito           VARCHAR(100) NOT NULL,
+  creado_en          TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  actualizado_en     TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+  UNIQUE KEY uk_instituciones_codigo_modular (codigo_modular),
+  KEY idx_codigo_modular (codigo_modular),
+  KEY idx_provincia_distrito (provincia, distrito)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   COMMENT='Tabla de instituciones educativas';
 
 -- ============================================
 -- TABLA 2: directores
--- Descripción: Almacena datos personales de directores
--- Relación: Un director pertenece a UNA institución
 -- ============================================
 CREATE TABLE IF NOT EXISTS directores (
-  id                      INT AUTO_INCREMENT PRIMARY KEY,
-  dni                     VARCHAR(8) UNIQUE NOT NULL COMMENT 'DNI peruano (8 dígitos)',
-  nombres                 VARCHAR(100) NOT NULL,
-  apellido_paterno        VARCHAR(100) NOT NULL,
-  apellido_materno        VARCHAR(100),
-  celular                 VARCHAR(20),
-  email                   VARCHAR(150) UNIQUE NOT NULL,
-  institucion_id          INT NOT NULL COMMENT 'Institución donde es director',
-  creado_en               TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  actualizado_en          TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  
-  CONSTRAINT fk_directores_institucion 
-    FOREIGN KEY (institucion_id) 
-    REFERENCES instituciones_educativas(id) 
-    ON DELETE RESTRICT 
-    ON UPDATE CASCADE,
-  
-  INDEX idx_dni (dni),
-  INDEX idx_email (email),
-  INDEX idx_institucion (institucion_id)
+  id                 INT AUTO_INCREMENT PRIMARY KEY,
+  dni                VARCHAR(8) NOT NULL COMMENT 'DNI peruano (8 digitos)',
+  nombres            VARCHAR(100) NOT NULL,
+  apellido_paterno   VARCHAR(100) NOT NULL,
+  apellido_materno   VARCHAR(100) DEFAULT NULL,
+  celular            VARCHAR(20) DEFAULT NULL,
+  email              VARCHAR(150) NOT NULL,
+  institucion_id     INT NOT NULL COMMENT 'Institucion donde es director',
+  creado_en          TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  actualizado_en     TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+  UNIQUE KEY uk_directores_dni (dni),
+  UNIQUE KEY uk_directores_email (email),
+  KEY idx_dni (dni),
+  KEY idx_email (email),
+  KEY idx_institucion (institucion_id),
+  CONSTRAINT fk_directores_institucion
+    FOREIGN KEY (institucion_id)
+    REFERENCES instituciones_educativas(id)
+    ON DELETE RESTRICT
+    ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   COMMENT='Tabla de directores de instituciones educativas';
 
 -- ============================================
 -- TABLA 3: usuarios
--- Descripción: Tabla de login/autenticación para el sistema
--- Relación: Un usuario puede ser director (opcionalmente) o especialista
 -- ============================================
 CREATE TABLE IF NOT EXISTS usuarios (
   id                      INT AUTO_INCREMENT PRIMARY KEY,
-  email                   VARCHAR(150) UNIQUE NOT NULL COMMENT 'Email para login',
-  password_hash           VARCHAR(255) NOT NULL COMMENT 'Contraseña hasheada con bcrypt',
+  email                   VARCHAR(150) NOT NULL COMMENT 'Email para login',
+  nombre                  VARCHAR(100) DEFAULT NULL COMMENT 'Nombre visible para admins y especialistas',
+  password_hash           VARCHAR(255) NOT NULL COMMENT 'Contrasena hasheada con bcrypt',
   debe_cambiar_password   BOOLEAN NOT NULL DEFAULT TRUE COMMENT 'Obliga al usuario a cambiar su clave en el primer ingreso',
   rol                     ENUM('director', 'especialista', 'admin') NOT NULL DEFAULT 'director',
-  director_id             INT UNIQUE COMMENT 'FK opcional: si es director, referencia a tabla directores',
+  director_id             INT DEFAULT NULL COMMENT 'FK opcional: si es director, referencia a tabla directores',
   estado                  ENUM('activo', 'inactivo', 'suspendido') DEFAULT 'activo',
-  ultimo_login            TIMESTAMP NULL COMMENT 'Últimas fecha/hora de login',
-  creado_en               TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  actualizado_en          TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  
-  CONSTRAINT fk_usuarios_director 
-    FOREIGN KEY (director_id) 
-    REFERENCES directores(id) 
-    ON DELETE SET NULL 
-    ON UPDATE CASCADE,
-  
-  INDEX idx_email (email),
-  INDEX idx_rol (rol),
-  INDEX idx_estado (estado),
-  INDEX idx_director_id (director_id),
-  INDEX idx_debe_cambiar_password (debe_cambiar_password)
+  ultimo_login            TIMESTAMP NULL DEFAULT NULL COMMENT 'Ultima fecha/hora de login',
+  creado_en               TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  actualizado_en          TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  reset_code              VARCHAR(6) DEFAULT NULL COMMENT 'Codigo temporal para recuperacion de password',
+  reset_expires           DATETIME DEFAULT NULL COMMENT 'Fecha de expiracion del codigo temporal',
+
+  UNIQUE KEY uk_usuarios_email (email),
+  UNIQUE KEY uk_usuarios_director_id (director_id),
+  KEY idx_email (email),
+  KEY idx_rol (rol),
+  KEY idx_estado (estado),
+  KEY idx_director_id (director_id),
+  KEY idx_debe_cambiar_password (debe_cambiar_password),
+  CONSTRAINT fk_usuarios_director
+    FOREIGN KEY (director_id)
+    REFERENCES directores(id)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-  COMMENT='Tabla de usuarios para autenticación en el sistema';
+  COMMENT='Tabla de usuarios para autenticacion en el sistema';
 
 -- ============================================
 -- TABLA 4: login_logs
--- Descripción: Auditoría de intentos de login
--- Propósito: Registrar accesos exitosos y fallidos
 -- ============================================
 CREATE TABLE IF NOT EXISTS login_logs (
-  id                      INT AUTO_INCREMENT PRIMARY KEY,
-  usuario_id              INT COMMENT 'FK a tabla usuarios (si login fue exitoso)',
-  email                   VARCHAR(150) NOT NULL COMMENT 'Email intentado',
-  fecha_hora              TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  exitoso                 BOOLEAN DEFAULT FALSE,
-  razon_fallo             VARCHAR(255) COMMENT 'Motivo del fallo (contraseña incorrecta, usuario no existe, etc)',
-  ip_address              VARCHAR(45) COMMENT 'Dirección IP del cliente',
-  user_agent              VARCHAR(500) COMMENT 'Navegador/cliente usado',
-  
-  CONSTRAINT fk_login_logs_usuario 
-    FOREIGN KEY (usuario_id) 
-    REFERENCES usuarios(id) 
-    ON DELETE SET NULL 
-    ON UPDATE CASCADE,
-  
-  INDEX idx_fecha_hora (fecha_hora),
-  INDEX idx_usuario_id (usuario_id),
-  INDEX idx_email (email),
-  INDEX idx_exitoso (exitoso)
+  id                 INT AUTO_INCREMENT PRIMARY KEY,
+  usuario_id         INT DEFAULT NULL COMMENT 'FK a usuarios si el login fue exitoso',
+  email              VARCHAR(150) NOT NULL COMMENT 'Email intentado',
+  fecha_hora         TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  exitoso            BOOLEAN DEFAULT FALSE,
+  razon_fallo        VARCHAR(255) DEFAULT NULL COMMENT 'Motivo del fallo',
+  ip_address         VARCHAR(45) DEFAULT NULL COMMENT 'Direccion IP del cliente',
+  user_agent         VARCHAR(500) DEFAULT NULL COMMENT 'Navegador o cliente usado',
+
+  KEY idx_fecha_hora (fecha_hora),
+  KEY idx_usuario_id (usuario_id),
+  KEY idx_email (email),
+  KEY idx_exitoso (exitoso),
+  CONSTRAINT fk_login_logs_usuario
+    FOREIGN KEY (usuario_id)
+    REFERENCES usuarios(id)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-  COMMENT='Auditoría de logins - histórico de accesos';
+  COMMENT='Auditoria de logins';
 
 -- ============================================
--- TABLA 4.1: auditoria_logs
--- Descripción: Auditoría de acciones de usuarios dentro del sistema
--- Propósito: Registrar quién, qué, cuándo y desde dónde hizo un cambio
+-- TABLA 5: auditoria_logs
 -- ============================================
 CREATE TABLE IF NOT EXISTS auditoria_logs (
-  id              INT AUTO_INCREMENT PRIMARY KEY,
-  usuario_id      INT NOT NULL COMMENT 'Usuario que realizó la acción',
-  modulo          VARCHAR(50) NOT NULL COMMENT 'Ej: Sustentos, Ingresos, Perfil, Admin',
-  accion          ENUM('CREAR', 'ACTUALIZAR', 'ELIMINAR', 'CAMBIAR_PASSWORD', 'DESCARGAR') NOT NULL,
-  descripcion     VARCHAR(255) NOT NULL COMMENT 'Ej: Subió el archivo Reporte_1.pdf',
-  fecha_hora      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  ip_address      VARCHAR(45) COMMENT 'Dirección IP desde donde se hizo',
-  
-  CONSTRAINT fk_auditoria_logs_usuario
-    FOREIGN KEY (usuario_id) 
-    REFERENCES usuarios(id) 
-    ON DELETE CASCADE,
-    
-  INDEX idx_auditoria_usuario (usuario_id),
-  INDEX idx_auditoria_fecha (fecha_hora),
-  INDEX idx_auditoria_modulo (modulo),
-  INDEX idx_auditoria_accion (accion)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-  COMMENT='Registro de auditoría de actividades de usuarios';
+  id                 INT AUTO_INCREMENT PRIMARY KEY,
+  usuario_id         INT NOT NULL COMMENT 'Usuario que realizo la accion',
+  modulo             VARCHAR(50) NOT NULL COMMENT 'Modulo afectado',
+  accion             ENUM('CREAR', 'ACTUALIZAR', 'ELIMINAR', 'CAMBIAR_PASSWORD', 'DESCARGAR') NOT NULL,
+  descripcion        VARCHAR(255) NOT NULL COMMENT 'Descripcion de la accion',
+  fecha_hora         TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  ip_address         VARCHAR(45) DEFAULT NULL COMMENT 'Direccion IP desde donde se hizo',
 
+  KEY idx_auditoria_usuario (usuario_id),
+  KEY idx_auditoria_fecha (fecha_hora),
+  KEY idx_auditoria_modulo (modulo),
+  KEY idx_auditoria_accion (accion),
+  CONSTRAINT fk_auditoria_logs_usuario
+    FOREIGN KEY (usuario_id)
+    REFERENCES usuarios(id)
+    ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  COMMENT='Registro de auditoria de actividades de usuarios';
 
 -- ============================================
--- TABLA 5: ingresos
--- DescripciÃ³n: Movimientos de ingresos por director
--- DiseÃ±o: Tabla normalizada, sin columnas por mes ni totales almacenados
+-- TABLA 6: ingresos
 -- ============================================
 CREATE TABLE IF NOT EXISTS ingresos (
-  id                      INT AUTO_INCREMENT PRIMARY KEY,
-  director_id             INT NOT NULL COMMENT 'FK al director responsable del registro',
-  fecha                   DATE NOT NULL,
-  tipo_comprobante        VARCHAR(100) NOT NULL,
-  numero_comprobante      VARCHAR(100) NOT NULL,
-  concepto                VARCHAR(255) NOT NULL,
-  monto                   DECIMAL(12,2) NOT NULL DEFAULT 0.00,
-  creado_en               TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  actualizado_en          TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  id                 INT AUTO_INCREMENT PRIMARY KEY,
+  director_id        INT NOT NULL COMMENT 'FK al director responsable del registro',
+  fecha              DATE NOT NULL,
+  tipo_comprobante   VARCHAR(100) NOT NULL,
+  numero_comprobante VARCHAR(100) NOT NULL,
+  concepto           VARCHAR(255) NOT NULL,
+  monto              DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+  creado_en          TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  actualizado_en     TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
+  KEY idx_ingresos_director_id (director_id),
+  KEY idx_ingresos_fecha (fecha),
+  KEY idx_ingresos_director_fecha (director_id, fecha),
   CONSTRAINT fk_ingresos_director
     FOREIGN KEY (director_id)
     REFERENCES directores(id)
     ON DELETE CASCADE
-    ON UPDATE CASCADE,
-
-  INDEX idx_ingresos_director_id (director_id),
-  INDEX idx_ingresos_fecha (fecha),
-  INDEX idx_ingresos_director_fecha (director_id, fecha)
+    ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   COMMENT='Ingresos registrados por directores';
 
 -- ============================================
--- TABLA 6: egresos
--- DescripciÃ³n: Movimientos de egresos por director
--- DiseÃ±o: Tabla normalizada, sin columnas por mes ni totales almacenados
+-- TABLA 7: egresos
 -- ============================================
 CREATE TABLE IF NOT EXISTS egresos (
-  id                      INT AUTO_INCREMENT PRIMARY KEY,
-  director_id             INT NOT NULL COMMENT 'FK al director responsable del registro',
-  fecha                   DATE NOT NULL,
-  tipo_comprobante        VARCHAR(100) NOT NULL,
-  numero_comprobante      VARCHAR(100) NOT NULL,
-  concepto                VARCHAR(255) NOT NULL,
-  monto                   DECIMAL(12,2) NOT NULL DEFAULT 0.00,
-  creado_en               TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  actualizado_en          TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  id                 INT AUTO_INCREMENT PRIMARY KEY,
+  director_id        INT NOT NULL COMMENT 'FK al director responsable del registro',
+  fecha              DATE NOT NULL,
+  tipo_comprobante   VARCHAR(100) NOT NULL,
+  numero_comprobante VARCHAR(100) NOT NULL,
+  concepto           VARCHAR(255) NOT NULL,
+  monto              DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+  creado_en          TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  actualizado_en     TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
+  KEY idx_egresos_director_id (director_id),
+  KEY idx_egresos_fecha (fecha),
+  KEY idx_egresos_director_fecha (director_id, fecha),
   CONSTRAINT fk_egresos_director
     FOREIGN KEY (director_id)
     REFERENCES directores(id)
     ON DELETE CASCADE
-    ON UPDATE CASCADE,
-
-  INDEX idx_egresos_director_id (director_id),
-  INDEX idx_egresos_fecha (fecha),
-  INDEX idx_egresos_director_fecha (director_id, fecha)
+    ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   COMMENT='Egresos registrados por directores';
 
 -- ============================================
--- TABLA 7: cierres_trimestrales
--- Descripcion: Bloquea cambios por director, anio y trimestre
+-- TABLA 8: cierres_trimestrales
 -- ============================================
 CREATE TABLE IF NOT EXISTS cierres_trimestrales (
-  id                      INT AUTO_INCREMENT PRIMARY KEY,
-  director_id             INT NOT NULL,
-  anio                    INT NOT NULL,
-  trimestre               TINYINT NOT NULL,
-  cerrado_en              TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  id                 INT AUTO_INCREMENT PRIMARY KEY,
+  director_id        INT NOT NULL,
+  anio               INT NOT NULL,
+  trimestre          TINYINT NOT NULL,
+  cerrado_en         TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
 
+  UNIQUE KEY uk_cierre_trimestre (director_id, anio, trimestre),
+  KEY idx_cierres_trimestrales_director (director_id, anio, trimestre),
   CONSTRAINT fk_cierres_trimestrales_director
     FOREIGN KEY (director_id)
     REFERENCES directores(id)
     ON DELETE CASCADE
     ON UPDATE CASCADE,
-
   CONSTRAINT chk_cierres_trimestrales_trimestre
-    CHECK (trimestre BETWEEN 1 AND 4),
-
-  UNIQUE KEY uk_cierre_trimestre (director_id, anio, trimestre),
-  INDEX idx_cierres_trimestrales_director (director_id, anio, trimestre)
+    CHECK (trimestre BETWEEN 1 AND 4)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-  COMMENT='Trimestres cerrados por director';
+  COMMENT='Cierres trimestrales para reportes y analisis';
 
 -- ============================================
--- TABLA 8: sustentos_pdf
--- Descripción: Almacena los metadatos y rutas de los archivos PDF subidos
+-- TABLA 9: estado_trimestres
+-- ============================================
+CREATE TABLE IF NOT EXISTS estado_trimestres (
+  id                     INT AUTO_INCREMENT PRIMARY KEY,
+  director_id            INT NOT NULL,
+  trimestre              INT NOT NULL,
+  anio                   INT NOT NULL,
+  estado                 ENUM('Borrador', 'Enviado', 'Observado', 'Aprobado') DEFAULT 'Borrador',
+  comentario_observacion TEXT DEFAULT NULL,
+  fecha_envio            DATETIME DEFAULT NULL,
+  fecha_auditoria        DATETIME DEFAULT NULL,
+  fecha_actualizacion    TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+  UNIQUE KEY unique_trimestre_director (director_id, trimestre, anio),
+  KEY idx_estado_trimestres_director (director_id),
+  CONSTRAINT fk_estado_trimestres_director
+    FOREIGN KEY (director_id)
+    REFERENCES directores(id)
+    ON DELETE CASCADE,
+  CONSTRAINT chk_estado_trimestres_trimestre
+    CHECK (trimestre IN (1, 2, 3, 4))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  COMMENT='Estado del flujo de revision trimestral';
+
+-- ============================================
+-- TABLA 10: sustentos_pdf
 -- ============================================
 CREATE TABLE IF NOT EXISTS sustentos_pdf (
-  id                      INT AUTO_INCREMENT PRIMARY KEY,
-  director_id             INT NOT NULL COMMENT 'FK al director que subió el archivo',
-  nombre_original         VARCHAR(255) NOT NULL COMMENT 'Ej: Reporte_Marzo.pdf',
-  ruta_archivo            VARCHAR(500) NOT NULL COMMENT 'Ruta física en el servidor',
-  tamanio_bytes           INT COMMENT 'Tamaño del archivo en bytes',
-  anio                    INT NOT NULL,
-  trimestre               TINYINT,
-  subido_en               TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  id                 INT AUTO_INCREMENT PRIMARY KEY,
+  director_id        INT NOT NULL COMMENT 'FK al director que subio el archivo',
+  nombre_original    VARCHAR(255) NOT NULL COMMENT 'Nombre del archivo original',
+  ruta_archivo       VARCHAR(500) NOT NULL COMMENT 'Ruta fisica en el servidor',
+  tamanio_bytes      INT DEFAULT NULL COMMENT 'Tamano del archivo en bytes',
+  anio               INT NOT NULL,
+  trimestre          TINYINT DEFAULT NULL,
+  subido_en          TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
 
+  KEY idx_sustentos_director (director_id),
+  KEY idx_sustentos_anio_trimestre (anio, trimestre),
   CONSTRAINT fk_sustentos_director
     FOREIGN KEY (director_id)
     REFERENCES directores(id)
     ON DELETE CASCADE
-    ON UPDATE CASCADE,
-
-  INDEX idx_sustentos_director (director_id),
-  INDEX idx_sustentos_anio_trimestre (anio, trimestre)
+    ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-  COMMENT='Metadatos de los PDFs de sustento subidos por directores';
+  COMMENT='Metadatos de PDFs subidos por directores';
 
 -- ============================================
--- TABLA 9: datos_institucionales
--- Descripción: Almacena datos institucionales extras del comité
+-- TABLA 11: datos_institucionales
 -- ============================================
 CREATE TABLE IF NOT EXISTS datos_institucionales (
   id                      INT AUTO_INCREMENT PRIMARY KEY,
   director_id             INT NOT NULL COMMENT 'FK al director responsable',
-  codigo_modular          VARCHAR(20),
-  nombre_tesorero         VARCHAR(100),
-  dni_tesorero            VARCHAR(8),
-  celular_tesorero        VARCHAR(15),
-  numero_cuenta_corriente VARCHAR(50),
-  banco                   VARCHAR(50) DEFAULT 'Banco de la Nación',
-  fecha_actualizacion     TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  
-  CONSTRAINT fk_datos_inst_director 
-    FOREIGN KEY (director_id) 
-    REFERENCES directores(id) 
-    ON DELETE CASCADE 
-    ON UPDATE CASCADE,
-    
-  INDEX idx_datos_inst_director_id (director_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-  COMMENT='Datos adicionales de la institución y comité';
+  nombre_tesorero         VARCHAR(100) DEFAULT NULL,
+  dni_tesorero            VARCHAR(8) DEFAULT NULL,
+  celular_tesorero        VARCHAR(9) DEFAULT NULL,
+  numero_cuenta_corriente VARCHAR(50) DEFAULT NULL,
+  banco                   VARCHAR(50) DEFAULT 'Banco de la Nacion',
+  fecha_actualizacion     TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
+  KEY idx_datos_inst_director_id (director_id),
+  CONSTRAINT fk_datos_inst_director
+    FOREIGN KEY (director_id)
+    REFERENCES directores(id)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  COMMENT='Datos adicionales de la institucion y comite';
 
 -- ============================================
--- TABLA 10: saldos_cuenta_corriente
--- Descripción: Saldos mensuales de la cuenta corriente por trimestre
+-- TABLA 12: saldos_cuenta_corriente
 -- ============================================
 CREATE TABLE IF NOT EXISTS saldos_cuenta_corriente (
-  id                      INT AUTO_INCREMENT PRIMARY KEY,
-  director_id             INT NOT NULL COMMENT 'FK al director logueado',
-  anio                    INT NOT NULL COMMENT 'Año del reporte (ej. 2026)',
-  trimestre               TINYINT NOT NULL COMMENT 'Trimestre (1, 2, 3 o 4)',
-  saldo_inicial           DECIMAL(12,2) DEFAULT 0.00 COMMENT 'Saldo inicial en CTA. CTE.',
-  saldo_mes1              DECIMAL(12,2) DEFAULT 0.00 COMMENT 'Saldo al terminar el 1er mes',
-  saldo_mes2              DECIMAL(12,2) DEFAULT 0.00 COMMENT 'Saldo al terminar el 2do mes',
-  saldo_mes3              DECIMAL(12,2) DEFAULT 0.00 COMMENT 'Saldo al terminar el 3er mes (Pasa a Consolidado)',
-  creado_en               TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  actualizado_en          TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  
-  CONSTRAINT fk_saldos_cc_director 
-    FOREIGN KEY (director_id) 
-    REFERENCES directores(id) 
-    ON DELETE CASCADE 
-    ON UPDATE CASCADE,
-    
-  CONSTRAINT chk_saldos_cc_trimestre
-    CHECK (trimestre BETWEEN 1 AND 4),
-    
+  id                 INT AUTO_INCREMENT PRIMARY KEY,
+  director_id        INT NOT NULL COMMENT 'FK al director logueado',
+  anio               INT NOT NULL COMMENT 'Ano del reporte',
+  trimestre          TINYINT NOT NULL COMMENT 'Trimestre (1, 2, 3 o 4)',
+  saldo_inicial      DECIMAL(12,2) DEFAULT 0.00 COMMENT 'Saldo inicial en cuenta corriente',
+  saldo_mes1         DECIMAL(12,2) DEFAULT 0.00 COMMENT 'Saldo al terminar el primer mes',
+  saldo_mes2         DECIMAL(12,2) DEFAULT 0.00 COMMENT 'Saldo al terminar el segundo mes',
+  saldo_mes3         DECIMAL(12,2) DEFAULT 0.00 COMMENT 'Saldo al terminar el tercer mes',
+  creado_en          TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  actualizado_en     TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
   UNIQUE KEY uk_saldos_cc_trimestre (director_id, anio, trimestre),
-  INDEX idx_saldos_cc_director (director_id, anio, trimestre)
+  KEY idx_saldos_cc_director (director_id, anio, trimestre),
+  CONSTRAINT fk_saldos_cc_director
+    FOREIGN KEY (director_id)
+    REFERENCES directores(id)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT chk_saldos_cc_trimestre
+    CHECK (trimestre BETWEEN 1 AND 4)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   COMMENT='Saldos mensuales de la cuenta corriente por trimestre';
 
 -- ============================================
+-- TABLA 13: notificaciones
 -- ============================================
--- 1. TABLA PRINCIPAL DE ESTADOS Y AUDITORÍA
--- Controla la fase en la que se encuentra la declaración financiera
-CREATE TABLE estado_trimestres (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    director_id INT NOT NULL,
-    trimestre INT NOT NULL CHECK (trimestre IN (1, 2, 3, 4)),
-    anio INT NOT NULL,
-    
-    -- Los 4 estados posibles de nuestro flujo:
-    estado ENUM('Borrador', 'Enviado', 'Observado', 'Aprobado') DEFAULT 'Borrador',
-    
-    -- Aquí se guarda el texto de rechazo que escribe el especialista en el Modal:
-    comentario_observacion TEXT NULL,
-    
-    -- Trazabilidad de tiempos:
-    fecha_envio DATETIME NULL,       -- Cuando el director aprieta "Cerrar Trimestre"
-    fecha_auditoria DATETIME NULL,   -- Cuando el especialista aprueba o rechaza
-    fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    
-    -- Restricción vital: Un director solo puede tener 1 estado por trimestre y año
-    UNIQUE KEY unique_trimestre_director (director_id, trimestre, anio),
-    
-    -- Llave foránea (Asumiendo que tu tabla de directores se llama 'directores')
-    FOREIGN KEY (director_id) REFERENCES directores(id) ON DELETE CASCADE
-);
+CREATE TABLE IF NOT EXISTS notificaciones (
+  id                 INT AUTO_INCREMENT PRIMARY KEY,
+  director_id        INT NOT NULL,
+  titulo             VARCHAR(150) NOT NULL,
+  mensaje            TEXT NOT NULL,
+  tipo               ENUM('info', 'exito', 'alerta', 'error') DEFAULT 'info',
+  leida              BOOLEAN DEFAULT FALSE,
+  fecha_creacion     TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
 
-
--- 2. TABLA DE NOTIFICACIONES (LA "CAMPANITA" DEL DIRECTOR)
--- Permite que el especialista le envíe alertas al director al aprobar/rechazar
-CREATE TABLE notificaciones (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    director_id INT NOT NULL,
-    
-    titulo VARCHAR(150) NOT NULL,
-    mensaje TEXT NOT NULL,
-    
-    -- Para darle color al aviso (ej. exito = verde, alerta = amarillo, error = rojo)
-    tipo ENUM('info', 'exito', 'alerta', 'error') DEFAULT 'info',
-    
-    -- Para saber si el director ya hizo clic en la campana para leerla
-    leida BOOLEAN DEFAULT FALSE,
-    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    
-    FOREIGN KEY (director_id) REFERENCES directores(id) ON DELETE CASCADE
-);
--- ============================================
--- ============================================
+  KEY idx_notificaciones_director_id (director_id),
+  CONSTRAINT fk_notificaciones_director
+    FOREIGN KEY (director_id)
+    REFERENCES directores(id)
+    ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  COMMENT='Notificaciones visibles para directores';
 
 -- ============================================
--- DATOS DE EJEMPLO
+-- TABLA 14: solicitudes_reemplazo
 -- ============================================
+CREATE TABLE IF NOT EXISTS solicitudes_reemplazo (
+  id                 INT AUTO_INCREMENT PRIMARY KEY,
+  director_id        INT NOT NULL,
+  escuela            VARCHAR(255) NOT NULL,
+  motivo             TEXT NOT NULL,
+  nuevo_correo       VARCHAR(255) NOT NULL,
+  telefono           VARCHAR(20) NOT NULL,
+  estado             ENUM('pendiente', 'aprobado', 'rechazado') DEFAULT 'pendiente',
+  fecha_creacion     TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
 
--- Insertar instituciones educativas
-INSERT INTO instituciones_educativas (codigo_modular, nombre_ie, nivel_educativo, modalidad, provincia, distrito) VALUES
-('0359323', 'FE Y ALEGRIA 42', 'primaria', 'especial', 'SANTA', 'CHIMBOTE'),
-('0495234', 'FE Y ALEGRIA 14', 'secundaria', 'regular', 'SANTA', 'CHIMBOTE'),
-('0577098', 'FE Y ALEGRIA 16', 'secundaria', 'regular', 'SANTA', 'CHIMBOTE'),
-('0686600', '88227 PEDRO PABLO ATUSPARIA', 'secundaria', 'regular', 'SANTA', 'NUEVO CHIMBOTE'),
-('0359356', 'INMACULADA DE LA MERCED', 'secundaria', 'regular', 'SANTA', 'CHIMBOTE'),
-('0570226', '01 CHIMBOTE', 'primaria', 'especial', 'SANTA', 'CHIMBOTE');
-
--- Insertar directores
-INSERT INTO directores (dni, nombres, apellido_paterno, apellido_materno, celular, email, institucion_id) VALUES
-('32970728', 'SARAI REBECA', 'BERNABE', 'MAGUIÑA', '949833586', 'sariber19@hotmail.com', 1),
-('87654321', 'EDEFIR CUSTODIO', 'VIERA', 'LOPEZ', '938107374', 'custodioviera1967@hotmail.com', 2),
-('00000000', 'HAYDEE', 'SANCHEZ', 'PORTAL de TAPIA', '966854853', '', 3),
-('32908230', 'ROSALBINA LIDIA', 'RODRIGUEZ', 'LUNA', '943810871', 'yedadero@hotmail.com', 4),
-('22222222', 'CAROLINA VIRGINIA', 'ROSPIGLIOSI', 'LEYVA', '944661493', 'carolinarospigliosi@hotmail.com', 5),
-('10126811', 'DARIA REINA', 'SANCHEZ', 'CHAVEZ', '949377272', 'daryexpaxmo@hotmail.com', 6);
-
--- Insertar usuarios (para login)
--- Contraseña por defecto: 123456 (hash bcrypt)
--- Los directores deben cambiar su contraseña en el primer login
-INSERT INTO usuarios (email, password_hash, debe_cambiar_password, rol, director_id, estado) VALUES
-('sariber19@hotmail.com', '$2a$10$slYQmyNdGzin7olVntoFreyUM4czQcUms/LewY5YsuqCqtiqWXXi', TRUE, 'director', 1, 'activo'),
-('custodioviera1967@hotmail.com', '$2a$10$slYQmyNdGzin7olVntoFreyUM4czQcUms/LewY5YsuqCqtiqWXXi', TRUE, 'director', 2, 'activo'),
-('', '$2a$10$slYQmyNdGzin7olVntoFreyUM4czQcUms/LewY5YsuqCqtiqWXXi', TRUE, 'director', 3, 'activo'),
-('yedadero@hotmail.com', '$2a$10$slYQmyNdGzin7olVntoFreyUM4czQcUms/LewY5YsuqCqtiqWXXi', TRUE, 'director', 4, 'activo'),
-('carolinarospigliosi@hotmail.com', '$2a$10$slYQmyNdGzin7olVntoFreyUM4czQcUms/LewY5YsuqCqtiqWXXi', TRUE, 'director', 5, 'activo'),
-('daryexpaxmo@hotmail.com', '$2a$10$slYQmyNdGzin7olVntoFreyUM4czQcUms/LewY5YsuqCqtiqWXXi', TRUE, 'director', 6, 'activo'),
-('especialista@ugel.edu.pe', '$2a$10$slYQmyNdGzin7olVntoFreyUM4czQcUms/LewY5YsuqCqtiqWXXi', FALSE, 'especialista', NULL, 'activo'),
-('admin1007@admin.com', '$2a$10$slYQmyNdGzin7olVntoFreyUM4czQcUms/LewY5YsuqCqtiqWXXi', FALSE, 'admin', NULL, 'activo');
+  KEY idx_solicitudes_director_id (director_id),
+  KEY idx_solicitudes_estado (estado),
+  CONSTRAINT fk_solicitudes_reemplazo_director
+    FOREIGN KEY (director_id)
+    REFERENCES directores(id)
+    ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  COMMENT='Solicitudes de cambio o reemplazo de director';

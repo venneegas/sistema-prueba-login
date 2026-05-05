@@ -1,0 +1,233 @@
+import React from 'react';
+import { AlertCircle, Building2, CheckCircle2, Clock, Download, FileText, Inbox, Loader2 } from 'lucide-react';
+import EspecialistaPeriodoFilters from './EspecialistaPeriodoFilters';
+import EspecialistaBarLineChart from './EspecialistaBarLineChart';
+
+const EspecialistaReportesView = ({
+  anioActual,
+  aniosDisponibles,
+  trimestreSeleccionado,
+  onAnioChange,
+  onTrimestreChange,
+  stats,
+  pctSubidos,
+  pctAprobados,
+  pctObservados,
+  onExportarGlobal,
+  isExporting,
+  reporteGlobal,
+  reporteLoading,
+  reporteError
+}) => {
+  return (
+    <>
+      <header className="bg-white shadow-sm px-8 py-5 flex items-center justify-between z-10 border-b border-slate-200">
+        <div className="flex items-center gap-6">
+          <h1 className="text-2xl font-bold text-slate-800">Reportes y Estadisticas</h1>
+          <EspecialistaPeriodoFilters
+            anioActual={anioActual}
+            aniosDisponibles={aniosDisponibles}
+            trimestreSeleccionado={trimestreSeleccionado}
+            onAnioChange={onAnioChange}
+            onTrimestreChange={onTrimestreChange}
+          />
+        </div>
+      </header>
+
+      <div className="flex-1 overflow-y-auto p-8 bg-slate-50/50">
+        <div className="max-w-6xl mx-auto space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                <Building2 size={24} />
+              </div>
+              <div>
+                <p className="text-sm text-slate-500 font-medium">Total Colegios</p>
+                <p className="text-2xl font-bold text-slate-800">{stats.total}</p>
+              </div>
+            </div>
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
+                <CheckCircle2 size={24} />
+              </div>
+              <div>
+                <p className="text-sm text-slate-500 font-medium">Recibidos Totales</p>
+                <p className="text-2xl font-bold text-slate-800">{stats.subidos}</p>
+              </div>
+            </div>
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
+                <Inbox size={24} />
+              </div>
+              <div>
+                <p className="text-sm text-amber-600 font-bold">Por Revisar</p>
+                <p className="text-2xl font-bold text-slate-800">{stats.enviados}</p>
+              </div>
+            </div>
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
+                <Clock size={24} />
+              </div>
+              <div>
+                <p className="text-sm text-slate-500 font-medium">En Borrador</p>
+                <p className="text-2xl font-bold text-slate-800">{stats.borradores}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center justify-center text-center">
+              <div className="relative w-32 h-32 mb-6">
+                <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
+                  <circle className="text-slate-100" strokeWidth="10" stroke="currentColor" fill="transparent" r="40" cx="50" cy="50" />
+                  <circle
+                    className="text-indigo-500 transition-all duration-1000 ease-out"
+                    strokeWidth="10"
+                    strokeDasharray={2 * Math.PI * 40}
+                    strokeDashoffset={(2 * Math.PI * 40) - (pctSubidos / 100) * (2 * Math.PI * 40)}
+                    strokeLinecap="round"
+                    stroke="currentColor"
+                    fill="transparent"
+                    r="40"
+                    cx="50"
+                    cy="50"
+                  />
+                </svg>
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                  <span className="text-2xl font-bold text-slate-700">{pctSubidos}%</span>
+                </div>
+              </div>
+              <h3 className="text-lg font-bold text-slate-800">Avance de Envios</h3>
+              <p className="text-sm text-slate-500 mt-1">
+                Instituciones que ya enviaron su declaracion ({stats.subidos} de {stats.total}).
+              </p>
+            </div>
+
+            <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center justify-center text-center">
+              <div className="relative w-32 h-32 mb-6">
+                <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
+                  <circle className="text-slate-100" strokeWidth="10" stroke="currentColor" fill="transparent" r="40" cx="50" cy="50" />
+                  <circle
+                    className="text-emerald-500 transition-all duration-1000 ease-out"
+                    strokeWidth="10"
+                    strokeDasharray={2 * Math.PI * 40}
+                    strokeDashoffset={(2 * Math.PI * 40) - (pctAprobados / 100) * (2 * Math.PI * 40)}
+                    strokeLinecap="round"
+                    stroke="currentColor"
+                    fill="transparent"
+                    r="40"
+                    cx="50"
+                    cy="50"
+                  />
+                </svg>
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                  <span className="text-2xl font-bold text-slate-700">{pctAprobados}%</span>
+                </div>
+              </div>
+              <h3 className="text-lg font-bold text-slate-800">Tasa de Aprobacion</h3>
+              <p className="text-sm text-slate-500 mt-1">
+                Reportes enviados que ya fueron aprobados ({stats.aprobados} de {stats.subidos}).
+              </p>
+            </div>
+
+            <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center justify-center text-center">
+              <div className="relative w-32 h-32 mb-6">
+                <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
+                  <circle className="text-slate-100" strokeWidth="10" stroke="currentColor" fill="transparent" r="40" cx="50" cy="50" />
+                  <circle
+                    className="text-rose-500 transition-all duration-1000 ease-out"
+                    strokeWidth="10"
+                    strokeDasharray={2 * Math.PI * 40}
+                    strokeDashoffset={(2 * Math.PI * 40) - (pctObservados / 100) * (2 * Math.PI * 40)}
+                    strokeLinecap="round"
+                    stroke="currentColor"
+                    fill="transparent"
+                    r="40"
+                    cx="50"
+                    cy="50"
+                  />
+                </svg>
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                  <span className="text-2xl font-bold text-slate-700">{pctObservados}%</span>
+                </div>
+              </div>
+              <h3 className="text-lg font-bold text-slate-800">Indice de Observaciones</h3>
+              <p className="text-sm text-slate-500 mt-1">
+                Reportes enviados que presentaron inconsistencias ({stats.observados} de {stats.subidos}).
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-br from-blue-900 to-blue-950 p-8 md:p-10 rounded-2xl shadow-md text-white flex flex-col md:flex-row items-center justify-between relative overflow-hidden mt-6">
+            <div className="absolute -right-12 -top-24 text-blue-800/30">
+              <FileText size={250} />
+            </div>
+            <div className="relative z-10 mb-6 md:mb-0 md:pr-8 text-center md:text-left flex-1">
+              <h3 className="text-2xl font-bold mb-3 flex items-center justify-center md:justify-start gap-3">
+                <Download className="text-blue-300" size={28} />
+                Reporte Consolidado Financiero
+              </h3>
+              <p className="text-blue-100 text-sm md:text-base max-w-3xl leading-relaxed">
+                Descarga la sabana de datos maestra en formato Excel (.xlsx). Incluye el estado actual de auditoria,
+                totales declarados de ingresos y egresos, y el saldo final bancario de todas las instituciones educativas.
+              </p>
+            </div>
+            <div className="relative z-10 w-full md:w-auto flex-shrink-0">
+              <button
+                onClick={onExportarGlobal}
+                disabled={isExporting}
+                className="w-full md:w-auto flex items-center justify-center gap-3 px-8 py-4 bg-blue-500 hover:bg-blue-400 text-white rounded-xl font-bold text-lg transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
+              >
+                {isExporting ? <Loader2 size={24} className="animate-spin" /> : <FileText size={24} />}
+                {isExporting ? 'Generando Archivo...' : 'Exportar a Excel'}
+              </button>
+            </div>
+          </div>
+
+          {reporteLoading ? (
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-10 flex items-center justify-center gap-3 text-slate-500">
+              <Loader2 size={24} className="animate-spin text-blue-500" />
+              <span className="font-medium">Cargando graficos financieros...</span>
+            </div>
+          ) : reporteError ? (
+            <div className="bg-white rounded-2xl shadow-sm border border-rose-200 p-8 flex items-center gap-3 text-rose-600">
+              <AlertCircle size={24} />
+              <span className="font-medium">{reporteError}</span>
+            </div>
+          ) : reporteGlobal.length === 0 ? (
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-10 text-center text-slate-500">
+              <p className="text-lg font-semibold text-slate-700">No hay datos financieros para graficar</p>
+              <p className="text-sm mt-2">Cuando los colegios registren ingresos y egresos en este periodo, apareceran aqui.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-6">
+              <EspecialistaBarLineChart
+                title="Ingresos Totales por Colegio"
+                subtitle="Barras y linea comparativa del total de ingresos registrados por cada institucion del periodo."
+                totalLabel="Ingreso general"
+                colorClass="bg-emerald-50 text-emerald-700 border border-emerald-200"
+                barColor="#10b981"
+                lineColor="#065f46"
+                data={reporteGlobal}
+                dataKey="totalIngresos"
+              />
+
+              <EspecialistaBarLineChart
+                title="Egresos Totales por Colegio"
+                subtitle="Vista consolidada de los egresos registrados por cada institucion en el mismo periodo."
+                totalLabel="Egreso general"
+                colorClass="bg-rose-50 text-rose-700 border border-rose-200"
+                barColor="#fb7185"
+                lineColor="#be123c"
+                data={reporteGlobal}
+                dataKey="totalEgresos"
+              />
+            </div>
+          )}
+        </div>
+      </div>
+    </>
+  );
+};
+
+export default EspecialistaReportesView;
