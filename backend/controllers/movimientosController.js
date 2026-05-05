@@ -82,6 +82,10 @@ const normalizarTexto = (valor) => String(valor || '')
 const MAPA_TIPOS_COMPROBANTE = {
   factura: 'Factura',
   boleta: 'Boleta',
+  cheque: 'Cheque',
+  'voucher banco': 'Voucher Banco',
+  'boleta venta': 'Boleta Venta',
+  'boleta venta electronica': 'Boleta Venta Electrónica',
   'recibo por honorarios': 'Recibo por Honorarios',
   'declaracion jurada': 'Declaración Jurada',
 };

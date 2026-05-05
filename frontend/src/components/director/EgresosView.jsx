@@ -11,6 +11,9 @@ const API_URL = buildApiUrl('/api/movimientos/egresos');
 const TIPOS_COMPROBANTE = [
   'Factura',
   'Boleta',
+  'Voucher Banco',
+  'Boleta Venta',
+  'Boleta Venta Electrónica',
   'Recibo por Honorarios',
   'Declaración Jurada',
 ];
@@ -26,6 +29,9 @@ const normalizarTexto = (valor) => (
 const MAPA_TIPOS_COMPROBANTE = {
   factura: 'Factura',
   boleta: 'Boleta',
+  'voucher banco': 'Voucher Banco',
+  'boleta venta': 'Boleta Venta',
+  'boleta venta electronica': 'Boleta Venta Electrónica',
   'recibo por honorarios': 'Recibo por Honorarios',
   'declaracion jurada': 'Declaración Jurada',
 };
