@@ -48,6 +48,7 @@ const ConsolidadoView = ({
   const [savingSaldos, setSavingSaldos] = useState(false);
   const [mensajeSaldos, setMensajeSaldos] = useState('');
   const [errorSaldos, setErrorSaldos] = useState('');
+  const [saldoInicialCaja, setSaldoInicialCaja] = useState(0);
   const [movimientos, setMovimientos] = useState({
     ingresos: [0, 0, 0],
     egresos: [0, 0, 0]
@@ -58,7 +59,6 @@ const ConsolidadoView = ({
   };
 
   // Calculos automaticos
-  const saldoInicialCaja = 0; // Podremos conectarlo a otro trimestre en el futuro si lo necesitas
   const totalIngresosMeses = movimientos.ingresos.reduce((sum, val) => sum + val, 0);
   const totalIngresos = saldoInicialCaja + totalIngresosMeses;
   const totalEgresos = movimientos.egresos.reduce((sum, val) => sum + val, 0);
@@ -77,6 +77,26 @@ const ConsolidadoView = ({
     const formatear = (date) => date.toISOString().split('T')[0];
     return { startDate: formatear(startDate), endDate: formatear(endDate), startMonth };
   }, [anio]);
+
+  const obtenerRangoTrimestrePorAnio = useCallback((quarterId, targetYear) => {
+    const currentYear = Number(targetYear);
+    const startMonth = (Number(quarterId) - 1) * 3;
+    const startDate = new Date(currentYear, startMonth, 1);
+    const endDate = new Date(currentYear, startMonth + 3, 0);
+    const formatear = (date) => date.toISOString().split('T')[0];
+    return { startDate: formatear(startDate), endDate: formatear(endDate) };
+  }, []);
+
+  const obtenerPeriodoAnterior = useCallback((quarterId = trimestreId, targetYear = anio) => {
+    const trimestreActual = Number(quarterId);
+    const anioActual = Number(targetYear);
+
+    if (trimestreActual === 1) {
+      return { trimestreId: 4, anio: anioActual - 1 };
+    }
+
+    return { trimestreId: trimestreActual - 1, anio: anioActual };
+  }, [anio, trimestreId]);
 
   // Cargar ingresos y egresos para la Seccion 1 y 3
   useEffect(() => {
@@ -113,6 +133,63 @@ const ConsolidadoView = ({
     };
     cargarMovimientos();
   }, [directorId, trimestreId, obtenerRangoTrimestre]);
+
+  useEffect(() => {
+    const cargarSaldoInicialCaja = async () => {
+      if (!directorId || !trimestreId) return;
+
+      const headers = { Authorization: `Bearer ${localStorage.getItem('token')}` };
+      const calcularSaldoFinalTrimestre = async (quarterId, targetYear) => {
+        if (Number(targetYear) < 2026) {
+          return 0;
+        }
+
+        const periodoAnterior = obtenerPeriodoAnterior(quarterId, targetYear);
+        const saldoInicialAnterior = await calcularSaldoFinalTrimestre(periodoAnterior.trimestreId, periodoAnterior.anio);
+        const { startDate, endDate } = obtenerRangoTrimestrePorAnio(quarterId, targetYear);
+        const query = new URLSearchParams({
+          directorId: String(directorId),
+          startDate,
+          endDate
+        });
+
+        const [resIngresos, resEgresos] = await Promise.all([
+          fetch(`${buildApiUrl('/api/movimientos/ingresos')}?${query.toString()}`, { headers }),
+          fetch(`${buildApiUrl('/api/movimientos/egresos')}?${query.toString()}`, { headers })
+        ]);
+
+        const dataIngresos = await resIngresos.json();
+        const dataEgresos = await resEgresos.json();
+
+        const totalIngresos = dataIngresos.success && Array.isArray(dataIngresos.data)
+          ? dataIngresos.data.reduce((sum, item) => sum + Number(item.monto || 0), 0)
+          : 0;
+
+        const totalEgresos = dataEgresos.success && Array.isArray(dataEgresos.data)
+          ? dataEgresos.data.reduce((sum, item) => sum + Number(item.monto || 0), 0)
+          : 0;
+
+        return saldoInicialAnterior + totalIngresos - totalEgresos;
+      };
+
+      try {
+        const periodoAnterior = obtenerPeriodoAnterior();
+
+        if (periodoAnterior.anio < 2026) {
+          setSaldoInicialCaja(0);
+          return;
+        }
+
+        const saldoFinalAnterior = await calcularSaldoFinalTrimestre(periodoAnterior.trimestreId, periodoAnterior.anio);
+        setSaldoInicialCaja(saldoFinalAnterior);
+      } catch (err) {
+        console.error('Error cargando saldo inicial del trimestre anterior', err);
+        setSaldoInicialCaja(0);
+      }
+    };
+
+    cargarSaldoInicialCaja();
+  }, [directorId, trimestreId, anio, obtenerPeriodoAnterior, obtenerRangoTrimestrePorAnio]);
 
   // Cargar los saldos de la base de datos al abrir o cambiar trimestre
   useEffect(() => {
