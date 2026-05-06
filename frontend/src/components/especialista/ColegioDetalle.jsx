@@ -163,6 +163,8 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio }) => {
             {colegio.nombre}
           </h1>
           <p className="text-sm text-slate-500 font-mono mt-1 flex items-center gap-2">
+            {colegio.numeroIE ? `N° IE: ${colegio.numeroIE}` : 'N° IE: -'}
+            <span className="text-slate-300">|</span>
             Código Modular: {colegio.codigoModular}
             <span className="text-slate-300">|</span>
             <span className="text-blue-700 bg-blue-50 px-2 py-0.5 rounded font-bold text-xs tracking-wide border border-blue-100">Trimestre {trimestre}</span>

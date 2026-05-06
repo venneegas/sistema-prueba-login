@@ -11,8 +11,11 @@ import useEspecialistaReporteGlobal from '../../hooks/useEspecialistaReporteGlob
 import useEspecialistaStats from '../../hooks/useEspecialistaStats';
 import exportEspecialistaReporte from '../../utils/exportEspecialistaReporte';
 
+const ESTADOS_EXPLORADOR = ['Borrador', 'Enviado', 'Observado', 'Aprobado'];
+
 const EspecialistaDashboard = ({ user, onLogout }) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [estadoFiltro, setEstadoFiltro] = useState('Todos');
   const [activeView, setActiveView] = useState('explorador');
   const [selectedColegio, setSelectedColegio] = useState(null);
   const [trimestreSeleccionado, setTrimestreSeleccionado] = useState('1');
@@ -38,10 +41,22 @@ const EspecialistaDashboard = ({ user, onLogout }) => {
     anioActual
   });
 
+  const estadosDisponibles = [
+    'Todos',
+    ...ESTADOS_EXPLORADOR,
+    ...colegios
+      .map((colegio) => colegio.estado)
+      .filter((estado) => estado && !ESTADOS_EXPLORADOR.includes(estado))
+  ];
+
   const filteredColegios = colegios.filter(
     (c) =>
-      (c.nombre && c.nombre.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (c.codigoModular && c.codigoModular.includes(searchTerm))
+      (
+        (c.nombre && c.nombre.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (c.codigoModular && c.codigoModular.includes(searchTerm)) ||
+        (c.numeroIE && c.numeroIE.toLowerCase().includes(searchTerm.toLowerCase()))
+      ) &&
+      (estadoFiltro === 'Todos' || c.estado === estadoFiltro)
   );
 
   const handleExportarGlobal = async () => {
@@ -122,6 +137,9 @@ const EspecialistaDashboard = ({ user, onLogout }) => {
             onTrimestreChange={setTrimestreSeleccionado}
             searchTerm={searchTerm}
             onSearchChange={setSearchTerm}
+            estadoFiltro={estadoFiltro}
+            onEstadoFiltroChange={setEstadoFiltro}
+            estadosDisponibles={estadosDisponibles}
             loading={loading}
             error={error}
             filteredColegios={filteredColegios}

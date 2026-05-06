@@ -22,6 +22,7 @@ const ConsolidadoView = ({
   anio,
   directorId,
   schoolName,
+  numeroIE,
   trimestreCerrado,
   cerrandoTrimestre,
   mensajeCierre,
@@ -447,7 +448,7 @@ const ConsolidadoView = ({
             <div className="col-span-2 rounded-2xl p-3 border border-slate-300 bg-white text-center font-bold shadow-sm">{anio}</div>
 
             <div className="col-span-3 rounded-2xl font-bold bg-slate-200 p-3 border border-slate-300">Número de la II.EE.</div>
-            <div className="col-span-9 rounded-2xl p-3 border border-slate-300 bg-white text-center font-bold shadow-sm">1580</div>
+            <div className="col-span-9 rounded-2xl p-3 border border-slate-300 bg-white text-center font-bold shadow-sm">{numeroIE || '-'}</div>
 
             <div className="col-span-3 rounded-2xl font-bold bg-slate-200 p-3 border border-slate-300">Nombre de la II.EE.</div>
             <div className="col-span-9 rounded-2xl p-3 border border-slate-300 bg-white text-center font-bold uppercase text-sky-800 shadow-sm">{schoolName || 'I.E. Sideral Carrion'}</div>

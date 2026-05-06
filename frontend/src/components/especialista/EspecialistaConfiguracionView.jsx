@@ -26,7 +26,7 @@ const EspecialistaConfiguracionView = ({ user, onOpenChangePassword }) => {
                 </p>
               </div>
               <div>
-                <label className="block text-sm font-semibold text-slate-500 mb-1">Correo Electronico</label>
+                <label className="block text-sm font-semibold text-slate-500 mb-1">Correo Electrónico</label>
                 <p className="text-slate-800 font-medium bg-slate-50 px-4 py-2.5 rounded-xl border border-slate-200 flex items-center gap-2">
                   <Mail size={16} className="text-slate-400" />
                   {user?.email || 'especialista@ugel.edu.pe'}
@@ -48,9 +48,9 @@ const EspecialistaConfiguracionView = ({ user, onOpenChangePassword }) => {
             </div>
             <div className="p-6 flex flex-col md:flex-row items-center justify-between gap-4">
               <div>
-                <h3 className="font-bold text-slate-700">Contrasena de acceso</h3>
+                <h3 className="font-bold text-slate-700">Contraseña de acceso</h3>
                 <p className="text-sm text-slate-500 mt-1 max-w-md">
-                  Te recomendamos cambiar tu contrasena periodicamente para mantener la seguridad de las auditorias.
+                  Te recomendamos cambiar tu contraseña periodicamente para mantener la seguridad de las auditorias.
                 </p>
               </div>
               <button
@@ -58,7 +58,7 @@ const EspecialistaConfiguracionView = ({ user, onOpenChangePassword }) => {
                 className="w-full md:w-auto flex items-center justify-center gap-2 px-6 py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold transition-all shadow-sm"
               >
                 <Key size={18} />
-                Cambiar Contrasena
+                Cambiar Contraseña
               </button>
             </div>
           </div>

@@ -394,6 +394,7 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
           anio={anioActual}
                 directorId={user.director?.id}
                 schoolName={user.director?.school}
+                numeroIE={user.director?.numero_ie}
                 trimestreCerrado={esCerradoFinal}
                 cerrandoTrimestre={cerrandoTrimestre}
                 mensajeCierre={mensajeCierreEfectivo}

@@ -5,6 +5,7 @@ const exportEspecialistaReporte = async ({ trimestreSeleccionado, anioActual, re
   const worksheet = workbook.addWorksheet(`Reporte T${trimestreSeleccionado} ${anioActual}`);
 
   worksheet.columns = [
+    { header: 'Numero IE', key: 'numeroIE', width: 16 },
     { header: 'Codigo Modular', key: 'codigoModular', width: 18 },
     { header: 'Institucion Educativa', key: 'nombre', width: 45 },
     { header: 'Estado', key: 'estado', width: 15 },
@@ -15,6 +16,7 @@ const exportEspecialistaReporte = async ({ trimestreSeleccionado, anioActual, re
 
   reporte.forEach((item) => {
     worksheet.addRow({
+      numeroIE: item.numeroIE || '',
       codigoModular: item.codigoModular,
       nombre: item.nombre,
       estado: item.estado,

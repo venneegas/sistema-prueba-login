@@ -589,14 +589,6 @@ const EgresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestreC
                 Declarar Mes en Cero
               </button>
             )}
-            <div className="w-px h-8 bg-slate-300 mx-1"></div>
-            <button
-              onClick={() => agregarFila(mesActivo)}
-              disabled={trimestreCerrado}
-              className="flex items-center gap-2 bg-rose-600 text-white px-5 py-2.5 rounded-xl text-sm hover:bg-rose-700 transition-all shadow-md font-bold disabled:cursor-not-allowed disabled:bg-slate-400"
-            >
-              <Plus size={18} /> Agregar Fila
-            </button>
           </div>
         </div>
 
@@ -767,29 +759,41 @@ const EgresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestreC
           </table>
         </div>
 
-        <div className="mt-8 flex justify-end gap-4">
-          <button
-            type="button"
-            onClick={handleDownloadPDF}
-            className="flex items-center gap-2 bg-white text-red-600 border border-red-200 px-6 py-3.5 rounded-2xl hover:bg-red-50 transition-all shadow-sm font-bold uppercase tracking-wide text-sm"
-          >
-            <FileText size={20} /> Descargar PDF
-          </button>
-          <button
-            type="button"
-            onClick={handleDownloadExcel}
-            className="flex items-center gap-2 bg-white text-emerald-700 border border-emerald-200 px-6 py-3.5 rounded-2xl hover:bg-emerald-50 transition-all shadow-sm font-bold uppercase tracking-wide text-sm"
-          >
-            <Download size={20} /> Descargar Excel
-          </button>
-          <button
-            type="button"
-            onClick={guardarMesActual}
-            disabled={saving || loading || trimestreCerrado}
-            className="flex items-center gap-2 bg-rose-600 text-white px-8 py-3.5 rounded-2xl hover:bg-rose-700 transition-all font-bold shadow-lg disabled:bg-slate-400 uppercase tracking-wide text-sm"
-          >
-            <Save size={20} /> {saving ? 'Guardando...' : 'Guardar Mes Actual'}
-          </button>
+        <div className="mt-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex justify-start">
+            <button
+              type="button"
+              onClick={() => agregarFila(mesActivo)}
+              disabled={trimestreCerrado}
+              className="flex items-center gap-2 bg-rose-600 text-white px-6 py-3.5 rounded-2xl hover:bg-rose-700 transition-all shadow-lg font-bold uppercase tracking-wide text-sm disabled:cursor-not-allowed disabled:bg-slate-400"
+            >
+              <Plus size={20} /> Agregar Fila
+            </button>
+          </div>
+          <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:justify-end">
+            <button
+              type="button"
+              onClick={handleDownloadPDF}
+              className="flex items-center justify-center gap-2 bg-white text-red-600 border border-red-200 px-6 py-3.5 rounded-2xl hover:bg-red-50 transition-all shadow-sm font-bold uppercase tracking-wide text-sm"
+            >
+              <FileText size={20} /> Descargar PDF
+            </button>
+            <button
+              type="button"
+              onClick={handleDownloadExcel}
+              className="flex items-center justify-center gap-2 bg-white text-emerald-700 border border-emerald-200 px-6 py-3.5 rounded-2xl hover:bg-emerald-50 transition-all shadow-sm font-bold uppercase tracking-wide text-sm"
+            >
+              <Download size={20} /> Descargar Excel
+            </button>
+            <button
+              type="button"
+              onClick={guardarMesActual}
+              disabled={saving || loading || trimestreCerrado}
+              className="flex items-center justify-center gap-2 bg-rose-600 text-white px-8 py-3.5 rounded-2xl hover:bg-rose-700 transition-all font-bold shadow-lg disabled:bg-slate-400 uppercase tracking-wide text-sm"
+            >
+              <Save size={20} /> {saving ? 'Guardando...' : 'Guardar Mes Actual'}
+            </button>
+          </div>
         </div>
       </div>
 

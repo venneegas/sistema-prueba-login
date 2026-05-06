@@ -10,6 +10,9 @@ const EspecialistaExploradorView = ({
   onTrimestreChange,
   searchTerm,
   onSearchChange,
+  estadoFiltro,
+  onEstadoFiltroChange,
+  estadosDisponibles,
   loading,
   error,
   filteredColegios,
@@ -29,15 +32,29 @@ const EspecialistaExploradorView = ({
           />
         </div>
 
-        <div className="relative w-96">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-          <input
-            type="text"
-            placeholder="Buscar por codigo o nombre..."
-            className="w-full pl-12 pr-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 focus:bg-white transition-all text-sm font-medium shadow-inner"
-            value={searchTerm}
-            onChange={(e) => onSearchChange(e.target.value)}
-          />
+        <div className="flex items-center gap-3">
+          <div className="relative w-96">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+            <input
+              type="text"
+              placeholder="Buscar por codigo, numero IE o nombre..."
+              className="w-full pl-12 pr-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 focus:bg-white transition-all text-sm font-medium shadow-inner"
+              value={searchTerm}
+              onChange={(e) => onSearchChange(e.target.value)}
+            />
+          </div>
+
+          <select
+            value={estadoFiltro}
+            onChange={(e) => onEstadoFiltroChange(e.target.value)}
+            className="min-w-[180px] rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium text-slate-700 shadow-inner transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white"
+          >
+            {estadosDisponibles.map((estado) => (
+              <option key={estado} value={estado}>
+                {estado === 'Todos' ? 'Todos los estados' : estado}
+              </option>
+            ))}
+          </select>
         </div>
       </header>
 
@@ -69,9 +86,16 @@ const EspecialistaExploradorView = ({
                     strokeWidth={1.5}
                   />
                   <h3 className="font-bold text-slate-800 line-clamp-2 leading-tight text-sm mb-1">{colegio.nombre}</h3>
-                  <p className="text-xs text-slate-500 font-mono mb-3 bg-slate-100 px-2 py-0.5 rounded">
-                    {colegio.codigoModular}
-                  </p>
+                  <div className="mb-3 flex flex-wrap items-center justify-center gap-2 text-xs font-mono">
+                    {colegio.numeroIE && (
+                      <span className="rounded bg-blue-50 px-2 py-0.5 text-blue-700 border border-blue-100">
+                        IE {colegio.numeroIE}
+                      </span>
+                    )}
+                    <span className="rounded bg-slate-100 px-2 py-0.5 text-slate-500">
+                      {colegio.codigoModular}
+                    </span>
+                  </div>
 
                   <div
                     className={`mt-auto w-full py-1.5 rounded-lg text-[11px] font-bold tracking-wide uppercase ${
@@ -98,7 +122,7 @@ const EspecialistaExploradorView = ({
                   <Folder size={48} className="text-slate-300" />
                 </div>
                 <p className="text-lg font-medium text-slate-700">No se encontraron colegios</p>
-                <p className="text-sm mt-1">Intenta con otro termino de busqueda</p>
+                <p className="text-sm mt-1">Intenta con otro termino de busqueda o cambia el estado seleccionado</p>
               </div>
             )}
           </>
