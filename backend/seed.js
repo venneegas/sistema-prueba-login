@@ -20,8 +20,8 @@ async function runSeeder() {
     console.log('🏫 Insertando Instituciones Educativas...');
     for (const ie of datos.instituciones_educativas) {
       await pool.execute(
-        `INSERT IGNORE INTO instituciones_educativas (id, codigo_modular, nombre_ie, nivel_educativo, modalidad, provincia, distrito) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [ie.id, ie.codigo_modular, ie.nombre_ie, ie.nivel_educativo, ie.modalidad, ie.provincia, ie.distrito]
+        `INSERT IGNORE INTO instituciones_educativas (id, codigo_modular, numero_ie, nombre_ie, nivel_educativo, modalidad, provincia, distrito) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [ie.id, ie.codigo_modular, ie.numero_ie || null, ie.nombre_ie, ie.nivel_educativo, ie.modalidad, ie.provincia, ie.distrito]
       );
     }
 

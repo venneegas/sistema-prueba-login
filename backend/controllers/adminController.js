@@ -91,7 +91,7 @@ const getUsers = async (req, res) => {
   try {
     const query = `
       SELECT u.id, u.email, u.rol, u.estado, u.nombre as usuario_nombre,
-             d.nombres, d.apellido_paterno, d.apellido_materno, ie.nombre_ie as colegio
+             d.nombres, d.apellido_paterno, d.apellido_materno, ie.nombre_ie as colegio, ie.numero_ie
       FROM usuarios u
       LEFT JOIN directores d ON u.director_id = d.id
       LEFT JOIN instituciones_educativas ie ON d.institucion_id = ie.id
@@ -118,7 +118,8 @@ const getUsers = async (req, res) => {
         email: row.email,
         rol: row.rol,
         estado: row.estado,
-        colegio: row.colegio || '-'
+        colegio: row.colegio || '-',
+        numeroIE: row.numero_ie || null
       };
     });
 

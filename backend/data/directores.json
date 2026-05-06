@@ -3,6 +3,7 @@
     {
       "id": 1,
       "codigo_modular": "0359323",
+      "numero_ie": null,
       "nombre_ie": "FE Y ALEGRIA 42",
       "nivel_educativo": "primaria",
       "modalidad": "especial",
@@ -12,6 +13,7 @@
     {
       "id": 2,
       "codigo_modular": "0495234",
+      "numero_ie": null,
       "nombre_ie": "FE Y ALEGRIA 14",
       "nivel_educativo": "secundaria",
       "modalidad": "regular",
@@ -21,6 +23,7 @@
     {
       "id": 3,
       "codigo_modular": "0577098",
+      "numero_ie": null,
       "nombre_ie": "FE Y ALEGRIA 16",
       "nivel_educativo": "secundaria",
       "modalidad": "regular",
@@ -30,7 +33,8 @@
     {
       "id": 4,
       "codigo_modular": "0686600",
-      "nombre_ie": "88227 PEDRO PABLO ATUSPARIA",
+      "numero_ie": "88227",
+      "nombre_ie": "PEDRO PABLO ATUSPARIA",
       "nivel_educativo": "secundaria",
       "modalidad": "regular",
       "provincia": "SANTA",
@@ -39,6 +43,7 @@
     {
       "id": 5,
       "codigo_modular": "0359356",
+      "numero_ie": null,
       "nombre_ie": "INMACULADA DE LA MERCED",
       "nivel_educativo": "secundaria",
       "modalidad": "regular",
@@ -48,7 +53,8 @@
     {
       "id": 6,
       "codigo_modular": "0570226",
-      "nombre_ie": "01 CHIMBOTE",
+      "numero_ie": "01",
+      "nombre_ie": "CHIMBOTE",
       "nivel_educativo": "primaria",
       "modalidad": "especial",
       "provincia": "SANTA",

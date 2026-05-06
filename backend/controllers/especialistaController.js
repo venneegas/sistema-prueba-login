@@ -11,6 +11,7 @@ const getColegiosPorTrimestre = async (req, res) => {
       SELECT 
           d.id AS id,
           ie.codigo_modular AS codigoModular,
+          ie.numero_ie AS numeroIE,
           ie.nombre_ie AS nombre,
           COALESCE(et.estado, 'Borrador') AS estado
       FROM directores d
@@ -184,6 +185,7 @@ const getReporteGlobal = async (req, res) => {
     const sql = `
       SELECT 
         ie.codigo_modular AS codigoModular,
+        ie.numero_ie AS numeroIE,
         ie.nombre_ie AS nombre,
         COALESCE(et.estado, 'Borrador') AS estado,
         (SELECT COALESCE(SUM(monto), 0) FROM ingresos i WHERE i.director_id = d.id AND YEAR(fecha) = ? AND MONTH(fecha) BETWEEN ? AND ?) AS totalIngresos,

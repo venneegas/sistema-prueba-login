@@ -13,6 +13,7 @@ USE ugel_db;
 CREATE TABLE IF NOT EXISTS instituciones_educativas (
   id                 INT AUTO_INCREMENT PRIMARY KEY,
   codigo_modular     VARCHAR(20) NOT NULL COMMENT 'Codigo MINEDU unico',
+  numero_ie          VARCHAR(20) DEFAULT NULL COMMENT 'Numero oficial de la institucion educativa',
   nombre_ie          VARCHAR(200) NOT NULL COMMENT 'Nombre completo de la institucion',
   nivel_educativo    ENUM('inicial', 'primaria', 'secundaria', 'tecnico', 'superior') NOT NULL,
   modalidad          ENUM('regular', 'especial', 'alternativa') NOT NULL,
