@@ -5,6 +5,7 @@ import Toast from '../Toast';
 import { jsPDF } from 'jspdf';
 import { autoTable } from 'jspdf-autotable';
 import ExcelJS from 'exceljs';
+import ConfirmModal from './ConfirmModal';
 
 const API_URL = buildApiUrl('/api/movimientos/ingresos');
 
@@ -80,6 +81,7 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
   const [mensaje, setMensaje] = useState('');
   const [error, setError] = useState('');
   const [filasTipoInvalido, setFilasTipoInvalido] = useState(new Set());
+  const [filasFechaInvalida, setFilasFechaInvalida] = useState(new Set());
   const [hayBorradores, setHayBorradores] = useState({ 0: false, 1: false, 2: false });
   const [reloadTrigger, setReloadTrigger] = useState(0);
   const [datosMeses, setDatosMeses] = useState([
@@ -87,6 +89,14 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
     [crearFilaVacia()],
     [crearFilaVacia()],
   ]);
+  const [confirmAction, setConfirmAction] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    confirmText: '',
+    onConfirm: null,
+    isDestructive: false
+  });
 
   // Función para guardar el borrador del mes actual en LocalStorage
   const guardarBorradorMensual = (mesIndex, datosMes) => {
@@ -97,11 +107,19 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
   };
 
   const descartarBorrador = (mesIndex) => {
-    if (!window.confirm('¿Descartar cambios no guardados y recuperar los datos originales del servidor?')) return;
-    const key = `draft_ingresos_${directorId}_${trimestreId}_${mesIndex}`;
-    localStorage.removeItem(key);
-    setHayBorradores((prev) => ({ ...prev, [mesIndex]: false }));
-    setReloadTrigger((prev) => prev + 1); // Dispara la recarga de datos del backend
+    setConfirmAction({
+      isOpen: true,
+      title: 'Descartar cambios',
+      message: '¿Estás seguro de descartar los cambios no guardados? Se recuperarán los datos originales del servidor.',
+      confirmText: 'Sí, descartar',
+      isDestructive: true,
+      onConfirm: () => {
+        const key = `draft_ingresos_${directorId}_${trimestreId}_${mesIndex}`;
+        localStorage.removeItem(key);
+        setHayBorradores((prev) => ({ ...prev, [mesIndex]: false }));
+        setReloadTrigger((prev) => prev + 1);
+      }
+    });
   };
 
   useEffect(() => {
@@ -216,6 +234,15 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
         return next;
       });
     }
+
+    if (campo === 'fecha' && valor) {
+      setFilasFechaInvalida((prev) => {
+        if (!prev.has(filaId)) return prev;
+        const next = new Set(prev);
+        next.delete(filaId);
+        return next;
+      });
+    }
   };
 
   const agregarFila = (mesIndex) => {
@@ -255,7 +282,7 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
     const input = dateInputRefs.current[filaId];
     if (!input) return;
 
-    input.focus();
+    input.focus({ preventScroll: true });
     if (typeof input.showPicker === 'function') {
       input.showPicker();
       return;
@@ -276,13 +303,16 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
     }
 
     const { startDate, endDate } = obtenerRangoMes(trimestreId, mesActivo);
-    const registros = datosMeses[mesActivo].map((fila) => ({
-      fecha: fila.fecha,
-      tipo_comprobante: fila.tipo,
-      numero_comprobante: fila.numero,
-      concepto: fila.concepto,
-      monto: fila.importe,
-    }));
+    // Solo enviamos al backend las filas que tienen contenido real
+    const registros = datosMeses[mesActivo]
+      .filter((fila) => filaTieneContenido(fila))
+      .map((fila) => ({
+        fecha: fila.fecha,
+        tipo_comprobante: fila.tipo,
+        numero_comprobante: fila.numero,
+        concepto: fila.concepto,
+        monto: fila.importe,
+      }));
 
     const filasSinTipo = datosMeses[mesActivo]
       .map((fila, index) => ({ fila, index }))
@@ -292,6 +322,21 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
       .filter((fila) => filaTieneContenido(fila) && !TIPOS_COMPROBANTE.includes(fila.tipo))
       .map((fila) => fila.id);
 
+    // Validar que las filas con contenido tengan una fecha establecida
+    const filasSinFecha = datosMeses[mesActivo]
+      .map((fila, index) => ({ fila, index }))
+      .filter(({ fila }) => filaTieneContenido(fila) && (!fila.fecha || String(fila.fecha).trim() === ''))
+      .map(({ index }) => index + 1);
+    const filaIdsSinFecha = datosMeses[mesActivo]
+      .filter((fila) => filaTieneContenido(fila) && (!fila.fecha || String(fila.fecha).trim() === ''))
+      .map((fila) => fila.id);
+
+    if (filasSinFecha.length > 0) {
+      setFilasFechaInvalida(new Set(filaIdsSinFecha));
+      setError(`La fecha es obligatoria en la(s) fila(s): ${filasSinFecha.join(', ')}.`);
+      return; // Detiene el guardado
+    }
+
     if (filasSinTipo.length > 0) {
       setFilasTipoInvalido(new Set(filaIdsSinTipo));
       setError(`Selecciona el Tipo de Comprobante en la(s) fila(s): ${filasSinTipo.join(', ')}.`);
@@ -300,6 +345,7 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
 
     setSaving(true);
     setFilasTipoInvalido(new Set());
+    setFilasFechaInvalida(new Set());
     setError('');
     setMensaje('');
 
@@ -337,47 +383,55 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
     }
   };
 
-  const declararSinMovimientos = async () => {
+  const declararSinMovimientos = () => {
     if (trimestreCerrado) return;
-    if (!window.confirm(`¿Estás seguro de declarar S/. 0.00 de ingresos para el mes de ${trimestreMeses[mesActivo]}? Se borrarán las filas actuales si las hubiera.`)) return;
 
-    setSaving(true);
-    setError('');
-    setMensaje('');
+    setConfirmAction({
+      isOpen: true,
+      title: 'Declarar Mes en Cero',
+      message: `¿Estás seguro de declarar S/. 0.00 de ingresos para el mes de ${trimestreMeses[mesActivo]}? Se borrarán las filas actuales si las hubiera.`,
+      confirmText: 'Sí, declarar en cero',
+      isDestructive: true,
+      onConfirm: async () => {
+        setSaving(true);
+        setError('');
+        setMensaje('');
 
-    try {
-      const { startDate, endDate } = obtenerRangoMes(trimestreId, mesActivo);
-      const response = await fetch(`${API_URL}/replace-range`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({
-          directorId,
-          startDate,
-          endDate,
-          registros: [], // Un array vacío le dice al servidor que guarde 0 movimientos
-        }),
-      });
+        try {
+          const { startDate, endDate } = obtenerRangoMes(trimestreId, mesActivo);
+          const response = await fetch(`${API_URL}/replace-range`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify({
+              directorId,
+              startDate,
+              endDate,
+              registros: [],
+            }),
+          });
 
-      const data = await leerRespuestaJson(response);
+          const data = await leerRespuestaJson(response);
 
-      if (!response.ok || !data.success) {
-        throw new Error(data.message || 'No se pudo declarar en cero.');
+          if (!response.ok || !data.success) {
+            throw new Error(data.message || 'No se pudo declarar en cero.');
+          }
+
+          setMensaje(`Se declaró sin movimientos el mes de ${trimestreMeses[mesActivo]}.`);
+          const key = `draft_ingresos_${directorId}_${trimestreId}_${mesActivo}`;
+          localStorage.removeItem(key);
+          setHayBorradores((prev) => ({ ...prev, [mesActivo]: false }));
+          setReloadTrigger(prev => prev + 1);
+        } catch (saveError) {
+          console.error(saveError);
+          setError(saveError.message || 'Error al declarar en cero.');
+        } finally {
+          setSaving(false);
+        }
       }
-
-      setMensaje(`Se declaró sin movimientos el mes de ${trimestreMeses[mesActivo]}.`);
-      const key = `draft_ingresos_${directorId}_${trimestreId}_${mesActivo}`;
-      localStorage.removeItem(key);
-      setHayBorradores((prev) => ({ ...prev, [mesActivo]: false }));
-      setReloadTrigger(prev => prev + 1); // Recargar los datos para refrescar la tabla a 0
-    } catch (saveError) {
-      console.error(saveError);
-      setError(saveError.message || 'Error al declarar en cero.');
-    } finally {
-      setSaving(false);
-    }
+    });
   };
 
   // Funciones placeholder para la exportación
@@ -599,7 +653,7 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
                         if (!trimestreCerrado) abrirSelectorFecha(fila.id);
                       }}
                       disabled={trimestreCerrado}
-                      className="block w-full text-left cursor-pointer group disabled:cursor-not-allowed"
+                      className="relative block w-full text-left cursor-pointer group disabled:cursor-not-allowed"
                       title="Seleccionar fecha"
                     >
                       <input
@@ -616,14 +670,21 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
                         value={fila.fecha}
                         onChange={(e) => handleInputChange(mesActivo, fila.id, 'fecha', e.target.value)}
                         disabled={trimestreCerrado}
-                        className="sr-only"
+                        className="absolute inset-0 w-full h-full opacity-0 pointer-events-none"
                         tabIndex={-1}
                         aria-hidden="true"
                       />
-                      <span className="block w-full p-2 text-center font-mono text-sm font-medium text-slate-700 group-hover:bg-slate-200 rounded transition-colors pointer-events-none">
+                      <span className={`block w-full p-2 text-center font-mono text-sm font-medium rounded transition-colors pointer-events-none ${
+                        filasFechaInvalida.has(fila.id)
+                          ? 'bg-red-50 text-red-600 ring-2 ring-red-500 group-hover:bg-red-100'
+                          : 'text-slate-700 group-hover:bg-slate-200'
+                      }`}>
                         {fila.fecha ? formatearFechaDDMM(fila.fecha) : '--'}
                       </span>
                     </button>
+                    {filasFechaInvalida.has(fila.id) && (
+                      <p className="px-1 pt-1 text-xs text-red-600 text-center">Requerido</p>
+                    )}
                   </td>
                   <td className="border border-slate-300 p-1">
                     <select
@@ -727,6 +788,16 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
           </button>
         </div>
       </div>
+
+      <ConfirmModal 
+        isOpen={confirmAction.isOpen}
+        onClose={() => setConfirmAction(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={confirmAction.onConfirm}
+        title={confirmAction.title}
+        message={confirmAction.message}
+        confirmText={confirmAction.confirmText}
+        isDestructive={confirmAction.isDestructive}
+      />
     </div>
   );
 };

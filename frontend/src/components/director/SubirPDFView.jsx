@@ -3,6 +3,7 @@ import { Upload, FileText, Trash2, CheckCircle, AlertCircle, Eye, Loader2 } from
 import { buildApiUrl } from '../../config/api';
 import { registrarAccion } from '../../utils/auditHelper';
 import Toast from '../Toast';
+import ConfirmModal from './ConfirmModal';
 
 const SubirPDFView = ({ trimestreMeses, trimestreId, anio, directorId, trimestreCerrado }) => {
   const [archivos, setArchivos] = useState([]);
@@ -10,6 +11,14 @@ const SubirPDFView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
   const [isDragging, setIsDragging] = useState(false);
   const [mensaje, setMensaje] = useState('');
   const [error, setError] = useState('');
+  const [confirmAction, setConfirmAction] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    confirmText: '',
+    onConfirm: null,
+    isDestructive: false
+  });
   
   const etiquetaTrimestre = trimestreMeses.join(' - ').toUpperCase();
 
@@ -149,27 +158,34 @@ const SubirPDFView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
   const eliminarArchivo = async (id) => {
     if (trimestreCerrado) return;
     
-    if (!window.confirm('¿Estás seguro de que deseas eliminar este documento permanentemente?')) return;
+    setConfirmAction({
+      isOpen: true,
+      title: 'Eliminar documento',
+      message: '¿Estás seguro de que deseas eliminar este documento permanentemente? Esta acción no se puede deshacer.',
+      confirmText: 'Sí, eliminar',
+      isDestructive: true,
+      onConfirm: async () => {
+        try {
+          const response = await fetch(buildApiUrl(`/api/sustentos/${id}?directorId=${directorId}`), {
+            method: 'DELETE',
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+          });
+          const data = await response.json();
 
-    try {
-      const response = await fetch(buildApiUrl(`/api/sustentos/${id}?directorId=${directorId}`), {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          if (response.ok && data.success) {
+            setArchivos(archivos.filter(a => a.id !== id));
+            setMensaje('Documento eliminado exitosamente.');
+          } else {
+            throw new Error(data.message || 'Error al eliminar el archivo');
+          }
+        } catch (err) {
+          console.error(err);
+          setError(err.message || 'No se pudo conectar con el servidor para eliminar.');
         }
-      });
-      const data = await response.json();
-
-      if (response.ok && data.success) {
-        setArchivos(archivos.filter(a => a.id !== id));
-        setMensaje('Documento eliminado exitosamente.');
-      } else {
-        throw new Error(data.message || 'Error al eliminar el archivo');
       }
-    } catch (err) {
-      console.error(err);
-      setError(err.message || 'No se pudo conectar con el servidor para eliminar.');
-    }
+    });
   };
 
   return (
@@ -289,6 +305,16 @@ const SubirPDFView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
           </div>
         </div>
       </div>
+
+      <ConfirmModal 
+        isOpen={confirmAction.isOpen}
+        onClose={() => setConfirmAction(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={confirmAction.onConfirm}
+        title={confirmAction.title}
+        message={confirmAction.message}
+        confirmText={confirmAction.confirmText}
+        isDestructive={confirmAction.isDestructive}
+      />
     </div>
   );
 };

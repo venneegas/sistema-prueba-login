@@ -18,6 +18,14 @@ const SolicitudReemplazoModal = ({ isOpen, onClose, director }) => {
     setError('');
     setMensaje('');
 
+    // Validación estricta del formato del correo electrónico
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(nuevoCorreo)) {
+      setError('Por favor, ingresa un formato de correo electrónico válido (ej: usuario@correo.com).');
+      setLoading(false);
+      return;
+    }
+
     try {
       // Lógica de conexión con el backend
       const response = await fetch(buildApiUrl('/api/solicitudes-reemplazo'), {
@@ -104,7 +112,18 @@ const SolicitudReemplazoModal = ({ isOpen, onClose, director }) => {
             </div>
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">Celular de Contacto *</label>
-              <input type="tel" required value={telefono} onChange={(e) => setTelefono(e.target.value)} placeholder="9 dígitos" maxLength="9" className={inputClass} />
+              <input 
+                type="tel" 
+                required 
+                value={telefono} 
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val === '' || /^\d+$/.test(val)) setTelefono(val);
+                }} 
+                placeholder="9 dígitos" 
+                maxLength="9" 
+                className={inputClass} 
+              />
             </div>
           </div>
 
