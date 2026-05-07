@@ -99,6 +99,146 @@
       "modalidad": "regular",
       "provincia": "SANTA",
       "distrito": "NUEVO CHIMBOTE"
+    },
+    {
+      "id": 11,
+      "codigo_modular": "359885",
+      "numero_ie": "317",
+      "nombre_ie": "317",
+      "nivel_educativo": "inicial",
+      "modalidad": "regular",
+      "provincia": "SANTA",
+      "distrito": "CHIMBOTE"
+    },
+    {
+      "id": 12,
+      "codigo_modular": "359893",
+      "numero_ie": "318",
+      "nombre_ie": "318",
+      "nivel_educativo": "inicial",
+      "modalidad": "regular",
+      "provincia": "SANTA",
+      "distrito": "CHIMBOTE"
+    },
+    {
+      "id": 13,
+      "codigo_modular": "359950",
+      "numero_ie": "321",
+      "nombre_ie": "321",
+      "nivel_educativo": "inicial",
+      "modalidad": "regular",
+      "provincia": "SANTA",
+      "distrito": "CHIMBOTE"
+    },
+    {
+      "id": 14,
+      "codigo_modular": "359976",
+      "numero_ie": "322",
+      "nombre_ie": "322",
+      "nivel_educativo": "inicial",
+      "modalidad": "regular",
+      "provincia": "SANTA",
+      "distrito": "CHIMBOTE"
+    },
+    {
+      "id": 15,
+      "codigo_modular": "359992",
+      "numero_ie": "323",
+      "nombre_ie": "323",
+      "nivel_educativo": "inicial",
+      "modalidad": "regular",
+      "provincia": "SANTA",
+      "distrito": "CHIMBOTE"
+    },
+    {
+      "id": 16,
+      "codigo_modular": "360000",
+      "numero_ie": "324",
+      "nombre_ie": "324",
+      "nivel_educativo": "inicial",
+      "modalidad": "regular",
+      "provincia": "SANTA",
+      "distrito": "NUEVO CHIMBOTE"
+    },
+    {
+      "id": 17,
+      "codigo_modular": "360057",
+      "numero_ie": "325",
+      "nombre_ie": "325",
+      "nivel_educativo": "inicial",
+      "modalidad": "regular",
+      "provincia": "SANTA",
+      "distrito": "NUEVO CHIMBOTE"
+    },
+    {
+      "id": 18,
+      "codigo_modular": "360073",
+      "numero_ie": "326",
+      "nombre_ie": "326",
+      "nivel_educativo": "inicial",
+      "modalidad": "regular",
+      "provincia": "SANTA",
+      "distrito": "SANTA"
+    },
+    {
+      "id": 19,
+      "codigo_modular": "1597756",
+      "numero_ie": "517",
+      "nombre_ie": "517",
+      "nivel_educativo": "inicial",
+      "modalidad": "regular",
+      "provincia": "SANTA",
+      "distrito": "NUEVO CHIMBOTE"
+    },
+    {
+      "id": 20,
+      "codigo_modular": "1597814",
+      "numero_ie": "521",
+      "nombre_ie": "521",
+      "nivel_educativo": "inicial",
+      "modalidad": "regular",
+      "provincia": "SANTA",
+      "distrito": "NUEVO CHIMBOTE"
+    },
+    {
+      "id": 21,
+      "codigo_modular": "1597822",
+      "numero_ie": "522",
+      "nombre_ie": "522",
+      "nivel_educativo": "inicial",
+      "modalidad": "regular",
+      "provincia": "SANTA",
+      "distrito": "NUEVO CHIMBOTE"
+    },
+    {
+      "id": 22,
+      "codigo_modular": "1597830",
+      "numero_ie": "523",
+      "nombre_ie": "523",
+      "nivel_educativo": "inicial",
+      "modalidad": "regular",
+      "provincia": "SANTA",
+      "distrito": "NUEVO CHIMBOTE"
+    },
+    {
+      "id": 23,
+      "codigo_modular": "1597848",
+      "numero_ie": "524",
+      "nombre_ie": "524",
+      "nivel_educativo": "inicial",
+      "modalidad": "regular",
+      "provincia": "SANTA",
+      "distrito": "NUEVO CHIMBOTE"
+    },
+    {
+      "id": 24,
+      "codigo_modular": "1597855",
+      "numero_ie": "525",
+      "nombre_ie": "525",
+      "nivel_educativo": "inicial",
+      "modalidad": "regular",
+      "provincia": "SANTA",
+      "distrito": "NUEVO CHIMBOTE"
     }
   ],
   "directores": [
@@ -201,6 +341,146 @@
       "celular": "972997959",
       "email": "lidiarodriguez.ardi@gmail.com",
       "institucion_id": 10
+    },
+    {
+      "id": 11,
+      "dni": "32981941",
+      "nombres": "MARIBEL LOURDES",
+      "apellido_paterno": "MORE",
+      "apellido_materno": "CRUZ",
+      "celular": "918210276",
+      "email": "maribelmore988@gmail.com",
+      "institucion_id": 11
+    },
+    {
+      "id": 12,
+      "dni": "32968497",
+      "nombres": "ERIKA JOVANNY",
+      "apellido_paterno": "TOLENTINO",
+      "apellido_materno": "CALDERON",
+      "celular": "974082067",
+      "email": "tolentinoerika56@gmail.com",
+      "institucion_id": 12
+    },
+    {
+      "id": 13,
+      "dni": "32939996",
+      "nombres": "SILVIA DEL PILAR",
+      "apellido_paterno": "ABANTO",
+      "apellido_materno": "TOLEDO",
+      "celular": "988018665",
+      "email": "silviaabantotoledo@gmail.com",
+      "institucion_id": 13
+    },
+    {
+      "id": 14,
+      "dni": "42482212",
+      "nombres": "JACQUELINE NEREIDA",
+      "apellido_paterno": "QUINTANA",
+      "apellido_materno": "YAREQUE",
+      "celular": "950693158",
+      "email": "jacqueline.quintana191@gmail.com",
+      "institucion_id": 14
+    },
+    {
+      "id": 15,
+      "dni": "32823305",
+      "nombres": "ESTELA SONIA",
+      "apellido_paterno": "MEJIA",
+      "apellido_materno": "DUCLOS",
+      "celular": "947342185",
+      "email": "astorsallayr@gmail.com",
+      "institucion_id": 15
+    },
+    {
+      "id": 16,
+      "dni": "32939083",
+      "nombres": "RITA JOVANA",
+      "apellido_paterno": "CEDEÑO",
+      "apellido_materno": "VERGARA",
+      "celular": "985884942",
+      "email": "ritadocumentos21@gmail.com",
+      "institucion_id": 16
+    },
+    {
+      "id": 17,
+      "dni": "40593448",
+      "nombres": "ELIZABETH SHIRLEY",
+      "apellido_paterno": "BOLAÑOS",
+      "apellido_materno": "AVALOS",
+      "celular": "953259081",
+      "email": "elyshi30@gmail.com",
+      "institucion_id": 17
+    },
+    {
+      "id": 18,
+      "dni": "32947018",
+      "nombres": "TERESA FABIOLA",
+      "apellido_paterno": "CALDERON",
+      "apellido_materno": "CASTILLO",
+      "celular": "939746119",
+      "email": "teresafabiola.castillo@gmail.com",
+      "institucion_id": 18
+    },
+    {
+      "id": 19,
+      "dni": "32920366",
+      "nombres": "JUANA MERCEDES",
+      "apellido_paterno": "CHANCAFE",
+      "apellido_materno": "VENEGAS",
+      "celular": "943486336",
+      "email": "juanachancafevenegas2423@gmail.com",
+      "institucion_id": 19
+    },
+    {
+      "id": 20,
+      "dni": "32959001",
+      "nombres": "ROCIO MARIANELA",
+      "apellido_paterno": "LOLOY",
+      "apellido_materno": "MUÑOZ",
+      "celular": "973373574",
+      "email": "rocio2020abcd@gmail.com",
+      "institucion_id": 20
+    },
+    {
+      "id": 21,
+      "dni": "32109344",
+      "nombres": "MIRIAM NATALIA",
+      "apellido_paterno": "PAZ",
+      "apellido_materno": "VASQUEZ",
+      "celular": "992378792",
+      "email": "miriamnataliapazvasquez@gmail.com",
+      "institucion_id": 21
+    },
+    {
+      "id": 22,
+      "dni": "32953530",
+      "nombres": "MARIA LEONOR",
+      "apellido_paterno": "CERNA",
+      "apellido_materno": "VILLANUEVA",
+      "celular": "972997959",
+      "email": "cernavillanuevamaria@gmail.com",
+      "institucion_id": 22
+    },
+    {
+      "id": 23,
+      "dni": "43620390",
+      "nombres": "DIANA MAGALY",
+      "apellido_paterno": "MARTINEZ",
+      "apellido_materno": "SOCOLA",
+      "celular": "996888266",
+      "email": "i.e524mundodealegria@gmail.com",
+      "institucion_id": 23
+    },
+    {
+      "id": 24,
+      "dni": "42085225",
+      "nombres": "ROSITA LISBETH",
+      "apellido_paterno": "LOPEZ",
+      "apellido_materno": "PAREDES",
+      "celular": "978790652",
+      "email": "lislopez2409@gmail.com",
+      "institucion_id": 24
     }
   ],
   "usuarios": [
@@ -290,6 +570,118 @@
       "password_hash": "$2a$10$abcdef1234567890abcdef1234567899",
       "rol": "director",
       "director_id": 10,
+      "estado": "activo"
+    },
+    {
+      "id": 14,
+      "email": "maribelmore988@gmail.com",
+      "password_hash": "$2a$10$abcdef1234567890abcdef1234567800",
+      "rol": "director",
+      "director_id": 11,
+      "estado": "activo"
+    },
+    {
+      "id": 15,
+      "email": "tolentinoerika56@gmail.com",
+      "password_hash": "$2a$10$abcdef1234567890abcdef1234567801",
+      "rol": "director",
+      "director_id": 12,
+      "estado": "activo"
+    },
+    {
+      "id": 16,
+      "email": "silviaabantotoledo@gmail.com",
+      "password_hash": "$2a$10$abcdef1234567890abcdef1234567802",
+      "rol": "director",
+      "director_id": 13,
+      "estado": "activo"
+    },
+    {
+      "id": 17,
+      "email": "jacqueline.quintana191@gmail.com",
+      "password_hash": "$2a$10$abcdef1234567890abcdef1234567803",
+      "rol": "director",
+      "director_id": 14,
+      "estado": "activo"
+    },
+    {
+      "id": 18,
+      "email": "astorsallayr@gmail.com",
+      "password_hash": "$2a$10$abcdef1234567890abcdef1234567804",
+      "rol": "director",
+      "director_id": 15,
+      "estado": "activo"
+    },
+    {
+      "id": 19,
+      "email": "ritadocumentos21@gmail.com",
+      "password_hash": "$2a$10$abcdef1234567890abcdef1234567805",
+      "rol": "director",
+      "director_id": 16,
+      "estado": "activo"
+    },
+    {
+      "id": 20,
+      "email": "elyshi30@gmail.com",
+      "password_hash": "$2a$10$abcdef1234567890abcdef1234567806",
+      "rol": "director",
+      "director_id": 17,
+      "estado": "activo"
+    },
+    {
+      "id": 21,
+      "email": "teresafabiola.castillo@gmail.com",
+      "password_hash": "$2a$10$abcdef1234567890abcdef1234567807",
+      "rol": "director",
+      "director_id": 18,
+      "estado": "activo"
+    },
+    {
+      "id": 22,
+      "email": "juanachancafevenegas2423@gmail.com",
+      "password_hash": "$2a$10$zTCEUvETr2o2ug6B0W1DQen7h/WD18BPCdQz36TyVy7q7nHrp2Wci",
+      "rol": "director",
+      "director_id": 19,
+      "estado": "activo"
+    },
+    {
+      "id": 23,
+      "email": "rocio2020abcd@gmail.com",
+      "password_hash": "$2a$10$zTCEUvETr2o2ug6B0W1DQen7h/WD18BPCdQz36TyVy7q7nHrp2Wci",
+      "rol": "director",
+      "director_id": 20,
+      "estado": "activo"
+    },
+    {
+      "id": 24,
+      "email": "miriamnataliapazvasquez@gmail.com",
+      "password_hash": "$2a$10$zTCEUvETr2o2ug6B0W1DQen7h/WD18BPCdQz36TyVy7q7nHrp2Wci",
+      "rol": "director",
+      "director_id": 21,
+      "estado": "activo"
+    },
+    {
+      "id": 25,
+      "email": "cernavillanuevamaria@gmail.com",
+      "password_hash": "$2a$10$zTCEUvETr2o2ug6B0W1DQen7h/WD18BPCdQz36TyVy7q7nHrp2Wci",
+      "rol": "director",
+      "director_id": 22,
+      "estado": "activo"
+    },
+    {
+      "id": 26,
+      "email": "i.e524mundodealegria@gmail.com",
+      "password_hash": "$2a$10$zTCEUvETr2o2ug6B0W1DQen7h/WD18BPCdQz36TyVy7q7nHrp2Wci",
+      "rol": "director",
+      "director_id": 23,
+      "estado": "activo"
+    },
+    {
+      "id": 27,
+      "email": "lislopez2409@gmail.com",
+      "password_hash": "$2a$10$zTCEUvETr2o2ug6B0W1DQen7h/WD18BPCdQz36TyVy7q7nHrp2Wci",
+      "rol": "director",
+      "director_id": 24,
       "estado": "activo"
     }
   ]
