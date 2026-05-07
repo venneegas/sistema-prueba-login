@@ -59,6 +59,46 @@
       "modalidad": "especial",
       "provincia": "SANTA",
       "distrito": "CHIMBOTE"
+    },
+    {
+      "id": 7,
+      "codigo_modular": "1001627",
+      "numero_ie": null,
+      "nombre_ie": "PRITE LA VICTORIA",
+      "nivel_educativo": "inicial",
+      "modalidad": "especial",
+      "provincia": "SANTA",
+      "distrito": "CHIMBOTE"
+    },
+    {
+      "id": 8,
+      "codigo_modular": "360016",
+      "numero_ie": "304",
+      "nombre_ie": "304",
+      "nivel_educativo": "inicial",
+      "modalidad": "regular",
+      "provincia": "SANTA",
+      "distrito": "CHIMBOTE"
+    },
+    {
+      "id": 9,
+      "codigo_modular": "359968",
+      "numero_ie": "314",
+      "nombre_ie": "314",
+      "nivel_educativo": "inicial",
+      "modalidad": "regular",
+      "provincia": "SANTA",
+      "distrito": "CHIMBOTE"
+    },
+    {
+      "id": 10,
+      "codigo_modular": "360032",
+      "numero_ie": "315",
+      "nombre_ie": "315",
+      "nivel_educativo": "inicial",
+      "modalidad": "regular",
+      "provincia": "SANTA",
+      "distrito": "NUEVO CHIMBOTE"
     }
   ],
   "directores": [
@@ -121,6 +161,46 @@
       "celular": "949377272",
       "email": "daryexpaxmo@hotmail.com",
       "institucion_id": 6
+    },
+    {
+      "id": 7,
+      "dni": "32823807",
+      "nombres": "ELIANA MERCEDES",
+      "apellido_paterno": "MANRIQUE",
+      "apellido_materno": "AÑAZGO",
+      "celular": "943065583",
+      "email": "emanriquea@hotmail.com",
+      "institucion_id": 7
+    },
+    {
+      "id": 8,
+      "dni": "32828462",
+      "nombres": "MERCEDES SANDRA",
+      "apellido_paterno": "DIAZ",
+      "apellido_materno": "DIAZ",
+      "celular": "943423489",
+      "email": "sandidi65_bella@hotmail.com",
+      "institucion_id": 8
+    },
+    {
+      "id": 9,
+      "dni": "42412646",
+      "nombres": "KARINA MABEL",
+      "apellido_paterno": "PAREDES",
+      "apellido_materno": "DIAZ",
+      "celular": "954637181",
+      "email": "paredeskarina025@gmail.com",
+      "institucion_id": 9
+    },
+    {
+      "id": 10,
+      "dni": "31617082",
+      "nombres": "LIDIA SOCORRO",
+      "apellido_paterno": "RODRIGUEZ",
+      "apellido_materno": "ARDILES DE PAIRAZAMAN",
+      "celular": "972997959",
+      "email": "lidiarodriguez.ardi@gmail.com",
+      "institucion_id": 10
     }
   ],
   "usuarios": [
@@ -178,6 +258,38 @@
       "password_hash": "$2a$10$abcdef1234567890abcdef1234567893",
       "rol": "especialista",
       "director_id": null,
+      "estado": "activo"
+    },
+    {
+      "id": 10,
+      "email": "emanriquea@hotmail.com",
+      "password_hash": "$2a$10$abcdef1234567890abcdef1234567896",
+      "rol": "director",
+      "director_id": 7,
+      "estado": "activo"
+    },
+    {
+      "id": 11,
+      "email": "sandidi65_bella@hotmail.com",
+      "password_hash": "$2a$10$abcdef1234567890abcdef1234567897",
+      "rol": "director",
+      "director_id": 8,
+      "estado": "activo"
+    },
+    {
+      "id": 12,
+      "email": "paredeskarina025@gmail.com",
+      "password_hash": "$2a$10$abcdef1234567890abcdef1234567898",
+      "rol": "director",
+      "director_id": 9,
+      "estado": "activo"
+    },
+    {
+      "id": 13,
+      "email": "lidiarodriguez.ardi@gmail.com",
+      "password_hash": "$2a$10$abcdef1234567890abcdef1234567899",
+      "rol": "director",
+      "director_id": 10,
       "estado": "activo"
     }
   ]
