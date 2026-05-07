@@ -8,6 +8,8 @@ const UsersView = () => {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('todos');
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [currentPage, setCurrentPage] = useState(1);
   
   // Estados para el Modal
   const [showModal, setShowModal] = useState(false);
@@ -62,6 +64,17 @@ const UsersView = () => {
     
     return matchesSearch && matchesRole;
   });
+
+  // Calcular paginación
+  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const displayedUsers = filteredUsers.slice(startIndex, endIndex);
+
+  // Resetear página cuando cambian los filtros
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, roleFilter, itemsPerPage]);
 
   // Manejar el envío del formulario (Crear o Editar)
   const handleSubmitUser = async (e) => {
@@ -196,7 +209,7 @@ const UsersView = () => {
             </div>
             <div className="flex items-center gap-3 w-full md:w-auto shrink-0">
               <select 
-                className="w-full md:w-auto bg-slate-50 border border-slate-200 text-slate-700 py-2.5 px-4 rounded-xl text-sm font-medium outline-none focus:border-blue-500"
+                className="bg-slate-50 border border-slate-200 text-slate-700 py-2.5 px-4 rounded-xl text-sm font-medium outline-none focus:border-blue-500"
                 value={roleFilter}
                 onChange={(e) => setRoleFilter(e.target.value)}
               >
@@ -205,6 +218,20 @@ const UsersView = () => {
                 <option value="especialista">Especialistas</option>
                 <option value="director">Directores</option>
               </select>
+
+              <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5">
+                <select 
+                  className="bg-transparent text-slate-700 text-sm font-medium outline-none"
+                  value={itemsPerPage}
+                  onChange={(e) => setItemsPerPage(parseInt(e.target.value))}
+                >
+                  <option value={10}>10</option>
+                  <option value={25}>25</option>
+                  <option value={50}>50</option>
+                  <option value={100}>100</option>
+                </select>
+                <span className="text-slate-500 text-sm font-medium">de {filteredUsers.length}</span>
+              </div>
             </div>
           </div>
 
@@ -222,12 +249,12 @@ const UsersView = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {filteredUsers.length === 0 ? (
+                  {displayedUsers.length === 0 ? (
                     <tr>
                       <td colSpan="5" className="p-8 text-center text-slate-500 font-medium">No se encontraron usuarios que coincidan con los filtros.</td>
                     </tr>
                   ) : (
-                    filteredUsers.map((u) => (
+                    displayedUsers.map((u) => (
                       <tr key={u.id} className="hover:bg-slate-50/80 transition-colors">
                         <td className="p-4">
                           <p className="font-bold text-slate-800">{u.nombre}</p>
@@ -271,6 +298,51 @@ const UsersView = () => {
                 </tbody>
               </table>
             </div>
+
+            {/* Controles de paginación */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between px-6 py-4 bg-slate-50 border-t border-slate-200">
+                <div className="text-sm text-slate-600 font-medium">
+                  Mostrando <span className="font-bold">{startIndex + 1}</span> a <span className="font-bold">{Math.min(endIndex, filteredUsers.length)}</span> de <span className="font-bold">{filteredUsers.length}</span> usuarios
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                    disabled={currentPage === 1}
+                    className={`p-2 rounded-lg transition-colors ${currentPage === 1 ? 'text-slate-300 cursor-not-allowed' : 'text-slate-600 hover:bg-white hover:text-blue-600 border border-slate-200'}`}
+                    title="Página anterior"
+                  >
+                    ←
+                  </button>
+
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                      <button
+                        key={page}
+                        onClick={() => setCurrentPage(page)}
+                        className={`min-w-[40px] h-10 rounded-lg font-bold transition-colors ${
+                          currentPage === page
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    ))}
+                  </div>
+
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                    disabled={currentPage === totalPages}
+                    className={`p-2 rounded-lg transition-colors ${currentPage === totalPages ? 'text-slate-300 cursor-not-allowed' : 'text-slate-600 hover:bg-white hover:text-blue-600 border border-slate-200'}`}
+                    title="Próxima página"
+                  >
+                    →
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

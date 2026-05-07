@@ -239,6 +239,96 @@
       "modalidad": "regular",
       "provincia": "SANTA",
       "distrito": "NUEVO CHIMBOTE"
+    },
+    {
+      "id": 25,
+      "codigo_modular": "0359596",
+      "numero_ie": "",
+      "nombre_ie": "MICAELA BASTIDAS",
+      "nivel_educativo": "secundaria",
+      "modalidad": "regular",
+      "provincia": "SANTA",
+      "distrito": "CHIMBOTE"
+    },
+    {
+      "id": 26,
+      "codigo_modular": "0360214",
+      "numero_ie": "",
+      "nombre_ie": "PILOTO - Nivel inicial",
+      "nivel_educativo": "inicial",
+      "modalidad": "regular",
+      "provincia": "SANTA",
+      "distrito": "NEPEÑA"
+    },
+    {
+      "id": 27,
+      "codigo_modular": "0577080",
+      "numero_ie": "",
+      "nombre_ie": "POLITECNICO NACIONAL DE SANTA",
+      "nivel_educativo": "secundaria",
+      "modalidad": "regular",
+      "provincia": "SANTA",
+      "distrito": "CHIMBOTE"
+    },
+    {
+      "id": 28,
+      "codigo_modular": "0491183",
+      "numero_ie": "",
+      "nombre_ie": "RAMON CASTILLA",
+      "nivel_educativo": "secundaria",
+      "modalidad": "regular",
+      "provincia": "SANTA",
+      "distrito": "SAMANCO"
+    },
+    {
+      "id": 29,
+      "codigo_modular": "0359372",
+      "numero_ie": "",
+      "nombre_ie": "REPUBLICA ARGENTINA",
+      "nivel_educativo": "secundaria",
+      "modalidad": "regular",
+      "provincia": "SANTA",
+      "distrito": "NUEVO CHIMBOTE"
+    },
+    {
+      "id": 30,
+      "codigo_modular": "0359406",
+      "numero_ie": "",
+      "nombre_ie": "SAN JACINTO",
+      "nivel_educativo": "secundaria",
+      "modalidad": "regular",
+      "provincia": "SANTA",
+      "distrito": "NEPEÑA"
+    },
+    {
+      "id": 31,
+      "codigo_modular": "0359349",
+      "numero_ie": "",
+      "nombre_ie": "SAN PEDRO",
+      "nivel_educativo": "secundaria",
+      "modalidad": "regular",
+      "provincia": "SANTA",
+      "distrito": "CHIMBOTE"
+    },
+    {
+      "id": 32,
+      "codigo_modular": "0359364",
+      "numero_ie": "",
+      "nombre_ie": "SANTA MARIA REINA",
+      "nivel_educativo": "secundaria",
+      "modalidad": "regular",
+      "provincia": "SANTA",
+      "distrito": "CHIMBOTE"
+    },
+    {
+      "id": 33,
+      "codigo_modular": "0359398",
+      "numero_ie": "",
+      "nombre_ie": "SANTIAGO ANTUNEZ DE MAYO",
+      "nivel_educativo": "secundaria",
+      "modalidad": "regular",
+      "provincia": "SANTA",
+      "distrito": "SANTA"
     }
   ],
   "directores": [
@@ -481,6 +571,96 @@
       "celular": "978790652",
       "email": "lislopez2409@gmail.com",
       "institucion_id": 24
+    },
+    {
+      "id": 25,
+      "dni": "32913245",
+      "nombres": "FÉLICITA GRICELDA",
+      "apellido_paterno": "HERNANDEZ",
+      "apellido_materno": "CRUZADO",
+      "celular": "940178952",
+      "email": "griceldaf123@gmail.com",
+      "institucion_id": 25
+    },
+    {
+      "id": 26,
+      "dni": "32790739",
+      "nombres": "YRMA NANCY",
+      "apellido_paterno": "VASQUEZ",
+      "apellido_materno": "DIAZ",
+      "celular": "960354934",
+      "email": "nancy24lulu@gmail.com",
+      "institucion_id": 26
+    },
+    {
+      "id": 27,
+      "dni": "32766541",
+      "nombres": "ELISVILLANELA BULILI",
+      "apellido_paterno": "ALVAREZ",
+      "apellido_materno": "CUEVA",
+      "celular": "945051459",
+      "email": "bulili@hotmail.com",
+      "institucion_id": 27
+    },
+    {
+      "id": 28,
+      "dni": "40458287",
+      "nombres": "CENINA MILAGRITOS",
+      "apellido_paterno": "TORRES",
+      "apellido_materno": "MEJIA",
+      "celular": "965688917",
+      "email": "d40458287b@perueduca.edu.pe",
+      "institucion_id": 28
+    },
+    {
+      "id": 29,
+      "dni": "32737832",
+      "nombres": "MILTON CESAR",
+      "apellido_paterno": "VELA",
+      "apellido_materno": "ALEJOS",
+      "celular": "993414219",
+      "email": "d32737832b@perueduca.edu.pe",
+      "institucion_id": 29
+    },
+    {
+      "id": 30,
+      "dni": "32916767",
+      "nombres": "JESUS BRUNO",
+      "apellido_paterno": "LOZANO",
+      "apellido_materno": "REGALADO",
+      "celular": "949337703",
+      "email": "jbloz21@hotmail.com",
+      "institucion_id": 30
+    },
+    {
+      "id": 31,
+      "dni": "32952552",
+      "nombres": "MARGARET IDELSA",
+      "apellido_paterno": "OLORTEGUI",
+      "apellido_materno": "MORALES",
+      "celular": "943916741",
+      "email": "olorteguimargaret@gmail.com",
+      "institucion_id": 31
+    },
+    {
+      "id": 32,
+      "dni": "32542962",
+      "nombres": "EDITH MARIA",
+      "apellido_paterno": "VÁSQUEZ",
+      "apellido_materno": "MARTELL",
+      "celular": "957610178",
+      "email": "edith270470@gmail.com",
+      "institucion_id": 32
+    },
+    {
+      "id": 33,
+      "dni": "26641397",
+      "nombres": "SEGUNDO RAMON",
+      "apellido_paterno": "LEYVA",
+      "apellido_materno": "MIRANDA",
+      "celular": "976082636",
+      "email": "segundoramonleyvamiranda@gmail.com",
+      "institucion_id": 33
     }
   ],
   "usuarios": [
@@ -682,6 +862,78 @@
       "password_hash": "$2a$10$zTCEUvETr2o2ug6B0W1DQen7h/WD18BPCdQz36TyVy7q7nHrp2Wci",
       "rol": "director",
       "director_id": 24,
+      "estado": "activo"
+    },
+    {
+      "id": 28,
+      "email": "griceldaf123@gmail.com",
+      "password_hash": "$2a$10$zTCEUvETr2o2ug6B0W1DQen7h/WD18BPCdQz36TyVy7q7nHrp2Wci",
+      "rol": "director",
+      "director_id": 25,
+      "estado": "activo"
+    },
+    {
+      "id": 29,
+      "email": "nancy24lulu@gmail.com",
+      "password_hash": "$2a$10$zTCEUvETr2o2ug6B0W1DQen7h/WD18BPCdQz36TyVy7q7nHrp2Wci",
+      "rol": "director",
+      "director_id": 26,
+      "estado": "activo"
+    },
+    {
+      "id": 30,
+      "email": "bulili@hotmail.com",
+      "password_hash": "$2a$10$zTCEUvETr2o2ug6B0W1DQen7h/WD18BPCdQz36TyVy7q7nHrp2Wci",
+      "rol": "director",
+      "director_id": 27,
+      "estado": "activo"
+    },
+    {
+      "id": 31,
+      "email": "d40458287b@perueduca.edu.pe",
+      "password_hash": "$2a$10$zTCEUvETr2o2ug6B0W1DQen7h/WD18BPCdQz36TyVy7q7nHrp2Wci",
+      "rol": "director",
+      "director_id": 28,
+      "estado": "activo"
+    },
+    {
+      "id": 32,
+      "email": "d32737832b@perueduca.edu.pe",
+      "password_hash": "$2a$10$zTCEUvETr2o2ug6B0W1DQen7h/WD18BPCdQz36TyVy7q7nHrp2Wci",
+      "rol": "director",
+      "director_id": 29,
+      "estado": "activo"
+    },
+    {
+      "id": 33,
+      "email": "jbloz21@hotmail.com",
+      "password_hash": "$2a$10$zTCEUvETr2o2ug6B0W1DQen7h/WD18BPCdQz36TyVy7q7nHrp2Wci",
+      "rol": "director",
+      "director_id": 30,
+      "estado": "activo"
+    },
+    {
+      "id": 34,
+      "email": "olorteguimargaret@gmail.com",
+      "password_hash": "$2a$10$zTCEUvETr2o2ug6B0W1DQen7h/WD18BPCdQz36TyVy7q7nHrp2Wci",
+      "rol": "director",
+      "director_id": 31,
+      "estado": "activo"
+    },
+    {
+      "id": 35,
+      "email": "edith270470@gmail.com",
+      "password_hash": "$2a$10$zTCEUvETr2o2ug6B0W1DQen7h/WD18BPCdQz36TyVy7q7nHrp2Wci",
+      "rol": "director",
+      "director_id": 32,
+      "estado": "activo"
+    },
+    {
+      "id": 36,
+      "email": "segundoramonleyvamiranda@gmail.com",
+      "password_hash": "$2a$10$zTCEUvETr2o2ug6B0W1DQen7h/WD18BPCdQz36TyVy7q7nHrp2Wci",
+      "rol": "director",
+      "director_id": 33,
       "estado": "activo"
     }
   ]
