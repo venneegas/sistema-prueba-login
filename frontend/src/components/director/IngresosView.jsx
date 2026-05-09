@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { Plus, Save, CalendarDays, X, Download, FileText } from 'lucide-react';
+import { Plus, Save, CalendarDays, X, Download, FileText, PaintBucket } from 'lucide-react';
 import { buildApiUrl } from '../../config/api';
 import Toast from '../Toast';
 import { jsPDF } from 'jspdf';
@@ -9,41 +9,14 @@ import ConfirmModal from './ConfirmModal';
 
 const API_URL = buildApiUrl('/api/movimientos/ingresos');
 
-const TIPOS_COMPROBANTE = [
-  'Factura',
-  'Boleta',
-  'Cheque',
-  'Recibo por Honorarios',
-  'Declaración Jurada',
-];
-
-const normalizarTexto = (valor) => (
-  String(valor || '')
-    .trim()
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-);
-
-const MAPA_TIPOS_COMPROBANTE = {
-  factura: 'Factura',
-  boleta: 'Boleta',
-  cheque: 'Cheque',
-  'recibo por honorarios': 'Recibo por Honorarios',
-  'declaracion jurada': 'Declaración Jurada',
-};
-
-const normalizarTipoComprobante = (tipo) => (
-  MAPA_TIPOS_COMPROBANTE[normalizarTexto(tipo)] || ''
-);
-
 const crearFilaVacia = () => ({
   id: `tmp-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
   fecha: '',
-  tipo: '',
+  comprobante_id: '',
   numero: '',
   concepto: '',
   importe: 0,
+  color: '',
 });
 
 const formatearFechaApi = (fecha) => {
@@ -56,7 +29,7 @@ const filaTieneContenido = (fila) => (
   || Boolean(String(fila.numero || '').trim())
   || Boolean(String(fila.concepto || '').trim())
   || Number(fila.importe || 0) > 0
-  || Boolean(String(fila.tipo || '').trim())
+  || Boolean(fila.comprobante_id)
 );
 
 const leerRespuestaJson = async (response) => {
@@ -79,6 +52,7 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [mensaje, setMensaje] = useState('');
+  const [listaComprobantes, setListaComprobantes] = useState([]);
   const [error, setError] = useState('');
   const [filasTipoInvalido, setFilasTipoInvalido] = useState(new Set());
   const [filasFechaInvalida, setFilasFechaInvalida] = useState(new Set());
@@ -121,6 +95,23 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
       }
     });
   };
+
+  useEffect(() => {
+    const fetchComprobantes = async () => {
+      try {
+        const response = await fetch(buildApiUrl('/api/comprobantes'), {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        });
+        const result = await leerRespuestaJson(response);
+        if (result.success) {
+          setListaComprobantes(result.data);
+        }
+      } catch (error) {
+        console.error('Error cargando comprobantes:', error);
+      }
+    };
+    fetchComprobantes();
+  }, []);
 
   useEffect(() => {
     setMesActivo(0);
@@ -177,10 +168,11 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
             agrupados[monthOffset].push({
               id: registro.id,
               fecha: formatearFechaApi(registro.fecha),
-              tipo: normalizarTipoComprobante(registro.tipo_comprobante),
+              comprobante_id: registro.comprobante_id || '',
               numero: registro.numero_comprobante || '',
               concepto: registro.concepto || '',
               importe: registro.monto ?? 0,
+              color: registro.color || '',
             });
           }
         });
@@ -226,7 +218,7 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
       return nuevosDatos;
     });
 
-    if (campo === 'tipo' && TIPOS_COMPROBANTE.includes(valor)) {
+    if (campo === 'comprobante_id' && valor) {
       setFilasTipoInvalido((prev) => {
         if (!prev.has(filaId)) return prev;
         const next = new Set(prev);
@@ -308,18 +300,19 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
       .filter((fila) => filaTieneContenido(fila))
       .map((fila) => ({
         fecha: fila.fecha,
-        tipo_comprobante: fila.tipo,
+        comprobante_id: fila.comprobante_id,
         numero_comprobante: fila.numero,
         concepto: fila.concepto,
         monto: fila.importe,
+        color: fila.color,
       }));
 
     const filasSinTipo = datosMeses[mesActivo]
       .map((fila, index) => ({ fila, index }))
-      .filter(({ fila }) => filaTieneContenido(fila) && !TIPOS_COMPROBANTE.includes(fila.tipo))
+      .filter(({ fila }) => filaTieneContenido(fila) && !fila.comprobante_id)
       .map(({ index }) => index + 1);
     const filaIdsSinTipo = datosMeses[mesActivo]
-      .filter((fila) => filaTieneContenido(fila) && !TIPOS_COMPROBANTE.includes(fila.tipo))
+      .filter((fila) => filaTieneContenido(fila) && !fila.comprobante_id)
       .map((fila) => fila.id);
 
     // Validar que las filas con contenido tengan una fecha establecida
@@ -434,6 +427,11 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
     });
   };
 
+  const obtenerNombreComprobante = (id) => {
+    const comp = listaComprobantes.find(c => String(c.id) === String(id));
+    return comp ? comp.nombre : '';
+  };
+
   // Funciones placeholder para la exportación
   const handleDownloadPDF = () => {
     const doc = new jsPDF();
@@ -452,7 +450,7 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
       .map((fila, index) => [
         index + 1,
         fila.fecha ? formatearFechaDDMM(fila.fecha) : '',
-        fila.tipo || '',
+        obtenerNombreComprobante(fila.comprobante_id),
         fila.numero || '',
         fila.concepto || '',
         `S/. ${Number(fila.importe || 0).toFixed(2)}`
@@ -517,9 +515,14 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
     });
 
     datosMeses[mesActivo].filter(fila => filaTieneContenido(fila)).forEach((fila, index) => {
-      const row = ws.addRow([ index + 1, fila.fecha ? formatearFechaDDMM(fila.fecha) : '', fila.tipo || '', fila.numero || '', fila.concepto || '', Number(fila.importe || 0) ]);
+      const row = ws.addRow([ index + 1, fila.fecha ? formatearFechaDDMM(fila.fecha) : '', obtenerNombreComprobante(fila.comprobante_id), fila.numero || '', fila.concepto || '', Number(fila.importe || 0) ]);
       row.getCell(6).numFmt = '"S/." #,##0.00';
-      row.eachCell(c => c.border = { top: { style: 'thin' }, bottom: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' } });
+      row.eachCell(c => {
+        c.border = { top: { style: 'thin' }, bottom: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' } };
+        if (fila.color) {
+          c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + fila.color.replace('#', '').toUpperCase() } };
+        }
+      });
     });
 
     const rowTotal = ws.addRow(['', '', '', '', 'TOTAL INGRESOS', Number(calcularTotal(mesActivo))]);
@@ -631,13 +634,13 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
                 <th className="border border-emerald-700/50 px-4 py-3 font-bold uppercase tracking-wider w-36 text-center text-xs">N° Comprobante</th>
                 <th className="border border-emerald-700/50 px-4 py-3 font-bold uppercase tracking-wider text-left text-xs">Concepto</th>
                 <th className="border border-emerald-700/50 px-4 py-3 font-bold uppercase tracking-wider w-36 text-right text-xs">Importe (S/.)</th>
-                <th className="border border-emerald-700/50 px-4 py-3 font-bold uppercase tracking-wider w-16 text-center text-xs">Acción</th>
+                <th className="border border-emerald-700/50 px-4 py-3 font-bold uppercase tracking-wider w-24 text-center text-xs">Acción</th>
               </tr>
             </thead>
             <tbody>
               {datosMeses[mesActivo].map((fila, index) => (
-                <tr key={fila.id} className="hover:bg-slate-50/80 transition-colors group/row">
-                  <td className="border border-slate-300 px-2 py-2 text-center bg-slate-50 font-medium text-slate-500">{index + 1}</td>
+                <tr key={fila.id} style={{ backgroundColor: fila.color || undefined }} className="hover:bg-slate-50/80 transition-colors group/row">
+                  <td className="border border-slate-300 px-2 py-2 text-center font-medium text-slate-500" style={{ backgroundColor: fila.color || '#f8fafc' }}>{index + 1}</td>
                   <td className="border border-slate-300 p-1">
                     <button
                       type="button"
@@ -680,15 +683,15 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
                   </td>
                   <td className="border border-slate-300 p-1">
                     <select
-                      value={fila.tipo}
-                      onChange={(e) => handleInputChange(mesActivo, fila.id, 'tipo', e.target.value)}
+                      value={fila.comprobante_id}
+                      onChange={(e) => handleInputChange(mesActivo, fila.id, 'comprobante_id', e.target.value)}
                       disabled={trimestreCerrado}
                       className={`${inputClass} ${filasTipoInvalido.has(fila.id) ? 'ring-2 ring-red-500 bg-red-50' : ''}`}
                     >
                       <option value="">Seleccionar</option>
-                      {TIPOS_COMPROBANTE.map((tipo) => (
-                        <option key={tipo} value={tipo}>
-                          {tipo}
+                      {listaComprobantes.map((comp) => (
+                        <option key={comp.id} value={comp.id}>
+                          {comp.nombre}
                         </option>
                       ))}
                     </select>
@@ -731,14 +734,38 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
                     />
                   </td>
                   <td className="border border-slate-300 p-1 text-center">
-                    <button
-                      onClick={() => eliminarFila(mesActivo, fila.id)}
-                      disabled={trimestreCerrado}
-                      className="bg-slate-400 text-white p-1.5 rounded-lg hover:bg-rose-600 transition-all disabled:cursor-not-allowed disabled:opacity-50"
-                      title="Eliminar fila"
-                    >
-                      <X size={16} />
-                    </button>
+                    <div className="flex items-center justify-center gap-1.5">
+                      <div className="relative group/color flex items-center justify-center">
+                        <label className={`cursor-pointer ${fila.color ? 'bg-white' : 'bg-slate-100'} text-slate-600 p-1.5 rounded-lg hover:bg-slate-200 transition-all border border-slate-300 shadow-sm`} title="Resaltar fila">
+                          <PaintBucket size={16} color={fila.color || 'currentColor'} />
+                          <input
+                            type="color"
+                            value={fila.color || '#ffffff'}
+                            onChange={(e) => handleInputChange(mesActivo, fila.id, 'color', e.target.value)}
+                            disabled={trimestreCerrado}
+                            className="opacity-0 absolute w-0 h-0"
+                          />
+                        </label>
+                        {fila.color && !trimestreCerrado && (
+                          <button
+                            type="button"
+                            onClick={() => handleInputChange(mesActivo, fila.id, 'color', '')}
+                            className="absolute -top-1.5 -right-1.5 bg-rose-100 text-rose-600 rounded-full p-0.5 hover:bg-rose-200 shadow-sm"
+                            title="Quitar color"
+                          >
+                            <X size={10} strokeWidth={3} />
+                          </button>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => eliminarFila(mesActivo, fila.id)}
+                        disabled={trimestreCerrado}
+                        className="bg-slate-400 text-white p-1.5 rounded-lg hover:bg-rose-600 transition-all disabled:cursor-not-allowed disabled:opacity-50 shadow-sm"
+                        title="Eliminar fila"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

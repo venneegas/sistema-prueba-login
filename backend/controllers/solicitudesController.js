@@ -7,7 +7,7 @@ const crearSolicitud = async (req, res) => {
     const { directorId, school, motivo, nuevoCorreo, telefono } = req.body;
     
     const [result] = await pool.query(
-      'INSERT INTO solicitudes_reemplazo (director_id, escuela, motivo, nuevo_correo, telefono) VALUES (?, ?, ?, ?, ?)',
+      'INSERT INTO solicitudes (director_id, escuela, motivo, nuevo_correo, telefono) VALUES (?, ?, ?, ?, ?)',
       [directorId, school, motivo, nuevoCorreo, telefono]
     );
     
@@ -35,7 +35,7 @@ const obtenerSolicitudes = async (req, res) => {
         telefono, 
         estado, 
         fecha_creacion 
-      FROM solicitudes_reemplazo 
+      FROM solicitudes 
       ORDER BY fecha_creacion DESC
     `);
     
@@ -54,7 +54,7 @@ const procesarSolicitud = async (req, res) => {
 
     // Si se aprueba, asignamos el nuevo correo al director y forzamos el cambio de contraseña
     if (estado === 'aprobado') {
-      const [solicitudes] = await pool.query('SELECT director_id, nuevo_correo FROM solicitudes_reemplazo WHERE id = ?', [id]);
+      const [solicitudes] = await pool.query('SELECT director_id, nuevo_correo FROM solicitudes WHERE id = ?', [id]);
       if (solicitudes.length === 0) {
         return res.status(404).json({ success: false, message: 'Solicitud no encontrada.' });
       }
@@ -79,7 +79,7 @@ const procesarSolicitud = async (req, res) => {
     }
 
     // Actualizamos el estado final de la solicitud
-    await pool.query('UPDATE solicitudes_reemplazo SET estado = ? WHERE id = ?', [estado, id]);
+    await pool.query('UPDATE solicitudes SET estado = ? WHERE id = ?', [estado, id]);
     
     res.json({ success: true, message: `Solicitud ${estado} correctamente.` });
   } catch (error) {

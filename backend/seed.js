@@ -12,20 +12,30 @@ async function runSeeder() {
     const datos = JSON.parse(rawData);
     
     // 2. Aquí extraeríamos los datos
-    console.log(`📦 Preparando para insertar ${datos.instituciones_educativas.length} colegios.`);
+    console.log(`📦 Preparando para insertar ${datos.instituciones.length} colegios.`);
     console.log(`📦 Preparando para insertar ${datos.directores.length} directores.`);
     console.log(`📦 Preparando para insertar ${datos.usuarios.length} usuarios.`);
     
-    // 3. Insertar Colegios (Instituciones Educativas)
-    console.log('🏫 Insertando Instituciones Educativas...');
-    for (const ie of datos.instituciones_educativas) {
+    // 3. Insertar Catálogo de Comprobantes
+    console.log('📄 Insertando Tipos de Comprobantes...');
+    const comprobantes = ['Factura', 'Boleta Venta', 'Boleta Electrónica', 'Recibo por Honorarios', 'Declaración Jurada', 'Voucher Banco', 'Cheque'];
+    for (const comp of comprobantes) {
       await pool.execute(
-        `INSERT IGNORE INTO instituciones_educativas (id, codigo_modular, numero_ie, nombre_ie, nivel_educativo, modalidad, provincia, distrito) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT IGNORE INTO comprobantes (nombre, activo) VALUES (?, 1)`,
+        [comp]
+      );
+    }
+
+    // 4. Insertar Colegios (Instituciones Educativas)
+    console.log('🏫 Insertando Instituciones Educativas...');
+    for (const ie of datos.instituciones) {
+      await pool.execute(
+        `INSERT IGNORE INTO instituciones (id, codigo_modular, numero, nombre, nivel_educativo, modalidad, provincia, distrito) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
         [ie.id, ie.codigo_modular, ie.numero_ie || null, ie.nombre_ie, ie.nivel_educativo, ie.modalidad, ie.provincia, ie.distrito]
       );
     }
 
-    // 4. Insertar Directores
+    // 5. Insertar Directores
     console.log('👨‍🏫 Insertando Directores...');
     for (const dir of datos.directores) {
       await pool.execute(
@@ -34,12 +44,12 @@ async function runSeeder() {
       );
     }
 
-    // 5. Insertar Usuarios
+    // 6. Insertar Usuarios
     console.log('🔐 Insertando Usuarios...');
     for (const usr of datos.usuarios) {
       await pool.execute(
-        `INSERT IGNORE INTO usuarios (id, email, password_hash, rol, director_id, estado) VALUES (?, ?, ?, ?, ?, ?)`,
-        [usr.id, usr.email, usr.password_hash, usr.rol, usr.director_id, usr.estado]
+        `INSERT IGNORE INTO usuarios (id, email, nombre, password_hash, rol, director_id, estado) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [usr.id, usr.email, usr.nombre || null, usr.password_hash, usr.rol, usr.director_id, usr.estado]
       );
     }
     

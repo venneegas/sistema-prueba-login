@@ -1,4 +1,4 @@
-const db = require('../config/db'); // Asumiendo que esta es tu conexión a BD
+const { pool } = require('../config/db');
 
 // @desc    Obtener los datos institucionales de un director
 // @route   GET /api/datos-institucionales/:directorId
@@ -6,9 +6,9 @@ const getDatos = async (req, res) => {
   try {
     const { directorId } = req.params;
     
-    // Usamos el pool de mysql2 para ejecutar la consulta
-    const [rows] = await db.pool.execute(
-      'SELECT * FROM datos_institucionales WHERE director_id = ?', 
+    // Usamos el pool para ejecutar la consulta
+    const [rows] = await pool.execute(
+      'SELECT * FROM tesoreria WHERE director_id = ?', 
       [directorId]
     );
     
@@ -40,23 +40,17 @@ const saveDatos = async (req, res) => {
       return res.status(400).json({ success: false, message: 'El celular del tesorero debe contener exactamente 9 dígitos numéricos.' });
     }
 
-    // Verificar si el director ya tiene datos registrados
-    const [existing] = await db.pool.execute('SELECT id FROM datos_institucionales WHERE director_id = ?', [directorId]);
-
-    if (existing.length > 0) {
-      // Si ya existen, los ACTUALIZAMOS (UPDATE)
-      await db.pool.execute(`
-        UPDATE datos_institucionales 
-        SET nombre_tesorero = ?, dni_tesorero = ?, celular_tesorero = ?, numero_cuenta_corriente = ?, banco = ?
-        WHERE director_id = ?
-      `, [nombre_tesorero, dni_tesorero, celular_tesorero, numero_cuenta_corriente, banco || 'Banco de la Nación', directorId]);
-    } else {
-      // Si no existen, los CREAMOS (INSERT)
-      await db.pool.execute(`
-        INSERT INTO datos_institucionales (director_id, nombre_tesorero, dni_tesorero, celular_tesorero, numero_cuenta_corriente, banco)
-        VALUES (?, ?, ?, ?, ?, ?)
-      `, [directorId, nombre_tesorero, dni_tesorero, celular_tesorero, numero_cuenta_corriente, banco || 'Banco de la Nación']);
-    }
+    // Operación atómica: Insertar o actualizar si el director_id ya existe
+    await pool.execute(`
+      INSERT INTO tesoreria (director_id, nombre_tesorero, dni_tesorero, celular_tesorero, numero_cuenta_corriente, banco)
+      VALUES (?, ?, ?, ?, ?, ?)
+      ON DUPLICATE KEY UPDATE 
+        nombre_tesorero = VALUES(nombre_tesorero),
+        dni_tesorero = VALUES(dni_tesorero),
+        celular_tesorero = VALUES(celular_tesorero),
+        numero_cuenta_corriente = VALUES(numero_cuenta_corriente),
+        banco = VALUES(banco)
+    `, [directorId, nombre_tesorero, dni_tesorero, celular_tesorero, numero_cuenta_corriente, banco || 'Banco de la Nación']);
 
     res.json({ success: true, message: 'Datos institucionales guardados correctamente.' });
   } catch (error) {

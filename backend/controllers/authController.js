@@ -71,7 +71,7 @@ const login = async (req, res) => {
 
     if (usuarios.length === 0) {
       await connection.execute(
-        `INSERT INTO login_logs (email, exitoso, razon_fallo, ip_address, user_agent) VALUES (?, FALSE, 'Usuario no encontrado', ?, ?)`,
+        `INSERT INTO sesiones (email, exitoso, razon_fallo, ip_address, user_agent) VALUES (?, FALSE, 'Usuario no encontrado', ?, ?)`,
         [correo.trim(), ipAddress, userAgent]
       );
       return res.status(401).json({
@@ -85,7 +85,7 @@ const login = async (req, res) => {
 
     if (!passwordValida) {
       await connection.execute(
-        `INSERT INTO login_logs (usuario_id, email, exitoso, razon_fallo, ip_address, user_agent) VALUES (?, ?, FALSE, 'Contraseña incorrecta', ?, ?)`,
+        `INSERT INTO sesiones (usuario_id, email, exitoso, razon_fallo, ip_address, user_agent) VALUES (?, ?, FALSE, 'Contraseña incorrecta', ?, ?)`,
         [usuario.id, correo.trim(), ipAddress, userAgent]
       );
       return res.status(401).json({
@@ -108,10 +108,10 @@ const login = async (req, res) => {
             d.celular,
             d.email,
             d.institucion_id,
-            ie.numero_ie,
-            ie.nombre_ie
+            i.numero AS numero_ie,
+            i.nombre AS nombre_ie
           FROM directores d
-          JOIN instituciones_educativas ie ON d.institucion_id = ie.id
+          JOIN instituciones i ON d.institucion_id = i.id
           WHERE d.id = ?
         `,
         [usuario.director_id]
@@ -124,7 +124,7 @@ const login = async (req, res) => {
 
     // Registrar log exitoso
     await connection.execute(
-      `INSERT INTO login_logs (usuario_id, email, exitoso, ip_address, user_agent) VALUES (?, ?, TRUE, ?, ?)`,
+      `INSERT INTO sesiones (usuario_id, email, exitoso, ip_address, user_agent) VALUES (?, ?, TRUE, ?, ?)`,
       [usuario.id, correo.trim(), ipAddress, userAgent]
     );
 

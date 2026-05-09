@@ -22,7 +22,7 @@ const subirSustentoPDF = async (req, res) => {
 
     // Insertar en nuestra nueva tabla sustentos_pdf
     const query = `
-      INSERT INTO sustentos_pdf (director_id, nombre_original, ruta_archivo, tamanio_bytes, anio, trimestre)
+      INSERT INTO sustentos (director_id, nombre_original, ruta_archivo, tamanio_bytes, anio, trimestre)
       VALUES (?, ?, ?, ?, ?, ?)
     `;
     
@@ -50,7 +50,7 @@ const obtenerSustentos = async (req, res) => {
 
     const query = `
       SELECT id, nombre_original, ruta_archivo, tamanio_bytes, subido_en
-      FROM sustentos_pdf
+      FROM sustentos
       WHERE director_id = ? AND anio = ? AND trimestre = ?
       ORDER BY subido_en DESC
     `;
@@ -75,14 +75,14 @@ const eliminarSustento = async (req, res) => {
     }
 
     // 1. Obtener la ruta del archivo y verificar permisos
-    const [rows] = await pool.execute('SELECT ruta_archivo FROM sustentos_pdf WHERE id = ? AND director_id = ?', [Number(id), Number(directorId)]);
+    const [rows] = await pool.execute('SELECT ruta_archivo FROM sustentos WHERE id = ? AND director_id = ?', [Number(id), Number(directorId)]);
     
     if (rows.length === 0) {
       return res.status(404).json({ success: false, message: 'Archivo no encontrado o acceso denegado.' });
     }
 
     // 2. Eliminar de la base de datos
-    await pool.execute('DELETE FROM sustentos_pdf WHERE id = ?', [Number(id)]);
+    await pool.execute('DELETE FROM sustentos WHERE id = ?', [Number(id)]);
 
     // 3. Eliminar el archivo físico del disco duro (usando path.basename por seguridad)
     const rutaFisica = path.join(__dirname, '..', 'uploads', 'pdfs', path.basename(rows[0].ruta_archivo));

@@ -10,17 +10,17 @@ const getColegiosPorTrimestre = async (req, res) => {
     const sql = `
       SELECT 
           d.id AS id,
-          ie.codigo_modular AS codigoModular,
-          ie.numero_ie AS numeroIE,
-          ie.nombre_ie AS nombre,
-          COALESCE(et.estado, 'Borrador') AS estado
+          i.codigo_modular AS codigoModular,
+          i.numero AS numeroIE,
+          i.nombre AS nombre,
+          COALESCE(e.estado, 'Borrador') AS estado
       FROM directores d
-      INNER JOIN instituciones_educativas ie ON d.institucion_id = ie.id
-      LEFT JOIN estado_trimestres et 
-          ON d.id = et.director_id 
-          AND et.trimestre = ? 
-          AND et.anio = ?
-      ORDER BY ie.nombre_ie ASC
+      INNER JOIN instituciones i ON d.institucion_id = i.id
+      LEFT JOIN estados e 
+          ON d.id = e.director_id 
+          AND e.trimestre = ? 
+          AND e.anio = ?
+      ORDER BY i.nombre ASC
     `;
 
     // 3. Ejecutar la consulta pasando los parámetros asegurando que sean números
@@ -54,21 +54,21 @@ const getResumenFinanciero = async (req, res) => {
     // 1. Obtener Total de Ingresos del trimestre
     const queryIngresos = `
       SELECT COALESCE(SUM(monto), 0) AS total 
-      FROM ingresos 
-      WHERE director_id = ? AND YEAR(fecha) = ? AND MONTH(fecha) BETWEEN ? AND ?
+      FROM movimientos 
+      WHERE director_id = ? AND tipo_movimiento = 'INGRESO' AND YEAR(fecha) = ? AND MONTH(fecha) BETWEEN ? AND ?
     `;
     
     // 2. Obtener Total de Egresos del trimestre
     const queryEgresos = `
       SELECT COALESCE(SUM(monto), 0) AS total 
-      FROM egresos 
-      WHERE director_id = ? AND YEAR(fecha) = ? AND MONTH(fecha) BETWEEN ? AND ?
+      FROM movimientos 
+      WHERE director_id = ? AND tipo_movimiento = 'EGRESO' AND YEAR(fecha) = ? AND MONTH(fecha) BETWEEN ? AND ?
     `;
 
     // 3. Obtener el Saldo del Banco (el saldo final del mes 3 del trimestre)
     const querySaldos = `
       SELECT saldo_mes3 AS saldo_final 
-      FROM saldos_cuenta_corriente 
+      FROM saldos 
       WHERE director_id = ? AND anio = ? AND trimestre = ?
     `;
 
@@ -100,7 +100,7 @@ const getPdfsPorColegio = async (req, res) => {
 
     const sql = `
       SELECT id, nombre_original, ruta_archivo, tamanio_bytes, subido_en 
-      FROM sustentos_pdf 
+      FROM sustentos 
       WHERE director_id = ? AND anio = ? AND trimestre = ?
       ORDER BY subido_en DESC
     `;
@@ -128,7 +128,7 @@ const auditarDeclaracion = async (req, res) => {
 
     // 1. Actualizar o Insertar el estado del trimestre
     const queryEstado = `
-      INSERT INTO estado_trimestres (director_id, trimestre, anio, estado, comentario_observacion, fecha_auditoria)
+      INSERT INTO estados (director_id, trimestre, anio, estado, comentario_observacion, fecha_auditoria)
       VALUES (?, ?, ?, ?, ?, NOW())
       ON DUPLICATE KEY UPDATE 
       estado = VALUES(estado), 
@@ -149,7 +149,7 @@ const auditarDeclaracion = async (req, res) => {
 
       // DESBLOQUEAR SISTEMA: Eliminamos el candado para que el director pueda editar de nuevo
       await connection.execute(
-        'DELETE FROM cierres_trimestrales WHERE director_id = ? AND anio = ? AND trimestre = ?',
+        'DELETE FROM cierres WHERE director_id = ? AND anio = ? AND trimestre = ?',
         [directorId, anio, trimestre]
       );
     } else if (estado === 'Aprobado') {
@@ -184,17 +184,17 @@ const getReporteGlobal = async (req, res) => {
     // Esta poderosa consulta trae la lista de colegios + sus estados + la suma total de su dinero
     const sql = `
       SELECT 
-        ie.codigo_modular AS codigoModular,
-        ie.numero_ie AS numeroIE,
-        ie.nombre_ie AS nombre,
-        COALESCE(et.estado, 'Borrador') AS estado,
-        (SELECT COALESCE(SUM(monto), 0) FROM ingresos i WHERE i.director_id = d.id AND YEAR(fecha) = ? AND MONTH(fecha) BETWEEN ? AND ?) AS totalIngresos,
-        (SELECT COALESCE(SUM(monto), 0) FROM egresos e WHERE e.director_id = d.id AND YEAR(fecha) = ? AND MONTH(fecha) BETWEEN ? AND ?) AS totalEgresos,
-        (SELECT COALESCE(saldo_mes3, 0) FROM saldos_cuenta_corriente scc WHERE scc.director_id = d.id AND anio = ? AND trimestre = ?) AS saldoFinal
+        i.codigo_modular AS codigoModular,
+        i.numero AS numeroIE,
+        i.nombre AS nombre,
+        COALESCE(e.estado, 'Borrador') AS estado,
+        (SELECT COALESCE(SUM(monto), 0) FROM movimientos m1 WHERE m1.director_id = d.id AND m1.tipo_movimiento = 'INGRESO' AND YEAR(m1.fecha) = ? AND MONTH(m1.fecha) BETWEEN ? AND ?) AS totalIngresos,
+        (SELECT COALESCE(SUM(monto), 0) FROM movimientos m2 WHERE m2.director_id = d.id AND m2.tipo_movimiento = 'EGRESO' AND YEAR(m2.fecha) = ? AND MONTH(m2.fecha) BETWEEN ? AND ?) AS totalEgresos,
+        (SELECT COALESCE(saldo_mes3, 0) FROM saldos s WHERE s.director_id = d.id AND anio = ? AND trimestre = ?) AS saldoFinal
       FROM directores d
-      INNER JOIN instituciones_educativas ie ON d.institucion_id = ie.id
-      LEFT JOIN estado_trimestres et ON d.id = et.director_id AND et.trimestre = ? AND et.anio = ?
-      ORDER BY ie.nombre_ie ASC
+      INNER JOIN instituciones i ON d.institucion_id = i.id
+      LEFT JOIN estados e ON d.id = e.director_id AND e.trimestre = ? AND e.anio = ?
+      ORDER BY i.nombre ASC
     `;
 
     const [rows] = await pool.execute(sql, [

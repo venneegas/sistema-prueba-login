@@ -1,7 +1,7 @@
 const { pool } = require('../config/db'); // Usamos tu conexión existente a la BD
 
 /**
- * Registra una acción en la tabla de auditoría (auditoria_logs)
+ * Registra una acción en la tabla de auditoría (auditorias)
  * 
  * @param {Object} data - Objeto con los datos de la auditoría
  * @param {number} data.usuario_id - ID del usuario (de la tabla `usuarios`) que realiza la acción
@@ -19,7 +19,7 @@ const logAuditoria = async ({ usuario_id, modulo, accion, descripcion, ip_addres
 
         // 2. Preparar la consulta SQL
         const sql = `
-            INSERT INTO auditoria_logs 
+            INSERT INTO auditorias 
             (usuario_id, modulo, accion, descripcion, ip_address) 
             VALUES (?, ?, ?, ?, ?)
         `;
@@ -30,7 +30,7 @@ const logAuditoria = async ({ usuario_id, modulo, accion, descripcion, ip_addres
     } catch (error) {
         // Solo imprimimos el error en consola para alertar al desarrollador.
         // No lanzamos (throw) el error para evitar que la acción principal del usuario fracase.
-        console.error('❌ Error al guardar en auditoria_logs:', error.message);
+        console.error('❌ Error al guardar en auditorias:', error.message);
     }
 };
 

@@ -56,7 +56,7 @@ const getAuditoriaLogs = async (req, res) => {
     const query = `
       SELECT a.id, a.modulo, a.accion, a.descripcion, a.fecha_hora, a.ip_address,
              u.email, u.rol
-      FROM auditoria_logs a
+      FROM auditorias a
       LEFT JOIN usuarios u ON a.usuario_id = u.id
       ORDER BY a.fecha_hora DESC
       LIMIT 100
@@ -74,7 +74,7 @@ const getLoginLogs = async (req, res) => {
   try {
     const query = `
       SELECT id, email, exitoso, razon_fallo, ip_address, user_agent, fecha_hora
-      FROM login_logs
+      FROM sesiones
       ORDER BY fecha_hora DESC
       LIMIT 100
     `;
@@ -91,10 +91,10 @@ const getUsers = async (req, res) => {
   try {
     const query = `
       SELECT u.id, u.email, u.rol, u.estado, u.nombre as usuario_nombre,
-             d.nombres, d.apellido_paterno, d.apellido_materno, ie.nombre_ie as colegio, ie.numero_ie
+             d.nombres, d.apellido_paterno, d.apellido_materno, i.nombre as colegio, i.numero
       FROM usuarios u
       LEFT JOIN directores d ON u.director_id = d.id
-      LEFT JOIN instituciones_educativas ie ON d.institucion_id = ie.id
+      LEFT JOIN instituciones i ON d.institucion_id = i.id
       ORDER BY u.creado_en DESC
     `;
     const [rows] = await pool.execute(query);
@@ -119,7 +119,7 @@ const getUsers = async (req, res) => {
         rol: row.rol,
         estado: row.estado,
         colegio: row.colegio || '-',
-        numeroIE: row.numero_ie || null
+        numeroIE: row.numero || null
       };
     });
 
