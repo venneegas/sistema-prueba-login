@@ -37,12 +37,12 @@ const EspecialistaBarLineChart = ({
     .join(' ');
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-      <div className="p-6 border-b border-slate-100">
+    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+      <div className="p-6 border-b border-slate-100 dark:border-slate-700">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h3 className="text-lg font-bold text-slate-800">{title}</h3>
-            <p className="text-sm text-slate-500 mt-1">{subtitle}</p>
+            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">{title}</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{subtitle}</p>
           </div>
           <div className={`px-4 py-2 rounded-xl text-sm font-bold ${colorClass}`}>
             {totalLabel}: {formatCurrency(total)}
@@ -51,14 +51,14 @@ const EspecialistaBarLineChart = ({
       </div>
 
       <div className="p-6">
-        <div className="flex items-center gap-6 text-xs text-slate-500 mb-4">
+        <div className="flex items-center gap-6 text-xs text-slate-500 dark:text-slate-400 mb-4">
           <div className="flex items-center gap-2">
             <span className="w-3 h-3 rounded-sm" style={{ backgroundColor: barColor }} />
             Barras por colegio
           </div>
           <div className="flex items-center gap-2">
             <span className="w-5 h-0.5 rounded-full" style={{ backgroundColor: lineColor }} />
-            Linea de tendencia
+            Línea de tendencia
           </div>
         </div>
 
@@ -70,8 +70,7 @@ const EspecialistaBarLineChart = ({
                 y1={topPadding + innerHeight}
                 x2={chartWidth}
                 y2={topPadding + innerHeight}
-                stroke="#cbd5e1"
-                strokeWidth="1"
+                className="stroke-slate-300 dark:stroke-slate-600 stroke-1"
               />
 
               {data.map((item, index) => {
@@ -96,7 +95,7 @@ const EspecialistaBarLineChart = ({
                       y={y - 8}
                       textAnchor="middle"
                       fontSize="10"
-                      fill="#475569"
+                      className="fill-slate-600 dark:fill-slate-300"
                     >
                       {value.toLocaleString('es-PE')}
                     </text>
@@ -105,7 +104,7 @@ const EspecialistaBarLineChart = ({
                       y={topPadding + innerHeight + 16}
                       textAnchor="middle"
                       fontSize="10"
-                      fill="#64748b"
+                      className="fill-slate-500 dark:fill-slate-400"
                     >
                       {item.codigoModular}
                     </text>

@@ -239,19 +239,20 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
       <DirectorSidebar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         onLogoutClick={() => setIsLogoutModalOpen(true)}
         onChangePasswordClick={() => setIsChangePasswordOpen(true)}
         onRequestReplacementClick={() => setIsSolicitudReemplazoOpen(true)}
+        user={user}
       />
 
       <main className="flex-1 overflow-y-auto p-10">
-        <div className="mb-8 flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+        <div className="mb-8 flex justify-between items-center bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700">
           <div>
-            <h1 className="text-2xl font-bold text-gray-800 uppercase tracking-tight">
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-slate-100 uppercase tracking-tight">
               Panel de Director: {user.director?.school || 'N/A'}
             </h1>
             {cambioObligatorioPendiente && (
@@ -266,7 +267,7 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
         value={anioActual}
         onChange={(e) => setAnioActual(Number(e.target.value))}
         disabled={cambioObligatorioPendiente}
-        className="bg-blue-50 border border-blue-200 text-blue-700 py-2 px-4 rounded-lg font-bold outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-60"
+        className="bg-blue-50 dark:bg-slate-700 border border-blue-200 dark:border-slate-600 text-blue-700 dark:text-slate-200 py-2 px-4 rounded-lg font-bold outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-60"
       >
         {aniosDisponibles.map((anio) => (
           <option key={anio} value={anio}>{anio}</option>
@@ -277,7 +278,7 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
               value={trimestreId}
               onChange={(e) => setTrimestreId(e.target.value)}
               disabled={cambioObligatorioPendiente}
-              className="bg-blue-50 border border-blue-200 text-blue-700 py-2 px-4 rounded-lg font-bold outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-60"
+              className="bg-blue-50 dark:bg-slate-700 border border-blue-200 dark:border-slate-600 text-blue-700 dark:text-slate-200 py-2 px-4 rounded-lg font-bold outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-60"
             >
               <option value="1">1er Trimestre</option>
               <option value="2">2do Trimestre</option>
@@ -290,7 +291,7 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
               <button
                 type="button"
                 onClick={toggleNotificaciones}
-                className="relative p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-700 rounded-full transition-colors focus:outline-none"
+                className="relative p-2 text-gray-400 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-gray-700 dark:hover:text-slate-200 rounded-full transition-colors focus:outline-none"
                 title="Notificaciones"
               >
                 <Bell size={22} />

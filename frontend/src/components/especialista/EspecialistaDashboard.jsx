@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ColegioDetalle from './ColegioDetalle';
 import ChangePasswordModal from '../ChangePasswordModal';
 import EspecialistaSidebar from './EspecialistaSidebar';
@@ -27,6 +27,30 @@ const EspecialistaDashboard = ({ user, onLogout }) => {
 
   const [isExporting, setIsExporting] = useState(false);
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  useEffect(() => {
+    const isDark = localStorage.getItem('theme') === 'dark' ||
+                   (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+    setIsDarkMode(isDark);
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, []);
+
+  const toggleDarkMode = () => {
+    if (isDarkMode) {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    } else {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    }
+    setIsDarkMode(!isDarkMode);
+  };
 
   const { colegios, loading, error } = useEspecialistaColegios({
     trimestreSeleccionado,
@@ -88,7 +112,7 @@ const EspecialistaDashboard = ({ user, onLogout }) => {
   };
 
   return (
-    <div className="flex h-screen bg-slate-50">
+    <div className="flex h-screen bg-slate-50 dark:bg-slate-900">
       <EspecialistaSidebar
         activeView={activeView}
         user={user}
@@ -120,6 +144,8 @@ const EspecialistaDashboard = ({ user, onLogout }) => {
           <EspecialistaConfiguracionView
             user={user}
             onOpenChangePassword={() => setIsChangePasswordOpen(true)}
+            isDarkMode={isDarkMode}
+            toggleDarkMode={toggleDarkMode}
           />
         ) : selectedColegio ? (
           <ColegioDetalle

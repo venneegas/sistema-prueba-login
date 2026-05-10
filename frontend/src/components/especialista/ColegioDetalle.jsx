@@ -148,37 +148,37 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio }) => {
   };
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-slate-50 overflow-hidden">
+    <div className="flex-1 flex flex-col h-full bg-slate-50 dark:bg-slate-900 overflow-hidden">
       {/* Cabecera de Navegación */}
-      <header className="bg-white shadow-sm px-8 py-5 flex items-center gap-4 z-10 border-b border-slate-200">
+      <header className="bg-white dark:bg-slate-800 shadow-sm px-8 py-5 flex items-center gap-4 z-10 border-b border-slate-200 dark:border-slate-700">
         <button 
           onClick={onBack}
-          className="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-500 hover:text-blue-600"
+          className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-colors text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400"
           title="Volver a las carpetas"
         >
           <ArrowLeft size={24} />
         </button>
         
         <div className="flex-1">
-          <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
             <Building2 size={24} className="text-blue-500" />
             {colegio.nombre}
           </h1>
-          <p className="text-sm text-slate-500 font-mono mt-1 flex items-center gap-2">
+          <p className="text-sm text-slate-500 dark:text-slate-400 font-mono mt-1 flex items-center gap-2">
             {colegio.numeroIE ? `N° IE: ${colegio.numeroIE}` : 'N° IE: -'}
-            <span className="text-slate-300">|</span>
+            <span className="text-slate-300 dark:text-slate-600">|</span>
             Código Modular: {colegio.codigoModular}
-            <span className="text-slate-300">|</span>
-            <span className="text-blue-700 bg-blue-50 px-2 py-0.5 rounded font-bold text-xs tracking-wide border border-blue-100">Trimestre {trimestre}</span>
+            <span className="text-slate-300 dark:text-slate-600">|</span>
+            <span className="text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded font-bold text-xs tracking-wide border border-blue-100 dark:border-blue-800">Trimestre {trimestre}</span>
           </p>
         </div>
         
         <div className={`px-4 py-1.5 rounded-xl text-xs font-bold tracking-wider uppercase border shadow-sm ${
-          colegio.estado === 'Aprobado' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 
-          colegio.estado === 'Observado' ? 'bg-rose-50 text-rose-600 border-rose-200' : 
-          colegio.estado === 'Enviado' ? 'bg-blue-50 text-blue-600 border-blue-200' : 
-          colegio.estado === 'Borrador' ? 'bg-amber-50 text-amber-600 border-amber-200' :
-          'bg-slate-50 text-slate-500 border-slate-200'
+          colegio.estado === 'Aprobado' ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800' : 
+          colegio.estado === 'Observado' ? 'bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-800' : 
+          colegio.estado === 'Enviado' ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800' : 
+          colegio.estado === 'Borrador' ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-800' :
+          'bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700'
         }`}>
           {colegio.estado}
         </div>
@@ -189,15 +189,15 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio }) => {
         <div className="max-w-6xl mx-auto space-y-6">
           
           {/* Panel de Acciones de Auditoría */}
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div>
-              <h2 className="text-lg font-bold text-slate-800">Resolución de Auditoría</h2>
-              <p className="text-sm text-slate-500 mt-1">Evalúa la declaración tras contrastarla con los sustentos adjuntos.</p>
+              <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">Resolución de Auditoría</h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Evalúa la declaración tras contrastarla con los sustentos adjuntos.</p>
             </div>
             
             <div className="flex items-center gap-3 w-full md:w-auto">
               {colegio.estado === 'Borrador' ? (
-                <div className="flex items-center gap-2 text-amber-600 bg-amber-50 px-4 py-2.5 rounded-xl border border-amber-200 text-sm font-bold w-full md:w-auto justify-center">
+                <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 px-4 py-2.5 rounded-xl border border-amber-200 dark:border-amber-800 text-sm font-bold w-full md:w-auto justify-center">
                   <AlertCircle size={18} />
                   En fase de Borrador (No auditable)
                 </div>
@@ -205,7 +205,7 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio }) => {
                 <>
                   <button 
                     onClick={() => setIsRejectModalOpen(true)}
-                    className="flex-1 md:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-rose-50 text-rose-600 hover:bg-rose-100 hover:text-rose-700 rounded-xl font-bold transition-colors border border-rose-200"
+                    className="flex-1 md:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/50 hover:text-rose-700 dark:hover:text-rose-300 rounded-xl font-bold transition-colors border border-rose-200 dark:border-rose-800"
                   >
                     <XCircle size={20} />
                     Observar / Rechazar
@@ -223,86 +223,86 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio }) => {
           </div>
 
           {/* Tarjetas de Resumen Financiero (Mock) */}
-          <h2 className="text-lg font-bold text-slate-700 border-b pb-2">Resumen Financiero Declarado</h2>
+          <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 border-b border-slate-200 dark:border-slate-700 pb-2">Resumen Financiero Declarado</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
+            <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
                 <DollarSign size={24} />
               </div>
               <div>
-                <p className="text-sm text-slate-500 font-medium">Total Ingresos</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Total Ingresos</p>
                 {loadingFinanzas ? (
-                  <Loader2 size={24} className="animate-spin text-slate-400 mt-1" />
+                  <Loader2 size={24} className="animate-spin text-slate-400 dark:text-slate-500 mt-1" />
                 ) : (
-                  <p className="text-2xl font-bold text-slate-800">{formatearMoneda(finanzas.ingresos)}</p>
+                  <p className="text-2xl font-bold text-slate-800 dark:text-slate-100">{formatearMoneda(finanzas.ingresos)}</p>
                 )}
               </div>
             </div>
             
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-rose-100 flex items-center justify-center text-rose-600">
+            <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center text-rose-600 dark:text-rose-400">
                 <DollarSign size={24} />
               </div>
               <div>
-                <p className="text-sm text-slate-500 font-medium">Total Egresos</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Total Egresos</p>
                 {loadingFinanzas ? (
-                  <Loader2 size={24} className="animate-spin text-slate-400 mt-1" />
+                  <Loader2 size={24} className="animate-spin text-slate-400 dark:text-slate-500 mt-1" />
                 ) : (
-                  <p className="text-2xl font-bold text-slate-800">{formatearMoneda(finanzas.egresos)}</p>
+                  <p className="text-2xl font-bold text-slate-800 dark:text-slate-100">{formatearMoneda(finanzas.egresos)}</p>
                 )}
               </div>
             </div>
 
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600">
+            <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
                 <DollarSign size={24} />
               </div>
               <div>
-                <p className="text-sm text-slate-500 font-medium">Dinero en Caja</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Dinero en Caja</p>
                 {loadingFinanzas ? (
-                  <Loader2 size={24} className="animate-spin text-slate-400 mt-1" />
+                  <Loader2 size={24} className="animate-spin text-slate-400 dark:text-slate-500 mt-1" />
                 ) : (
-                  <p className="text-2xl font-bold text-slate-800">{formatearMoneda(finanzas.dineroEnCaja)}</p>
+                  <p className="text-2xl font-bold text-slate-800 dark:text-slate-100">{formatearMoneda(finanzas.dineroEnCaja)}</p>
                 )}
               </div>
             </div>
 
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-teal-100 flex items-center justify-center text-teal-600">
+            <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-teal-100 dark:bg-teal-900/30 flex items-center justify-center text-teal-600 dark:text-teal-400">
                 <Building2 size={24} />
               </div>
               <div>
-                <p className="text-sm text-slate-500 font-medium">Dinero en Banco</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Dinero en Banco</p>
                 {loadingFinanzas ? (
-                  <Loader2 size={24} className="animate-spin text-slate-400 mt-1" />
+                  <Loader2 size={24} className="animate-spin text-slate-400 dark:text-slate-500 mt-1" />
                 ) : (
-                  <p className="text-2xl font-bold text-slate-800">{formatearMoneda(finanzas.dineroEnBanco)}</p>
+                  <p className="text-2xl font-bold text-slate-800 dark:text-slate-100">{formatearMoneda(finanzas.dineroEnBanco)}</p>
                 )}
               </div>
             </div>
 
-            <div className="md:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-blue-200 flex items-center gap-4 relative overflow-hidden">
+            <div className="md:col-span-2 bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-blue-200 dark:border-blue-800 flex items-center gap-4 relative overflow-hidden">
               <div className="absolute top-0 left-0 w-1 h-full bg-blue-500"></div>
-              <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+              <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
                 <DollarSign size={24} />
               </div>
               <div>
-                <p className="text-sm text-blue-600 font-medium">Saldo Actual Banco (Consolidado)</p>
+                <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">Saldo Actual Banco (Consolidado)</p>
                 {loadingFinanzas ? (
                   <Loader2 size={24} className="animate-spin text-blue-400 mt-1" />
                 ) : (
-                  <p className="text-2xl font-bold text-blue-950">{formatearMoneda(finanzas.saldoTotal)}</p>
+                  <p className="text-2xl font-bold text-blue-950 dark:text-slate-100">{formatearMoneda(finanzas.saldoTotal)}</p>
                 )}
               </div>
             </div>
           </div>
 
           {/* Sección de Documentos PDF */}
-          <h2 className="text-lg font-bold text-slate-700 border-b pb-2 mt-8">Sustentos Subidos (PDF)</h2>
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+          <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 border-b border-slate-200 dark:border-slate-700 pb-2 mt-8">Sustentos Subidos (PDF)</h2>
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-slate-50 text-slate-500 text-sm border-b border-slate-200">
+                <tr className="bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 text-sm border-b border-slate-200 dark:border-slate-700">
                   <th className="p-4 font-medium">Nombre del Archivo</th>
                   <th className="p-4 font-medium">Fecha de Subida</th>
                   <th className="p-4 font-medium">Tamaño</th>
@@ -312,34 +312,34 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio }) => {
               <tbody>
                 {loadingPdfs ? (
                   <tr>
-                    <td colSpan="4" className="p-8 text-center text-slate-500">
+                    <td colSpan="4" className="p-8 text-center text-slate-500 dark:text-slate-400">
                       <Loader2 size={32} className="animate-spin mx-auto mb-2 text-blue-500" />
                       Cargando documentos...
                     </td>
                   </tr>
                 ) : pdfs.length === 0 ? (
                   <tr>
-                    <td colSpan="4" className="p-8 text-center text-slate-500">
-                      <FileText size={32} className="mx-auto mb-2 text-slate-300" />
+                    <td colSpan="4" className="p-8 text-center text-slate-500 dark:text-slate-400">
+                      <FileText size={32} className="mx-auto mb-2 text-slate-300 dark:text-slate-600" />
                       No se encontraron sustentos subidos para este trimestre.
                     </td>
                   </tr>
                 ) : (
                   pdfs.map((pdf) => (
-                    <tr key={pdf.id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                      <td className="p-4 font-medium text-slate-700 flex items-center gap-3">
+                    <tr key={pdf.id} className="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                      <td className="p-4 font-medium text-slate-700 dark:text-slate-200 flex items-center gap-3">
                         <FileText className="text-red-500 flex-shrink-0" size={20} />
                         <span className="truncate max-w-xs block" title={pdf.nombre_original}>{pdf.nombre_original}</span>
                       </td>
-                      <td className="p-4 text-slate-500 text-sm">{formatearFecha(pdf.subido_en)}</td>
-                      <td className="p-4 text-slate-500 text-sm whitespace-nowrap">{formatearTamano(pdf.tamanio_bytes)}</td>
+                      <td className="p-4 text-slate-500 dark:text-slate-400 text-sm">{formatearFecha(pdf.subido_en)}</td>
+                      <td className="p-4 text-slate-500 dark:text-slate-400 text-sm whitespace-nowrap">{formatearTamano(pdf.tamanio_bytes)}</td>
                       <td className="p-4 text-center">
                         <div className="flex justify-center gap-2">
                           {/* Usamos target="_blank" para abrir el archivo directamente desde nuestro servidor de uploads */}
-                          <a href={getPdfUrl(pdf.ruta_archivo)} target="_blank" rel="noopener noreferrer" className="p-1.5 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors" title="Ver PDF">
+                          <a href={getPdfUrl(pdf.ruta_archivo)} target="_blank" rel="noopener noreferrer" className="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-lg transition-colors" title="Ver PDF">
                             <Eye size={18} />
                           </a>
-                          <a href={getPdfUrl(pdf.ruta_archivo)} download target="_blank" rel="noopener noreferrer" className="p-1.5 text-slate-600 hover:bg-slate-200 rounded-lg transition-colors" title="Descargar">
+                          <a href={getPdfUrl(pdf.ruta_archivo)} download target="_blank" rel="noopener noreferrer" className="p-1.5 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors" title="Descargar">
                             <Download size={18} />
                           </a>
                         </div>
@@ -356,16 +356,16 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio }) => {
       {/* --- MODAL DE RECHAZO / OBSERVACIÓN --- */}
       {isRejectModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-200">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-200 border border-slate-700">
             {/* Cabecera del modal */}
-            <div className="flex items-center justify-between p-5 border-b border-slate-100 bg-slate-50">
-              <h3 className="font-bold text-slate-800 flex items-center gap-2">
+            <div className="flex items-center justify-between p-5 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+              <h3 className="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
                 <XCircle className="text-rose-500" size={20} />
                 Observar / Rechazar Declaración
               </h3>
               <button 
                 onClick={() => setIsRejectModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600 hover:bg-slate-200 p-1.5 rounded-lg transition-colors"
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 p-1.5 rounded-lg transition-colors"
               >
                 <X size={20} />
               </button>
@@ -373,11 +373,11 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio }) => {
             
             {/* Cuerpo del modal */}
             <div className="p-6">
-              <p className="text-sm text-slate-600 mb-4">
+              <p className="text-sm text-slate-600 dark:text-slate-300 mb-4">
                 Por favor, detalla los motivos por los cuales estás observando o rechazando el informe financiero de <strong>{colegio.nombre}</strong>. Este mensaje será visible para el director.
               </p>
               <textarea 
-                className="w-full h-32 p-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 resize-none text-sm text-slate-700 bg-slate-50 focus:bg-white transition-colors"
+                className="w-full h-32 p-3 border border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 resize-none text-sm text-slate-700 dark:text-slate-200 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 transition-colors"
                 placeholder="Ej: Falta adjuntar la factura de compra de materiales de limpieza correspondiente al mes de febrero..."
                 value={rejectComment}
                 onChange={(e) => setRejectComment(e.target.value)}
@@ -385,10 +385,10 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio }) => {
             </div>
             
             {/* Pie del modal (Botones) */}
-            <div className="p-5 border-t border-slate-100 flex justify-end gap-3 bg-slate-50">
+            <div className="p-5 border-t border-slate-100 dark:border-slate-700 flex justify-end gap-3 bg-slate-50 dark:bg-slate-800/50">
               <button 
                 onClick={() => setIsRejectModalOpen(false)}
-                className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800 hover:bg-slate-200 rounded-xl transition-colors"
+                className="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-slate-800 dark:hover:text-slate-100 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-colors"
               >
                 Cancelar
               </button>
@@ -407,16 +407,16 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio }) => {
       {/* --- MODAL DE APROBACIÓN --- */}
       {isApproveModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200 border border-slate-700">
             {/* Cabecera del modal */}
-            <div className="flex items-center justify-between p-5 border-b border-slate-100 bg-slate-50">
-              <h3 className="font-bold text-slate-800 flex items-center gap-2">
+            <div className="flex items-center justify-between p-5 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+              <h3 className="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
                 <CheckCircle className="text-emerald-500" size={20} />
                 Confirmar Aprobación
               </h3>
               <button 
                 onClick={() => setIsApproveModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600 hover:bg-slate-200 p-1.5 rounded-lg transition-colors"
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 p-1.5 rounded-lg transition-colors"
               >
                 <X size={20} />
               </button>
@@ -424,19 +424,19 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio }) => {
             
             {/* Cuerpo del modal */}
             <div className="p-6">
-              <p className="text-sm text-slate-600">
+              <p className="text-sm text-slate-600 dark:text-slate-300">
                 ¿Estás seguro de que deseas <strong>aprobar</strong> el informe financiero de <strong>{colegio.nombre}</strong>? 
               </p>
-              <p className="text-sm text-slate-600 mt-3">
+              <p className="text-sm text-slate-600 dark:text-slate-300 mt-3">
                 Al confirmar, se registrará la auditoría como exitosa y se enviará una notificación automática al director indicando que su declaración ha sido aceptada.
               </p>
             </div>
             
             {/* Pie del modal (Botones) */}
-            <div className="p-5 border-t border-slate-100 flex justify-end gap-3 bg-slate-50">
+            <div className="p-5 border-t border-slate-100 dark:border-slate-700 flex justify-end gap-3 bg-slate-50 dark:bg-slate-800/50">
               <button 
                 onClick={() => setIsApproveModalOpen(false)}
-                className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800 hover:bg-slate-200 rounded-xl transition-colors"
+                className="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-slate-800 dark:hover:text-slate-100 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-colors"
               >
                 Cancelar
               </button>

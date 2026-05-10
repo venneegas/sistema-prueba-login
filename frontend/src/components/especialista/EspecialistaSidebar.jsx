@@ -3,17 +3,17 @@ import { Key, LayoutDashboard, LogOut, PieChart, Settings, User } from 'lucide-r
 
 const menuItems = [
   { id: 'explorador', label: 'Explorador', icon: LayoutDashboard },
-  { id: 'reportes', label: 'Estadisticas', icon: PieChart },
+  { id: 'reportes', label: 'Estadísticas', icon: PieChart },
   { id: 'solicitudes', label: 'Solicitudes', icon: Key },
-  { id: 'configuracion', label: 'Configuracion', icon: Settings }
+  { id: 'configuracion', label: 'Configuración', icon: Settings }
 ];
 
 const EspecialistaSidebar = ({ activeView, user, onChangeView, onLogout }) => {
   return (
-    <aside className="w-64 bg-blue-950 text-white flex flex-col shadow-xl z-20">
+    <aside className="w-64 bg-blue-950 text-white flex flex-col shadow-xl z-20 border-r border-blue-800">
       <div className="p-6 border-b border-blue-900/50">
         <h2 className="text-xl font-bold text-blue-200">UGEL Panel</h2>
-        <p className="text-xs text-blue-400 mt-1">Supervision y Auditoria</p>
+        <p className="text-xs text-blue-400 mt-1">Supervisión y Auditoria</p>
       </div>
 
       <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
@@ -48,7 +48,7 @@ const EspecialistaSidebar = ({ activeView, user, onChangeView, onLogout }) => {
           className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white rounded-xl transition-colors font-medium"
         >
           <LogOut size={18} />
-          <span>Cerrar Sesion</span>
+          <span>Cerrar Sesión</span>
         </button>
       </div>
     </aside>
