@@ -1,6 +1,6 @@
 # 📧 Recuperación de Contraseña con Nodemailer
 
-Este documento detalla cómo se ha implementado el sistema de recuperación de contraseñas de manera 100% gratuita utilizando **Nodemailer** y **Gmail**.
+Este documento detalla cómo se ha implementado el sistema de recuperación de contraseñas de manera 100% gratuita utilizando **Nodemailer** y un **Servidor de Correo Propio (cPanel)**.
 
 ---
 
@@ -8,7 +8,7 @@ Este documento detalla cómo se ha implementado el sistema de recuperación de c
 
 `Nodemailer` es la librería estándar y más popular en el ecosistema de Node.js para el envío de correos electrónicos. 
 * **Ventaja Principal:** No depende de APIs costosas (como SendGrid o Mailgun), sino que se comunica directamente utilizando el protocolo SMTP (Simple Mail Transfer Protocol), lo que permite usar cualquier proveedor de correo electrónico convencional (Gmail, Outlook, Yahoo, etc.).
-* **Seguridad:** Soporta conexiones cifradas modernas (TLS/SSL).
+* **Seguridad:** Soporta conexiones cifradas modernas (TLS/SSL), integrándose perfectamente con correos corporativos institucionales.
 
 ---
 
@@ -23,27 +23,24 @@ Para garantizar la seguridad del usuario y evitar restablecimientos de contrase�
 
 ---
 
-## 🔑 Configuración del Remitente (Gmail)
+## 🔑 Configuración del Remitente (cPanel Institucional)
 
-Por motivos de seguridad, Gmail **no permite** que aplicaciones de terceros (como nuestro backend en Node.js) inicien sesión usando tu contraseña normal. 
+El sistema está configurado para utilizar una cuenta institucional gestionada a través de cPanel (ej. `mail.ugelsanta.gob.pe`). 
 
-Para que Nodemailer funcione, debes generar una **"Contraseña de Aplicación"** (App Password):
-
-### Pasos para obtener la Contraseña de Aplicación en Google:
-1. Inicia sesión en la cuenta de Google (Gmail) que servirá como remitente (ej. `soporte.ugel@gmail.com`).
-2. Ve a la configuración de tu cuenta: **Gestionar tu cuenta de Google**.
-3. En el menú izquierdo, selecciona **Seguridad**.
-4. Asegúrate de tener activada la **Verificación en dos pasos** (Es un requisito obligatorio de Google).
-5. Usa el buscador interno de ajustes (lupa arriba) y escribe: **"Contraseñas de aplicaciones"**.
-6. Selecciona "Otra (nombre personalizado)", escribe "Sistema UGEL" y dale a **Generar**.
-7. Te aparecerá una contraseña de 16 letras (ej. `abcd efgh ijkl mnop`).
+### Datos de Conexión SMTP:
+* **Host:** `mail.ugelsanta.gob.pe`
+* **Puerto:** `465` (Requiere conexión segura SSL/TLS)
+* **Usuario:** `recursos_propios_ie@ugelsanta.gob.pe`
 
 ### Configuración en el `.env`:
-Copia esa contraseña (sin espacios) y el correo, colócalos en el archivo `.env` del backend:
+Las credenciales exactas deben colocarse en el archivo `.env` del backend:
 
 ```env
-EMAIL_USER=tu_correo_de_soporte@gmail.com
-EMAIL_PASS=abcdefghijklmnop
+EMAIL_HOST=mail.ugelsanta.gob.pe
+EMAIL_PORT=465
+EMAIL_SECURE=true
+EMAIL_USER=recursos_propios_ie@ugelsanta.gob.pe
+EMAIL_PASS=**********
 ```
 
 ---

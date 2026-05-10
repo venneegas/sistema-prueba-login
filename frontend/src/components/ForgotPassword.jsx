@@ -119,12 +119,18 @@ const ForgotPassword = ({ onBackToLogin }) => {
       ) : (
         // FORMULARIO PASO 2
         <form onSubmit={handleResetPassword} className="space-y-4">
+          <div className="text-center mb-4 bg-slate-50 py-2 rounded border border-slate-100">
+            <p className="text-xs text-gray-500 uppercase tracking-wide">Restableciendo acceso para</p>
+            <p className="font-semibold text-blue-700">{email}</p>
+          </div>
           <div>
             <label className="block text-gray-700 text-sm font-bold mb-2">Código de 6 dígitos</label>
             <input
               type="text"
               required
               maxLength="6"
+              inputMode="numeric"
+              pattern="[0-9]*"
               value={codigo}
               onChange={(e) => setCodigo(e.target.value)}
               className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 tracking-widest text-center text-lg"
@@ -136,6 +142,7 @@ const ForgotPassword = ({ onBackToLogin }) => {
             <input
               type="password"
               required
+              autoComplete="new-password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -147,13 +154,18 @@ const ForgotPassword = ({ onBackToLogin }) => {
             <input
               type="password"
               required
+              autoComplete="new-password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Repite la nueva contraseña"
             />
           </div>
-          <button type="submit" disabled={loading} className="w-full bg-green-600 text-white font-bold py-2 px-4 rounded hover:bg-green-700 disabled:opacity-50">
+          <button 
+            type="submit" 
+            disabled={loading || message.type === 'success'} 
+            className="w-full bg-green-600 text-white font-bold py-2 px-4 rounded hover:bg-green-700 disabled:opacity-50 transition-colors duration-200"
+          >
             {loading ? 'Guardando...' : 'Guardar y Entrar'}
           </button>
         </form>

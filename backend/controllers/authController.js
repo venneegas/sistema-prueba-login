@@ -5,11 +5,16 @@ const nodemailer = require('nodemailer');
 
 // Configuración de Nodemailer
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  host: process.env.EMAIL_HOST,
+  port: process.env.EMAIL_PORT,
+  secure: process.env.EMAIL_SECURE === 'true', // true para puerto 465
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
+  tls: {
+    rejectUnauthorized: false // Importante para evitar errores de certificados autofirmados en cPanel
+  }
 });
 
 const obtenerTieneColumnaDebeCambiarPassword = async (connection) => {
