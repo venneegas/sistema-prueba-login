@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, FolderOpen, UploadCloud, LogOut, Settings, Key, Moon, Sun, HelpCircle, UserMinus, User } from 'lucide-react';
+import { LayoutDashboard, FolderOpen, UploadCloud, LogOut, Settings, Key, Moon, Sun, HelpCircle, UserMinus, User, X, Phone, Mail, Clock } from 'lucide-react';
 
 const DirectorSidebar = ({ activeTab, setActiveTab, onLogoutClick, onChangePasswordClick, onRequestReplacementClick, user }) => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isSoporteOpen, setIsSoporteOpen] = useState(false);
 
   useEffect(() => {
     // Cargar preferencia desde localStorage o si el SO está en modo oscuro
@@ -106,7 +107,7 @@ const DirectorSidebar = ({ activeTab, setActiveTab, onLogoutClick, onChangePassw
               </button>
               <button
                 onClick={() => {
-                  alert("SOPORTE TÉCNICO UGEL\n\n📞 Teléfono: (043) 314615 - Anexo 102\n✉️ Correo: soporte.sistemas@ugel.edu.pe\n🕒 Horario: Lunes a Viernes de 8:00 AM a 5:00 PM\n\nComunícate con nosotros si tienes problemas para subir tus sustentos o cambiar tu contraseña.");
+                  setIsSoporteOpen(true);
                   setIsSettingsOpen(false);
                 }}
                 className="w-full flex items-center justify-start space-x-3 px-3 py-2.5 rounded-lg text-sm text-left text-slate-200 hover:bg-slate-700 hover:text-white transition-colors border-t border-slate-700 mt-1 pt-2.5 font-medium"
@@ -127,6 +128,70 @@ const DirectorSidebar = ({ activeTab, setActiveTab, onLogoutClick, onChangePassw
           <Settings size={18} />
           <span>Configuración</span>
         </button>
+
+        {/* Modal de Soporte Técnico */}
+        {isSoporteOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden animate-in fade-in zoom-in duration-200 border border-slate-200 dark:border-slate-700">
+              <div className="flex items-center justify-between p-5 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+                <h3 className="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                  <HelpCircle className="text-blue-500" size={20} />
+                  Soporte Técnico UGEL
+                </h3>
+                <button 
+                  onClick={() => setIsSoporteOpen(false)}
+                  className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 p-1.5 rounded-lg transition-colors"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+              
+              <div className="p-6">
+                <p className="text-sm text-slate-600 dark:text-slate-300 mb-6 font-medium">
+                  Comunícate con nosotros si tienes problemas o consultas.
+                </p>
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4">
+                    <div className="p-2.5 bg-blue-50 dark:bg-blue-900/30 rounded-xl text-blue-600 dark:text-blue-400">
+                      <Phone size={20} />
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Teléfono / WhatsApp</p>
+                      <p className="text-sm font-bold text-slate-800 dark:text-slate-200">943096816</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="p-2.5 bg-emerald-50 dark:bg-emerald-900/30 rounded-xl text-emerald-600 dark:text-emerald-400">
+                      <Mail size={20} />
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Correo Electrónico</p>
+                      <p className="text-sm font-bold text-slate-800 dark:text-slate-200 break-all">recursos_propios_ie@ugelsanta.gob.pe</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="p-2.5 bg-amber-50 dark:bg-amber-900/30 rounded-xl text-amber-600 dark:text-amber-400">
+                      <Clock size={20} />
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Horario de Atención</p>
+                      <p className="text-sm font-bold text-slate-800 dark:text-slate-200">Lunes a Viernes de 8:00 AM a 5:00 PM</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="p-5 border-t border-slate-100 dark:border-slate-700 flex justify-end bg-slate-50 dark:bg-slate-800/50">
+                <button 
+                  onClick={() => setIsSoporteOpen(false)}
+                  className="px-6 py-2.5 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-sm transition-colors"
+                >
+                  Entendido
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Info del Usuario */}
         <div className="flex items-center gap-3 mb-4 px-2">

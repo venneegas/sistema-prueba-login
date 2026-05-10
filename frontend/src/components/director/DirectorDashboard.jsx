@@ -381,10 +381,10 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
 
         {cambioObligatorioPendiente ? (
           <div className="bg-amber-50 border border-amber-200 rounded-xl p-6 text-amber-900">
-            <h2 className="text-lg font-bold mb-2">Cambio de contrasena pendiente</h2>
+            <h2 className="text-lg font-bold mb-2">Cambio de contraseña pendiente</h2>
             <p>
               Ya ingresaste con la clave temporal. Antes de continuar, registra una nueva
-              contrasena personal para completar tu primer acceso.
+              contraseña personal para completar tu primer acceso.
             </p>
           </div>
         ) : (

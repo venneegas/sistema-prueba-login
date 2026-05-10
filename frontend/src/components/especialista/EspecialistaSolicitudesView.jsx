@@ -8,6 +8,9 @@ const EspecialistaSolicitudesView = () => {
   const [error, setError] = useState('');
   const [filtro, setFiltro] = useState('pendiente'); // pendiente, resueltas
   const [procesandoId, setProcesandoId] = useState(null);
+  const [successModal, setSuccessModal] = useState(null);
+  const [errorModal, setErrorModal] = useState(null);
+  const [confirmModal, setConfirmModal] = useState(null);
 
   useEffect(() => {
     cargarSolicitudes();
@@ -37,14 +40,6 @@ const EspecialistaSolicitudesView = () => {
   };
 
   const procesarSolicitud = async (id, accion) => {
-    const confirmar = window.confirm(
-      accion === 'aprobar' 
-        ? '¿Estás seguro de APROBAR esta solicitud? Se generarán nuevas credenciales para este usuario.' 
-        : '¿Estás seguro de RECHAZAR esta solicitud?'
-    );
-    
-    if (!confirmar) return;
-
     setProcesandoId(id);
     try {
       const response = await fetch(buildApiUrl(`/api/solicitudes-reemplazo/${id}`), {
@@ -59,14 +54,21 @@ const EspecialistaSolicitudesView = () => {
       const data = await response.json();
       if (response.ok && data.success) {
         setSolicitudes(prev => prev.map(s => s.id === id ? { ...s, estado: accion === 'aprobar' ? 'aprobado' : 'rechazado' } : s));
-        alert(`Solicitud ${accion === 'aprobar' ? 'aprobada' : 'rechazada'} exitosamente.`);
+        setSuccessModal({ isOpen: true, type: accion, message: `Solicitud ${accion === 'aprobar' ? 'aprobada' : 'rechazada'} exitosamente.` });
       } else {
         throw new Error(data.message || 'Error al procesar la solicitud');
       }
     } catch (err) {
-      alert('Error: ' + err.message);
+      setErrorModal({ isOpen: true, message: err.message });
     } finally {
       setProcesandoId(null);
+    }
+  };
+
+  const handleConfirmar = () => {
+    if (confirmModal) {
+      procesarSolicitud(confirmModal.id, confirmModal.accion);
+      setConfirmModal(null);
     }
   };
 
@@ -172,14 +174,14 @@ const EspecialistaSolicitudesView = () => {
                     {solicitud.estado === 'pendiente' ? (
                       <>
                         <button
-                          onClick={() => procesarSolicitud(solicitud.id, 'aprobar')}
+                          onClick={() => setConfirmModal({ id: solicitud.id, accion: 'aprobar', school: solicitud.school })}
                           disabled={procesandoId === solicitud.id}
                           className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-3 rounded-xl text-sm font-bold shadow-sm transition-colors disabled:opacity-50"
                         >
                           <CheckCircle size={18} /> Aprobar y Asignar
                         </button>
                         <button
-                          onClick={() => procesarSolicitud(solicitud.id, 'rechazar')}
+                          onClick={() => setConfirmModal({ id: solicitud.id, accion: 'rechazar', school: solicitud.school })}
                           disabled={procesandoId === solicitud.id}
                           className="w-full flex items-center justify-center gap-2 bg-white dark:bg-transparent border-2 border-rose-100 dark:border-rose-900/50 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/30 hover:border-rose-200 dark:hover:border-rose-800 px-4 py-2.5 rounded-xl text-sm font-bold transition-colors disabled:opacity-50"
                         >
@@ -199,6 +201,99 @@ const EspecialistaSolicitudesView = () => {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* --- MODAL DE CONFIRMACIÓN --- */}
+        {confirmModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200 border border-slate-700">
+              <div className="flex items-center justify-between p-5 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+                <h3 className="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                  {confirmModal.accion === 'aprobar' ? (
+                    <><CheckCircle className="text-emerald-500" size={20} /> Confirmar Aprobación</>
+                  ) : (
+                    <><XCircle className="text-rose-500" size={20} /> Confirmar Rechazo</>
+                  )}
+                </h3>
+              </div>
+              <div className="p-6">
+                <p className="text-sm text-slate-600 dark:text-slate-300">
+                  {confirmModal.accion === 'aprobar' 
+                    ? `¿Estás seguro de APROBAR la solicitud de ${confirmModal.school}? Se generarán nuevas credenciales para este usuario.` 
+                    : `¿Estás seguro de RECHAZAR la solicitud de ${confirmModal.school}?`}
+                </p>
+              </div>
+              <div className="p-5 border-t border-slate-100 dark:border-slate-700 flex justify-end gap-3 bg-slate-50 dark:bg-slate-800/50">
+                <button 
+                  onClick={() => setConfirmModal(null)}
+                  className="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-slate-800 dark:hover:text-slate-100 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button 
+                  onClick={handleConfirmar}
+                  className={`px-4 py-2 text-sm font-bold text-white rounded-xl shadow-sm transition-colors flex items-center gap-2 ${confirmModal.accion === 'aprobar' ? 'bg-emerald-500 hover:bg-emerald-600' : 'bg-rose-500 hover:bg-rose-600'}`}
+                >
+                  {confirmModal.accion === 'aprobar' ? <CheckCircle size={16} /> : <XCircle size={16} />}
+                  {confirmModal.accion === 'aprobar' ? 'Sí, Aprobar' : 'Sí, Rechazar'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* --- MODAL DE ÉXITO --- */}
+        {successModal?.isOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in duration-200 border border-slate-700">
+              <div className="p-6 text-center">
+                <div className={`mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4 ${successModal.type === 'aprobar' ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400' : 'bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400'}`}>
+                  {successModal.type === 'aprobar' ? <CheckCircle size={32} /> : <XCircle size={32} />}
+                </div>
+                <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-2">
+                  {successModal.type === 'aprobar' ? '¡Aprobada!' : '¡Rechazada!'}
+                </h3>
+                <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">
+                  {successModal.message}
+                </p>
+              </div>
+              <div className="p-4 border-t border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 flex justify-center">
+                <button 
+                  onClick={() => setSuccessModal(null)}
+                  className={`px-6 py-2.5 text-sm font-bold text-white rounded-xl shadow-sm transition-colors w-full ${successModal.type === 'aprobar' ? 'bg-emerald-500 hover:bg-emerald-600' : 'bg-rose-500 hover:bg-rose-600'}`}
+                >
+                  Entendido
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* --- MODAL DE ERROR --- */}
+        {errorModal?.isOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in duration-200 border border-slate-700">
+              <div className="p-6 text-center">
+                <div className="mx-auto w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 flex items-center justify-center mb-4">
+                  <AlertCircle size={32} />
+                </div>
+                <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-2">
+                  Hubo un problema
+                </h3>
+                <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">
+                  {errorModal.message}
+                </p>
+              </div>
+              <div className="p-4 border-t border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 flex justify-center">
+                <button 
+                  onClick={() => setErrorModal(null)}
+                  className="px-6 py-2.5 text-sm font-bold text-white rounded-xl shadow-sm transition-colors w-full bg-red-500 hover:bg-red-600"
+                >
+                  Cerrar
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>

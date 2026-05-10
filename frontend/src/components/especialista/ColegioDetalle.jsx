@@ -4,6 +4,8 @@ import { ArrowLeft, FileText, DollarSign, Download, Eye, Building2, CheckCircle,
 const ColegioDetalle = ({ colegio, onBack, trimestre, anio }) => {
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
   const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
+  const [successModal, setSuccessModal] = useState(null);
+  const [errorModal, setErrorModal] = useState(null);
   const [rejectComment, setRejectComment] = useState('');
 
   const [finanzas, setFinanzas] = useState({ ingresos: 0, egresos: 0, dineroEnCaja: 0, dineroEnBanco: 0, saldoTotal: 0 });
@@ -91,7 +93,7 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio }) => {
 
   const handleRejectSubmit = async () => {
     if (!rejectComment.trim()) {
-      alert("Por favor, ingresa un motivo para el rechazo.");
+      setErrorModal({ isOpen: true, message: "Por favor, ingresa un motivo para la observación." });
       return;
     }
     
@@ -112,13 +114,11 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio }) => {
       if (data.success) {
         setIsRejectModalOpen(false);
         setRejectComment('');
-        onBack(); // Regresamos al explorador de carpetas
-        // Pequeño truco para forzar actualización de la cuadrícula
-        setTimeout(() => alert("El informe ha sido OBSERVADO. El director ha sido notificado."), 100);
+        setSuccessModal({ isOpen: true, type: 'reject', message: "El informe ha sido OBSERVADO. El director ha sido notificado." });
       }
     } catch (error) {
       console.error("Error al rechazar:", error);
-      alert("Error de conexión al guardar la auditoría.");
+      setErrorModal({ isOpen: true, message: "Error de conexión al guardar la auditoría." });
     }
   };
 
@@ -138,12 +138,11 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio }) => {
       
       if (data.success) {
         setIsApproveModalOpen(false);
-        onBack();
-        setTimeout(() => alert("El informe ha sido APROBADO exitosamente."), 100);
+        setSuccessModal({ isOpen: true, type: 'approve', message: "El informe ha sido APROBADO exitosamente." });
       }
     } catch (error) {
       console.error("Error al aprobar:", error);
-      alert("Error de conexión al guardar la auditoría.");
+      setErrorModal({ isOpen: true, message: "Error de conexión al guardar la auditoría." });
     }
   };
 
@@ -446,6 +445,63 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio }) => {
               >
                 <CheckCircle size={16} />
                 Sí, Aprobar Informe
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* --- MODAL DE ÉXITO --- */}
+      {successModal?.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in duration-200 border border-slate-700">
+            <div className="p-6 text-center">
+              <div className={`mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4 ${successModal.type === 'approve' ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400' : 'bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400'}`}>
+                {successModal.type === 'approve' ? <CheckCircle size={32} /> : <XCircle size={32} />}
+              </div>
+              <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-2">
+                {successModal.type === 'approve' ? '¡Aprobado!' : '¡Observado!'}
+              </h3>
+              <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">
+                {successModal.message}
+              </p>
+            </div>
+            <div className="p-4 border-t border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 flex justify-center">
+              <button 
+                onClick={() => {
+                  setSuccessModal(null);
+                  onBack(); // Regresamos al explorador recién cuando el usuario cierra este modal
+                }}
+                className={`px-6 py-2.5 text-sm font-bold text-white rounded-xl shadow-sm transition-colors w-full ${successModal.type === 'approve' ? 'bg-emerald-500 hover:bg-emerald-600' : 'bg-rose-500 hover:bg-rose-600'}`}
+              >
+                Entendido
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* --- MODAL DE ERROR --- */}
+      {errorModal?.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in duration-200 border border-slate-700">
+            <div className="p-6 text-center">
+              <div className="mx-auto w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 flex items-center justify-center mb-4">
+                <AlertCircle size={32} />
+              </div>
+              <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-2">
+                Hubo un problema
+              </h3>
+              <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">
+                {errorModal.message}
+              </p>
+            </div>
+            <div className="p-4 border-t border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 flex justify-center">
+              <button 
+                onClick={() => setErrorModal(null)}
+                className="px-6 py-2.5 text-sm font-bold text-white rounded-xl shadow-sm transition-colors w-full bg-red-500 hover:bg-red-600"
+              >
+                Cerrar
               </button>
             </div>
           </div>

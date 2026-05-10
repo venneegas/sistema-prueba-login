@@ -1,5 +1,5 @@
 import React from 'react';
-import { Key, LayoutDashboard, LogOut, PieChart, Settings, User } from 'lucide-react';
+import { Key, LayoutDashboard, LogOut, PieChart, Settings, User, UserCheck } from 'lucide-react';
 
 const menuItems = [
   { id: 'explorador', label: 'Explorador', icon: LayoutDashboard },
@@ -12,8 +12,11 @@ const EspecialistaSidebar = ({ activeView, user, onChangeView, onLogout }) => {
   return (
     <aside className="w-64 bg-blue-950 text-white flex flex-col shadow-xl z-20 border-r border-blue-800">
       <div className="p-6 border-b border-blue-900/50">
-        <h2 className="text-xl font-bold text-blue-200">UGEL Panel</h2>
-        <p className="text-xs text-blue-400 mt-1">Supervisión y Auditoria</p>
+        <div className="flex items-center gap-3">
+          <UserCheck className="text-blue-400" size={24} />
+          <h2 className="text-xl font-bold text-blue-200 uppercase">Especialista</h2>
+        </div>
+        <p className="text-xs text-blue-400 mt-2 font-medium tracking-wide">Supervisión y Auditoría</p>
       </div>
 
       <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
