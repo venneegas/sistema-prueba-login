@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { AlertCircle, Folder, Loader2, Search, Grid3x3, List } from 'lucide-react';
+import { AlertCircle, Building2, Loader2, Search, Grid3x3, List } from 'lucide-react';
 import EspecialistaPeriodoFilters from './EspecialistaPeriodoFilters';
 
 const EspecialistaExploradorView = ({
@@ -142,38 +142,37 @@ const EspecialistaExploradorView = ({
                   <div
                     key={colegio.id}
                     onClick={() => handleSelectColegio(colegio)}
-                    className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md hover:border-blue-400 hover:-translate-y-1 transition-all cursor-pointer flex flex-col items-center text-center group"
+                    className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md hover:border-indigo-300 hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col items-center text-center group relative overflow-hidden"
                   >
-                    <Folder
-                      size={72}
-                      className="mb-3 text-blue-400 group-hover:text-blue-500 transition-colors"
-                      fill="currentColor"
-                      fillOpacity={0.2}
-                      strokeWidth={1.5}
-                    />
-                    <h3 className="font-bold text-slate-800 line-clamp-2 leading-tight text-sm mb-1">{colegio.nombre}</h3>
-                    <div className="mb-3 flex flex-wrap items-center justify-center gap-2 text-xs font-mono">
+                    <div className="absolute top-0 left-0 w-full h-1.5 bg-indigo-500 transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
+                    
+                    <div className="w-16 h-16 bg-slate-50 border border-slate-100 rounded-full flex items-center justify-center mb-4 group-hover:bg-indigo-50 group-hover:border-indigo-100 transition-colors duration-300">
+                      <Building2 size={32} className="text-slate-400 group-hover:text-indigo-500 transition-colors duration-300" />
+                    </div>
+                    
+                    <h3 className="font-bold text-slate-800 line-clamp-2 leading-tight text-sm mb-2 group-hover:text-indigo-700 transition-colors">{colegio.nombre}</h3>
+                    <div className="mb-4 flex flex-wrap items-center justify-center gap-2 text-xs font-mono">
                       {colegio.numeroIE && (
-                        <span className="rounded bg-blue-50 px-2 py-0.5 text-blue-700 border border-blue-100">
+                        <span className="rounded-md bg-slate-100 px-2 py-1 text-slate-600 border border-slate-200 group-hover:border-indigo-200 group-hover:bg-indigo-50 group-hover:text-indigo-700 transition-colors">
                           IE {colegio.numeroIE}
                         </span>
                       )}
-                      <span className="rounded bg-slate-100 px-2 py-0.5 text-slate-500">
+                      <span className="rounded-md bg-slate-100 px-2 py-1 text-slate-500 border border-slate-200">
                         {colegio.codigoModular}
                       </span>
                     </div>
 
                     <div
-                      className={`mt-auto w-full py-1.5 rounded-lg text-[11px] font-bold tracking-wide uppercase ${
+                      className={`mt-auto w-full py-2 rounded-xl text-[11px] font-bold tracking-wide uppercase transition-colors ${
                         colegio.estado === 'Aprobado'
-                          ? 'bg-emerald-50 text-emerald-600 border border-emerald-100'
+                          ? 'bg-emerald-50 text-emerald-600 border border-emerald-200'
                           : colegio.estado === 'Observado'
-                            ? 'bg-rose-50 text-rose-600 border border-rose-100'
+                            ? 'bg-rose-50 text-rose-600 border border-rose-200'
                             : colegio.estado === 'Enviado'
-                              ? 'bg-blue-50 text-blue-600 border border-blue-100'
+                              ? 'bg-blue-50 text-blue-600 border border-blue-200'
                               : colegio.estado === 'Borrador'
-                                ? 'bg-amber-50 text-amber-600 border border-amber-100'
-                                : 'bg-slate-50 text-slate-500 border border-slate-100'
+                                ? 'bg-amber-50 text-amber-600 border border-amber-200'
+                                : 'bg-slate-50 text-slate-500 border border-slate-200'
                       }`}
                     >
                       {colegio.estado}
@@ -195,41 +194,46 @@ const EspecialistaExploradorView = ({
                   <div
                     key={colegio.id}
                     onClick={() => handleSelectColegio(colegio)}
-                    className="grid grid-cols-1 lg:grid-cols-12 gap-4 px-4 py-4 bg-white rounded-lg border border-slate-200 hover:shadow-md hover:border-blue-400 hover:bg-blue-50 transition-all cursor-pointer items-center"
+                    className="grid grid-cols-1 lg:grid-cols-12 gap-4 px-4 py-4 bg-white rounded-xl border border-slate-200 hover:shadow-md hover:border-indigo-300 hover:bg-slate-50 transition-all duration-300 cursor-pointer items-center group relative overflow-hidden"
                   >
-                    <div className="col-span-1 lg:col-span-2 flex items-center gap-2">
-                      <Folder size={20} className="text-blue-400 flex-shrink-0" fill="currentColor" fillOpacity={0.2} />
-                      <span className="font-mono font-bold text-blue-700">
+                    <div className="absolute left-0 top-0 w-1 h-full bg-indigo-500 transform origin-bottom scale-y-0 group-hover:scale-y-100 transition-transform duration-300"></div>
+
+                    <div className="col-span-1 lg:col-span-2 flex items-center gap-3">
+                      <div className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center group-hover:bg-indigo-100 transition-colors">
+                        <Building2 size={20} className="text-slate-500 group-hover:text-indigo-600 transition-colors" />
+                      </div>
+                      <span className="font-mono font-bold text-slate-700 group-hover:text-indigo-700 transition-colors">
                         {colegio.numeroIE ? `IE ${colegio.numeroIE}` : '-'}
                       </span>
                     </div>
 
                     <div className="col-span-1 lg:col-span-4">
-                      <p className="font-medium text-slate-800 truncate">{colegio.nombre}</p>
+                      <p className="font-bold text-slate-800 truncate group-hover:text-indigo-700 transition-colors">{colegio.nombre}</p>
                     </div>
 
                     <div className="col-span-1 lg:col-span-2">
-                      <span className="font-mono text-sm text-slate-600">{colegio.codigoModular}</span>
+                      <span className="font-mono text-sm font-medium text-slate-500 bg-slate-100 px-2 py-1 rounded-md border border-slate-200">{colegio.codigoModular}</span>
                     </div>
 
                     <div className="col-span-1 lg:col-span-2">
-                      <p className="text-sm text-slate-600">
-                        {colegio.provincia} - {colegio.distrito}
+                      <p className="text-sm text-slate-500 flex flex-col leading-tight">
+                        <span className="font-medium text-slate-700">{colegio.distrito}</span>
+                        <span className="text-xs">{colegio.provincia}</span>
                       </p>
                     </div>
 
                     <div className="col-span-1 lg:col-span-2">
                       <span
-                        className={`inline-block px-3 py-1 rounded-lg text-[11px] font-bold uppercase ${
+                        className={`inline-flex items-center justify-center w-full px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wide transition-colors ${
                           colegio.estado === 'Aprobado'
-                            ? 'bg-emerald-50 text-emerald-600 border border-emerald-100'
+                            ? 'bg-emerald-50 text-emerald-600 border border-emerald-200'
                             : colegio.estado === 'Observado'
-                              ? 'bg-rose-50 text-rose-600 border border-rose-100'
+                              ? 'bg-rose-50 text-rose-600 border border-rose-200'
                               : colegio.estado === 'Enviado'
-                                ? 'bg-blue-50 text-blue-600 border border-blue-100'
+                                ? 'bg-blue-50 text-blue-600 border border-blue-200'
                                 : colegio.estado === 'Borrador'
-                                  ? 'bg-amber-50 text-amber-600 border border-amber-100'
-                                  : 'bg-slate-50 text-slate-500 border border-slate-100'
+                                  ? 'bg-amber-50 text-amber-600 border border-amber-200'
+                                  : 'bg-slate-50 text-slate-500 border border-slate-200'
                         }`}
                       >
                         {colegio.estado}
@@ -243,7 +247,7 @@ const EspecialistaExploradorView = ({
             {filteredColegios.length === 0 && (
               <div className="text-center py-20 text-slate-500 flex flex-col items-center">
                 <div className="bg-slate-100 p-6 rounded-full mb-4">
-                  <Folder size={48} className="text-slate-300" />
+                  <Building2 size={48} className="text-slate-300" />
                 </div>
                 <p className="text-lg font-medium text-slate-700">No se encontraron colegios</p>
                 <p className="text-sm mt-1">Intenta con otro termino de busqueda o cambia el estado seleccionado</p>

@@ -1,5 +1,24 @@
 const { pool } = require('../config/db'); 
 
+const calcularSaldoInicialCaja = async (directorId, trimestreId, anio) => {
+  if (anio < 2026) return 0;
+  
+  const trimestreAnterior = trimestreId === 1 ? 4 : trimestreId - 1;
+  const anioAnterior = trimestreId === 1 ? anio - 1 : anio;
+  
+  if (anioAnterior < 2026) return 0;
+  
+  const mesInicio = (trimestreAnterior - 1) * 3 + 1;
+  const mesFin = trimestreAnterior * 3;
+
+  const [[ingresos]] = await pool.execute(`SELECT COALESCE(SUM(monto), 0) AS total FROM movimientos WHERE director_id = ? AND tipo_movimiento = 'INGRESO' AND YEAR(fecha) = ? AND MONTH(fecha) BETWEEN ? AND ?`, [directorId, anioAnterior, mesInicio, mesFin]);
+  const [[egresos]] = await pool.execute(`SELECT COALESCE(SUM(monto), 0) AS total FROM movimientos WHERE director_id = ? AND tipo_movimiento = 'EGRESO' AND YEAR(fecha) = ? AND MONTH(fecha) BETWEEN ? AND ?`, [directorId, anioAnterior, mesInicio, mesFin]);
+
+  const saldoAnterior = await calcularSaldoInicialCaja(directorId, trimestreAnterior, anioAnterior);
+  
+  return saldoAnterior + Number(ingresos.total) - Number(egresos.total);
+};
+
 const getColegiosPorTrimestre = async (req, res) => {
   try {
     // 1. Recibir los parámetros de trimestre y año (por defecto el actual si no envían)
@@ -72,6 +91,8 @@ const getResumenFinanciero = async (req, res) => {
       WHERE director_id = ? AND anio = ? AND trimestre = ?
     `;
 
+    const saldoInicialCaja = await calcularSaldoInicialCaja(directorId, trimestre, anio);
+
     // Ejecutar las 3 consultas en paralelo para mayor velocidad
     const [ingresosResult, egresosResult, saldosResult] = await Promise.all([
       pool.execute(queryIngresos, [directorId, anio, mesInicio, mesFin]),
@@ -79,11 +100,18 @@ const getResumenFinanciero = async (req, res) => {
       pool.execute(querySaldos, [directorId, anio, trimestre])
     ]);
 
+    const ingresosTrimestre = Number(ingresosResult[0][0].total);
+    const egresosTrimestre = Number(egresosResult[0][0].total);
+    const saldoBanco = saldosResult[0].length > 0 ? Number(saldosResult[0][0].saldo_final) : 0;
+    const dineroEnCaja = saldoInicialCaja + ingresosTrimestre - egresosTrimestre;
+
     res.status(200).json({
       success: true,
-      totalIngresos: Number(ingresosResult[0][0].total),
-      totalEgresos: Number(egresosResult[0][0].total),
-      saldoBanco: saldosResult[0].length > 0 ? Number(saldosResult[0][0].saldo_final) : 0
+      totalIngresos: ingresosTrimestre,
+      totalEgresos: egresosTrimestre,
+      dineroEnCaja: dineroEnCaja,
+      dineroEnBanco: saldoBanco,
+      saldoTotal: dineroEnCaja + saldoBanco
     });
 
   } catch (error) {
@@ -184,6 +212,7 @@ const getReporteGlobal = async (req, res) => {
     // Esta poderosa consulta trae la lista de colegios + sus estados + la suma total de su dinero
     const sql = `
       SELECT 
+        d.id AS directorId,
         i.codigo_modular AS codigoModular,
         i.numero AS numeroIE,
         i.nombre AS nombre,
@@ -204,7 +233,25 @@ const getReporteGlobal = async (req, res) => {
       trimestre, anio          // Para estados
     ]);
 
-    res.status(200).json({ success: true, reporte: rows });
+    // Procesar saldo inicial de caja y consolidar datos para cada colegio
+    const reporteProcesado = await Promise.all(rows.map(async (row) => {
+      const saldoInicialCaja = await calcularSaldoInicialCaja(row.directorId, trimestre, anio);
+      const ingresos = Number(row.totalIngresos);
+      const egresos = Number(row.totalEgresos);
+      const dineroEnBanco = Number(row.saldoFinal);
+      const dineroEnCaja = saldoInicialCaja + ingresos - egresos;
+
+      return {
+        ...row,
+        totalIngresos: ingresos,
+        totalEgresos: egresos,
+        dineroEnCaja: dineroEnCaja,
+        dineroEnBanco: dineroEnBanco,
+        saldoTotal: dineroEnCaja + dineroEnBanco
+      };
+    }));
+
+    res.status(200).json({ success: true, reporte: reporteProcesado });
   } catch (error) {
     console.error('Error al generar reporte global:', error);
     res.status(500).json({ success: false, message: 'Error interno al generar los datos del reporte.' });

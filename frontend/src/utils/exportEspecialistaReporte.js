@@ -11,7 +11,9 @@ const exportEspecialistaReporte = async ({ trimestreSeleccionado, anioActual, re
     { header: 'Estado', key: 'estado', width: 15 },
     { header: 'Total Ingresos (S/)', key: 'ingresos', width: 22, style: { numFmt: '"S/"#,##0.00' } },
     { header: 'Total Egresos (S/)', key: 'egresos', width: 22, style: { numFmt: '"S/"#,##0.00' } },
-    { header: 'Saldo Final (S/)', key: 'saldo', width: 22, style: { numFmt: '"S/"#,##0.00' } }
+    { header: 'Dinero en Caja (S/)', key: 'caja', width: 22, style: { numFmt: '"S/"#,##0.00' } },
+    { header: 'Dinero en Banco (S/)', key: 'banco', width: 22, style: { numFmt: '"S/"#,##0.00' } },
+    { header: 'Consolidado Total (S/)', key: 'total', width: 25, style: { numFmt: '"S/"#,##0.00' } }
   ];
 
   reporte.forEach((item) => {
@@ -22,7 +24,9 @@ const exportEspecialistaReporte = async ({ trimestreSeleccionado, anioActual, re
       estado: item.estado,
       ingresos: Number(item.totalIngresos),
       egresos: Number(item.totalEgresos),
-      saldo: Number(item.saldoFinal)
+      caja: Number(item.dineroEnCaja),
+      banco: Number(item.dineroEnBanco),
+      total: Number(item.saldoTotal)
     });
   });
 

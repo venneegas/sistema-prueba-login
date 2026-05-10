@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlertCircle, Building2, CheckCircle2, Clock, Download, FileText, Inbox, Loader2 } from 'lucide-react';
+import { AlertCircle, Building2, CheckCircle2, Inbox, Clock, Download, FileText, Loader2 } from 'lucide-react';
 import EspecialistaPeriodoFilters from './EspecialistaPeriodoFilters';
 import EspecialistaBarLineChart from './EspecialistaBarLineChart';
 
@@ -37,39 +37,39 @@ const EspecialistaReportesView = ({
       <div className="flex-1 overflow-y-auto p-8 bg-slate-50/50">
         <div className="max-w-6xl mx-auto space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover:border-indigo-300 hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex items-center gap-4 group cursor-default">
+              <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-300">
                 <Building2 size={24} />
               </div>
               <div>
-                <p className="text-sm text-slate-500 font-medium">Total Colegios</p>
+                <p className="text-xs text-indigo-600 font-bold uppercase tracking-wider mb-0.5">Total Colegios</p>
                 <p className="text-2xl font-bold text-slate-800">{stats.total}</p>
               </div>
             </div>
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover:border-emerald-300 hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex items-center gap-4 group cursor-default">
+              <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-colors duration-300">
                 <CheckCircle2 size={24} />
               </div>
               <div>
-                <p className="text-sm text-slate-500 font-medium">Recibidos Totales</p>
+                <p className="text-xs text-emerald-600 font-bold uppercase tracking-wider mb-0.5">Recibidos Totales</p>
                 <p className="text-2xl font-bold text-slate-800">{stats.subidos}</p>
               </div>
             </div>
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover:border-amber-300 hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex items-center gap-4 group cursor-default">
+              <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 group-hover:bg-amber-500 group-hover:text-white transition-colors duration-300">
                 <Inbox size={24} />
               </div>
               <div>
-                <p className="text-sm text-amber-600 font-bold">Por Revisar</p>
+                <p className="text-xs text-amber-600 font-bold uppercase tracking-wider mb-0.5">Por Revisar</p>
                 <p className="text-2xl font-bold text-slate-800">{stats.enviados}</p>
               </div>
             </div>
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover:border-slate-400 hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex items-center gap-4 group cursor-default">
+              <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 group-hover:bg-slate-600 group-hover:text-white transition-colors duration-300">
                 <Clock size={24} />
               </div>
               <div>
-                <p className="text-sm text-slate-500 font-medium">En Borrador</p>
+                <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-0.5">En Borrador</p>
                 <p className="text-2xl font-bold text-slate-800">{stats.borradores}</p>
               </div>
             </div>

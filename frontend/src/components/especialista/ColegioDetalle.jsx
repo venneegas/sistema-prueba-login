@@ -6,7 +6,7 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio }) => {
   const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
   const [rejectComment, setRejectComment] = useState('');
 
-  const [finanzas, setFinanzas] = useState({ ingresos: 0, egresos: 0, saldoBanco: 0 });
+  const [finanzas, setFinanzas] = useState({ ingresos: 0, egresos: 0, dineroEnCaja: 0, dineroEnBanco: 0, saldoTotal: 0 });
   const [loadingFinanzas, setLoadingFinanzas] = useState(true);
   
   const [pdfs, setPdfs] = useState([]);
@@ -25,7 +25,9 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio }) => {
           setFinanzas({
             ingresos: data.totalIngresos,
             egresos: data.totalEgresos,
-            saldoBanco: data.saldoBanco
+            dineroEnCaja: data.dineroEnCaja,
+            dineroEnBanco: data.dineroEnBanco,
+            saldoTotal: data.saldoTotal
           });
         }
       } catch (error) {
@@ -251,17 +253,45 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio }) => {
               </div>
             </div>
 
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-blue-200 flex items-center gap-4 relative overflow-hidden">
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600">
+                <DollarSign size={24} />
+              </div>
+              <div>
+                <p className="text-sm text-slate-500 font-medium">Dinero en Caja</p>
+                {loadingFinanzas ? (
+                  <Loader2 size={24} className="animate-spin text-slate-400 mt-1" />
+                ) : (
+                  <p className="text-2xl font-bold text-slate-800">{formatearMoneda(finanzas.dineroEnCaja)}</p>
+                )}
+              </div>
+            </div>
+
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-teal-100 flex items-center justify-center text-teal-600">
+                <Building2 size={24} />
+              </div>
+              <div>
+                <p className="text-sm text-slate-500 font-medium">Dinero en Banco</p>
+                {loadingFinanzas ? (
+                  <Loader2 size={24} className="animate-spin text-slate-400 mt-1" />
+                ) : (
+                  <p className="text-2xl font-bold text-slate-800">{formatearMoneda(finanzas.dineroEnBanco)}</p>
+                )}
+              </div>
+            </div>
+
+            <div className="md:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-blue-200 flex items-center gap-4 relative overflow-hidden">
               <div className="absolute top-0 left-0 w-1 h-full bg-blue-500"></div>
               <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
                 <DollarSign size={24} />
               </div>
               <div>
-                <p className="text-sm text-blue-600 font-medium">Saldo Actual Banco</p>
+                <p className="text-sm text-blue-600 font-medium">Saldo Actual Banco (Consolidado)</p>
                 {loadingFinanzas ? (
                   <Loader2 size={24} className="animate-spin text-blue-400 mt-1" />
                 ) : (
-                  <p className="text-2xl font-bold text-blue-950">{formatearMoneda(finanzas.saldoBanco)}</p>
+                  <p className="text-2xl font-bold text-blue-950">{formatearMoneda(finanzas.saldoTotal)}</p>
                 )}
               </div>
             </div>
