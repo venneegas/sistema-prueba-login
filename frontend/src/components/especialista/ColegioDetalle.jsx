@@ -20,7 +20,11 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio }) => {
       setLoadingFinanzas(true);
       try {
         // Nota: colegio.id equivale al directorId en nuestra consulta SQL
-        const response = await fetch(`http://localhost:5000/api/especialista/colegio/${colegio.id}/finanzas?trimestre=${trimestre}&anio=${anio}`);
+        const response = await fetch(`http://localhost:5000/api/especialista/colegio/${colegio.id}/finanzas?trimestre=${trimestre}&anio=${anio}`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
         const data = await response.json();
         
         if (data.success) {
@@ -47,7 +51,11 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio }) => {
     const fetchPdfs = async () => {
       setLoadingPdfs(true);
       try {
-        const response = await fetch(`http://localhost:5000/api/especialista/colegio/${colegio.id}/pdfs?trimestre=${trimestre}&anio=${anio}`);
+        const response = await fetch(`http://localhost:5000/api/especialista/colegio/${colegio.id}/pdfs?trimestre=${trimestre}&anio=${anio}`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
         const data = await response.json();
         
         if (data.success) {
@@ -100,7 +108,10 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio }) => {
     try {
       const response = await fetch('http://localhost:5000/api/especialista/auditar', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
         body: JSON.stringify({
           directorId: colegio.id,
           trimestre: trimestre,
@@ -126,7 +137,10 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio }) => {
     try {
       const response = await fetch('http://localhost:5000/api/especialista/auditar', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
         body: JSON.stringify({
           directorId: colegio.id,
           trimestre: trimestre,

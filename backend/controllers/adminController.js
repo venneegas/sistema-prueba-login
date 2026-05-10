@@ -158,6 +158,16 @@ const createUser = async (req, res) => {
       [nombre, email, hashedPassword, rol, 'activo']
     );
 
+    try {
+      await logAuditoria({
+        usuario_id: req.usuario?.id || req.user?.id || 1,
+        modulo: 'Administración',
+        accion: 'CREAR_USER',
+        descripcion: `Se creó un nuevo usuario: ${email} con el rol de ${rol}.`,
+        ip_address: req.ip || req.connection?.remoteAddress
+      });
+    } catch (auditErr) { console.error('Error registrando auditoría:', auditErr); }
+
     res.status(201).json({ success: true, message: 'Usuario creado exitosamente.' });
   } catch (error) {
     console.error('Error al crear usuario:', error);
@@ -189,6 +199,17 @@ const updateUser = async (req, res) => {
     }
 
     await pool.execute(query, params);
+
+    try {
+      await logAuditoria({
+        usuario_id: req.usuario?.id || req.user?.id || 1,
+        modulo: 'Administración',
+        accion: 'EDITAR_USER',
+        descripcion: `Se actualizaron los datos del usuario ID: ${id} (${email}).`,
+        ip_address: req.ip || req.connection?.remoteAddress
+      });
+    } catch (auditErr) { console.error('Error registrando auditoría:', auditErr); }
+
     res.status(200).json({ success: true, message: 'Usuario actualizado exitosamente.' });
   } catch (error) {
     console.error('Error al actualizar usuario:', error);
@@ -206,12 +227,34 @@ const deleteUser = async (req, res) => {
     }
 
     await pool.execute('DELETE FROM usuarios WHERE id = ?', [id]);
+
+    try {
+      await logAuditoria({
+        usuario_id: req.usuario?.id || req.user?.id || 1,
+        modulo: 'Administración',
+        accion: 'BORRAR_USER',
+        descripcion: `Se eliminó al usuario con ID: ${id}.`,
+        ip_address: req.ip || req.connection?.remoteAddress
+      });
+    } catch (auditErr) { console.error('Error registrando auditoría:', auditErr); }
+
     res.status(200).json({ success: true, message: 'Usuario eliminado exitosamente.' });
   } catch (error) {
     console.error('Error al eliminar usuario:', error);
     // 1451 es el código de error de MySQL para "restricción de llave foránea"
     if (error.errno === 1451 || error.code === 'ER_ROW_IS_REFERENCED_2') {
       await pool.execute("UPDATE usuarios SET estado = IF(estado = 'activo', 'suspendido', 'activo') WHERE id = ?", [id]);
+      
+      try {
+        await logAuditoria({
+          usuario_id: req.usuario?.id || req.user?.id || 1,
+          modulo: 'Administración',
+          accion: 'ESTADO_USER',
+          descripcion: `Se alternó el estado (suspendido/activo) del usuario con ID: ${id} debido a dependencias.`,
+          ip_address: req.ip || req.connection?.remoteAddress
+        });
+      } catch (auditErr) { console.error('Error registrando auditoría:', auditErr); }
+
       return res.status(200).json({ success: true, message: 'Estado del usuario alternado entre Suspendido/Activo porque tiene registros vinculados.' });
     }
     res.status(500).json({ success: false, message: 'Error interno al procesar la solicitud.' });

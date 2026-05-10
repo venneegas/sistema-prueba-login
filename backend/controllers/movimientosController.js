@@ -1,4 +1,5 @@
 const { pool } = require('../config/db');
+const { logAuditoria } = require('../utils/auditLogger');
 
 const TIPO_MOVIMIENTO = {
   ingresos: 'INGRESO',
@@ -300,6 +301,27 @@ const cerrarTrimestre = async (req, res) => {
       VALUES (?, ?, ?, 'Enviado', NOW())
       ON DUPLICATE KEY UPDATE estado = 'Enviado', fecha_envio = NOW()
     `, [directorId, trimestreId, anio]);
+
+  // Registrar auditoría del cierre de trimestre
+  try {
+    // Intentamos extraer el ID real del Director desde el Token
+    let currentUserId = req.usuario?.id || req.user?.id;
+    if (!currentUserId && req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+      try {
+        const token = req.headers.authorization.split(' ')[1];
+        const decoded = require('jsonwebtoken').verify(token, process.env.JWT_SECRET || 'firma_secreta_ugel_2026');
+        currentUserId = decoded.id;
+      } catch (e) { /* Ignorar error de token aquí */ }
+    }
+
+    await logAuditoria({
+      usuario_id: currentUserId || 1,
+      modulo: 'Declaración',
+      accion: 'CIERRE_TRIM',
+      descripcion: `El director cerró la declaración del trimestre ${trimestreId} del año ${anio}.`,
+      ip_address: req.ip || req.connection?.remoteAddress
+    });
+  } catch (err) { console.error('Error registrando auditoría:', err); }
 
     const cierre = await obtenerEstadoCierre(pool, directorId, Number(anio), Number(trimestreId));
 

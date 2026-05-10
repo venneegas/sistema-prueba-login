@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { pool } = require('../config/db');
+const { logAuditoria } = require('../utils/auditLogger');
 
 const subirSustentoPDF = async (req, res) => {
   try {
@@ -27,6 +28,25 @@ const subirSustentoPDF = async (req, res) => {
     `;
     
     const [result] = await pool.execute(query, [director_id, nombre_original, ruta_archivo, tamanio_bytes, anio, trimestre]);
+
+    try {
+      let currentUserId = req.usuario?.id || req.user?.id;
+      if (!currentUserId && req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+        try {
+          const token = req.headers.authorization.split(' ')[1];
+          const decoded = require('jsonwebtoken').verify(token, process.env.JWT_SECRET || 'firma_secreta_ugel_2026');
+          currentUserId = decoded.id;
+        } catch (e) { /* Ignorar error de token */ }
+      }
+
+      await logAuditoria({
+        usuario_id: currentUserId || 1,
+        modulo: 'Documentos',
+        accion: 'SUBIR_PDF',
+        descripcion: `El director subió el sustento ${nombre_original} para el trimestre ${trimestre} del año ${anio}.`,
+        ip_address: req.ip || req.connection?.remoteAddress
+      });
+    } catch (auditErr) { console.error('Error registrando auditoría:', auditErr); }
 
     res.status(201).json({
       success: true,
@@ -89,6 +109,25 @@ const eliminarSustento = async (req, res) => {
     if (fs.existsSync(rutaFisica)) {
       fs.unlinkSync(rutaFisica);
     }
+
+    try {
+      let currentUserId = req.usuario?.id || req.user?.id;
+      if (!currentUserId && req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+        try {
+          const token = req.headers.authorization.split(' ')[1];
+          const decoded = require('jsonwebtoken').verify(token, process.env.JWT_SECRET || 'firma_secreta_ugel_2026');
+          currentUserId = decoded.id;
+        } catch (e) { /* Ignorar error de token */ }
+      }
+
+      await logAuditoria({
+        usuario_id: currentUserId || 1,
+        modulo: 'Documentos',
+        accion: 'ELIMINAR_PDF',
+        descripcion: `Se eliminó un sustento PDF (ID: ${id}) del director ID: ${directorId}.`,
+        ip_address: req.ip || req.connection?.remoteAddress
+      });
+    } catch (auditErr) { console.error('Error registrando auditoría:', auditErr); }
 
     res.json({ success: true, message: 'Archivo eliminado correctamente.' });
   } catch (error) {

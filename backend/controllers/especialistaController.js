@@ -1,4 +1,5 @@
 const { pool } = require('../config/db'); 
+const { logAuditoria } = require('../utils/auditLogger');
 
 const calcularSaldoInicialCaja = async (directorId, trimestreId, anio) => {
   if (anio < 2026) return 0;
@@ -189,6 +190,27 @@ const auditarDeclaracion = async (req, res) => {
     // 3. Insertar la Notificación para el director
     const queryNotif = `INSERT INTO notificaciones (director_id, titulo, mensaje, tipo) VALUES (?, ?, ?, ?)`;
     await connection.execute(queryNotif, [directorId, titulo, mensaje, tipo]);
+
+    // 4. Registrar auditoría de la evaluación
+    try {
+      // Intentamos extraer el ID real del Especialista desde el Token
+      let currentUserId = req.usuario?.id || req.user?.id;
+      if (!currentUserId && req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+        try {
+          const token = req.headers.authorization.split(' ')[1];
+          const decoded = require('jsonwebtoken').verify(token, process.env.JWT_SECRET || 'firma_secreta_ugel_2026');
+          currentUserId = decoded.id;
+        } catch (e) { /* Ignorar error de token aquí */ }
+      }
+
+      await logAuditoria({
+        usuario_id: currentUserId || 1,
+        modulo: 'Auditoría',
+        accion: `EVAL_${estado.toUpperCase()}`,
+        descripcion: `El Especialista evaluó el trimestre ${trimestre} del año ${anio} de la I.E. (Director ID: ${directorId}) con estado: ${estado}`,
+        ip_address: req.ip || req.connection?.remoteAddress
+      });
+    } catch (auditErr) { console.error('Error en logAuditoria:', auditErr); }
 
     await connection.commit();
     res.status(200).json({ success: true, message: 'Auditoría registrada y notificada con éxito.' });

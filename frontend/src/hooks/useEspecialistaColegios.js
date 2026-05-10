@@ -12,7 +12,12 @@ const useEspecialistaColegios = ({ trimestreSeleccionado, anioActual }) => {
 
       try {
         const response = await fetch(
-          `http://localhost:5000/api/especialista/colegios?trimestre=${trimestreSeleccionado}&anio=${anioActual}`
+          `http://localhost:5000/api/especialista/colegios?trimestre=${trimestreSeleccionado}&anio=${anioActual}`,
+          {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+          }
         );
         const data = await response.json();
 

@@ -2,6 +2,7 @@ const { pool } = require('../config/db');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
+const { logAuditoria } = require('../utils/auditLogger');
 
 // Configuración de Nodemailer
 const transporter = nodemailer.createTransport({
@@ -284,6 +285,17 @@ const changePassword = async (req, res) => {
       [hashedPassword, usuario.id]
     );
 
+    // Registrar auditoría
+    try {
+      await logAuditoria({
+        usuario_id: usuario.id,
+        modulo: 'Seguridad',
+        accion: 'CAMBIO_PASSWORD',
+        descripcion: 'El usuario cambió su contraseña desde el sistema.',
+        ip_address: req.ip || req.connection?.remoteAddress
+      });
+    } catch (err) { console.error('Error al registrar auditoría:', err); }
+
     connection.release();
     connection = null;
 
@@ -424,6 +436,17 @@ const restablecerPassword = async (req, res) => {
       'UPDATE usuarios SET password_hash = ?, reset_code = NULL, reset_expires = NULL WHERE id = ?',
       [hashedPassword, usuario.id]
     );
+
+    // Registrar auditoría
+    try {
+      await logAuditoria({
+        usuario_id: usuario.id,
+        modulo: 'Seguridad',
+        accion: 'RECUPERACION_PASSWORD',
+        descripcion: 'El usuario restableció su contraseña mediante correo electrónico.',
+        ip_address: req.ip || req.connection?.remoteAddress
+      });
+    } catch (err) { console.error('Error al registrar auditoría:', err); }
 
     connection.release();
     connection = null;
