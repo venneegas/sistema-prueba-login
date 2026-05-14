@@ -62,15 +62,16 @@ const login = async (req, res) => {
     const [usuarios] = await connection.execute(
       `
         SELECT
-          id,
-          email,
-          password_hash,
-          rol,
-          nombre,
-          director_id,
-          ${tieneColumnaDebeCambiarPassword ? 'COALESCE(debe_cambiar_password, FALSE)' : 'FALSE'} AS debe_cambiar_password
-        FROM usuarios
-        WHERE email = ?
+          u.id,
+          u.email,
+          u.password_hash,
+          r.nombre AS rol,
+          u.nombre,
+          u.director_id,
+          ${tieneColumnaDebeCambiarPassword ? 'COALESCE(u.debe_cambiar_password, FALSE)' : 'FALSE'} AS debe_cambiar_password
+        FROM usuarios u
+        INNER JOIN roles r ON u.rol_id = r.id
+        WHERE u.email = ?
       `,
       [correo.trim()]
     );

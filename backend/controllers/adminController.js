@@ -55,9 +55,10 @@ const getAuditoriaLogs = async (req, res) => {
     // Traemos los últimos 100 logs cruzados con el correo del usuario
     const query = `
       SELECT a.id, a.modulo, a.accion, a.descripcion, a.fecha_hora, a.ip_address,
-             u.email, u.rol
+             u.email, r.nombre AS rol
       FROM auditorias a
       LEFT JOIN usuarios u ON a.usuario_id = u.id
+      LEFT JOIN roles r ON u.rol_id = r.id
       ORDER BY a.fecha_hora DESC
       LIMIT 100
     `;
@@ -90,9 +91,10 @@ const getLoginLogs = async (req, res) => {
 const getUsers = async (req, res) => {
   try {
     const query = `
-      SELECT u.id, u.email, u.rol, u.estado, u.nombre as usuario_nombre,
+      SELECT u.id, u.email, r.nombre AS rol, u.estado, u.nombre as usuario_nombre,
              d.nombres, d.apellido_paterno, d.apellido_materno, i.nombre as colegio, i.numero
       FROM usuarios u
+      LEFT JOIN roles r ON u.rol_id = r.id
       LEFT JOIN directores d ON u.director_id = d.id
       LEFT JOIN instituciones i ON d.institucion_id = i.id
       ORDER BY u.creado_en DESC
@@ -152,10 +154,14 @@ const createUser = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
+    // Mapear el string 'rol' al 'rol_id' correspondiente
+    const rolesMap = { director: 1, especialista: 2, admin: 3 };
+    const rol_id = rolesMap[rol.toLowerCase()] || 1;
+
     // Insertar en la base de datos
     await pool.execute(
-      'INSERT INTO usuarios (nombre, email, password_hash, rol, estado) VALUES (?, ?, ?, ?, ?)',
-      [nombre, email, hashedPassword, rol, 'activo']
+      'INSERT INTO usuarios (nombre, email, password_hash, rol_id, estado) VALUES (?, ?, ?, ?, ?)',
+      [nombre, email, hashedPassword, rol_id, 'activo']
     );
 
     try {
@@ -184,8 +190,12 @@ const updateUser = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Nombre, email y rol son requeridos.' });
     }
 
-    let query = 'UPDATE usuarios SET nombre = ?, email = ?, rol = ? WHERE id = ?';
-    let params = [nombre, email, rol, id];
+    // Mapear el string 'rol' al 'rol_id'
+    const rolesMap = { director: 1, especialista: 2, admin: 3 };
+    const rol_id = rolesMap[rol.toLowerCase()] || 1;
+
+    let query = 'UPDATE usuarios SET nombre = ?, email = ?, rol_id = ? WHERE id = ?';
+    let params = [nombre, email, rol_id, id];
 
     // Solo actualizamos la contraseña si el admin escribió una nueva
     if (password && password.trim() !== '') {
@@ -194,8 +204,8 @@ const updateUser = async (req, res) => {
       }
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password, salt);
-      query = 'UPDATE usuarios SET nombre = ?, email = ?, rol = ?, password_hash = ? WHERE id = ?';
-      params = [nombre, email, rol, hashedPassword, id];
+      query = 'UPDATE usuarios SET nombre = ?, email = ?, rol_id = ?, password_hash = ? WHERE id = ?';
+      params = [nombre, email, rol_id, hashedPassword, id];
     }
 
     await pool.execute(query, params);

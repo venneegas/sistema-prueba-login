@@ -57,7 +57,24 @@ CREATE TABLE IF NOT EXISTS directores (
   COMMENT='Tabla de directores de instituciones educativas';
 
 -- ============================================
--- TABLA 3: usuarios
+-- TABLA 3: roles
+-- ============================================
+CREATE TABLE IF NOT EXISTS roles (
+  id          INT AUTO_INCREMENT PRIMARY KEY,
+  nombre      VARCHAR(50) NOT NULL UNIQUE COMMENT 'Nombre del rol (ej: director, especialista, admin)',
+  descripcion VARCHAR(255) DEFAULT NULL COMMENT 'Descripcion breve de los permisos del rol',
+  creado_en   TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  COMMENT='Tabla catalogo de roles del sistema';
+
+-- Insertar roles por defecto obligatorios
+INSERT IGNORE INTO roles (id, nombre, descripcion) VALUES
+(1, 'director', 'Director de una institucion educativa'),
+(2, 'especialista', 'Especialista de la UGEL, audita colegios'),
+(3, 'admin', 'Administrador del sistema con acceso total');
+
+-- ============================================
+-- TABLA 4: usuarios
 -- ============================================
 CREATE TABLE IF NOT EXISTS usuarios (
   id                      INT AUTO_INCREMENT PRIMARY KEY,
@@ -65,7 +82,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
   nombre                  VARCHAR(100) DEFAULT NULL COMMENT 'Nombre visible para admins y especialistas',
   password_hash           VARCHAR(255) NOT NULL COMMENT 'Contrasena hasheada con bcrypt',
   debe_cambiar_password   BOOLEAN NOT NULL DEFAULT TRUE COMMENT 'Obliga al usuario a cambiar su clave en el primer ingreso',
-  rol                     ENUM('director', 'especialista', 'admin') NOT NULL DEFAULT 'director',
+  rol_id                  INT NOT NULL DEFAULT 1 COMMENT 'FK a la tabla roles (1=director)',
   director_id             INT DEFAULT NULL COMMENT 'FK opcional: si es director, referencia a tabla directores',
   estado                  ENUM('activo', 'inactivo', 'suspendido') DEFAULT 'activo',
   ultimo_login            TIMESTAMP NULL DEFAULT NULL COMMENT 'Ultima fecha/hora de login',
@@ -77,7 +94,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
   UNIQUE KEY uk_usuarios_email (email),
   UNIQUE KEY uk_usuarios_director_id (director_id),
   KEY idx_email (email),
-  KEY idx_rol (rol),
+  KEY idx_rol_id (rol_id),
   KEY idx_estado (estado),
   KEY idx_director_id (director_id),
   KEY idx_debe_cambiar_password (debe_cambiar_password),
@@ -85,6 +102,11 @@ CREATE TABLE IF NOT EXISTS usuarios (
     FOREIGN KEY (director_id)
     REFERENCES directores(id)
     ON DELETE SET NULL
+    ON UPDATE CASCADE,
+  CONSTRAINT fk_usuarios_rol
+    FOREIGN KEY (rol_id)
+    REFERENCES roles(id)
+    ON DELETE RESTRICT
     ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   COMMENT='Tabla de usuarios para autenticacion en el sistema';
