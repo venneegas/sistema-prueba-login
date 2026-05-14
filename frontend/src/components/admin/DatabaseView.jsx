@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { HardDrive, Database, ShieldAlert, Download } from 'lucide-react';
+import { buildApiUrl } from '../../config/api';
 
 const DatabaseView = () => {
   const [isDownloading, setIsDownloading] = useState(false);
@@ -9,7 +10,7 @@ const DatabaseView = () => {
     
     try {
       // Llamada real al backend
-      const response = await fetch('http://localhost:5000/api/admin/backup', {
+      const response = await fetch(buildApiUrl('/api/admin/backup'), {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
       

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Save } from 'lucide-react';
+import { buildApiUrl } from '../../config/api';
 
 const obtenerNombreCompleto = (director) => {
   const partes = [
@@ -23,9 +24,6 @@ const InformacionGeneralView = ({ director }) => {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState(null);
 
-  // URL de la API del backend
-  const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
-
   // Efecto para cargar los datos del backend al abrir la pantalla
   useEffect(() => {
     if (director?.id) {
@@ -39,7 +37,7 @@ const InformacionGeneralView = ({ director }) => {
   const fetchDatos = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_URL}/api/datos-institucionales/${director.id}`);
+      const response = await fetch(buildApiUrl(`/api/datos-institucionales/${director.id}`));
       const result = await response.json();
       
       if (result.success && result.data) {
@@ -81,7 +79,7 @@ const InformacionGeneralView = ({ director }) => {
     setMessage(null);
 
     try {
-      const response = await fetch(`${API_URL}/api/datos-institucionales/${director.id}`, {
+      const response = await fetch(buildApiUrl(`/api/datos-institucionales/${director.id}`), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

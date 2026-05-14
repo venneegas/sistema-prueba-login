@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Activity, RefreshCw, Search } from 'lucide-react';
+import { buildApiUrl } from '../../config/api';
 
 const AuditoriaView = () => {
   const [logs, setLogs] = useState([]);
@@ -14,7 +15,7 @@ const AuditoriaView = () => {
   const cargarLogs = async () => {
     try {
       const token = localStorage.getItem('token'); // Asegúrate de usar la key de tu token
-      const response = await fetch('http://localhost:5000/api/admin/auditoria', {
+      const response = await fetch(buildApiUrl('/api/admin/auditoria'), {
         headers: {
           'Authorization': `Bearer ${token}`
         }

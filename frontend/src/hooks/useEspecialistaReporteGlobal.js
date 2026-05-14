@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { buildApiUrl } from '../config/api';
 
 const useEspecialistaReporteGlobal = ({ trimestreSeleccionado, anioActual }) => {
   const [reporte, setReporte] = useState([]);
@@ -12,7 +13,7 @@ const useEspecialistaReporteGlobal = ({ trimestreSeleccionado, anioActual }) => 
 
       try {
         const response = await fetch(
-          `http://localhost:5000/api/especialista/reporte-global?trimestre=${trimestreSeleccionado}&anio=${anioActual}`,
+          buildApiUrl(`/api/especialista/reporte-global?trimestre=${trimestreSeleccionado}&anio=${anioActual}`),
           {
             headers: {
               'Authorization': `Bearer ${localStorage.getItem('token')}`

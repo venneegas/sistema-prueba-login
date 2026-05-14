@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, FileText, DollarSign, Download, Eye, Building2, CheckCircle, XCircle, AlertCircle, X, Loader2 } from 'lucide-react';
 
+const API_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
+
 const ColegioDetalle = ({ colegio, onBack, trimestre, anio }) => {
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
   const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
@@ -20,7 +22,7 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio }) => {
       setLoadingFinanzas(true);
       try {
         // Nota: colegio.id equivale al directorId en nuestra consulta SQL
-        const response = await fetch(`http://localhost:5000/api/especialista/colegio/${colegio.id}/finanzas?trimestre=${trimestre}&anio=${anio}`, {
+        const response = await fetch(`${API_URL}/api/especialista/colegio/${colegio.id}/finanzas?trimestre=${trimestre}&anio=${anio}`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
@@ -51,7 +53,7 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio }) => {
     const fetchPdfs = async () => {
       setLoadingPdfs(true);
       try {
-        const response = await fetch(`http://localhost:5000/api/especialista/colegio/${colegio.id}/pdfs?trimestre=${trimestre}&anio=${anio}`, {
+        const response = await fetch(`${API_URL}/api/especialista/colegio/${colegio.id}/pdfs?trimestre=${trimestre}&anio=${anio}`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
@@ -96,7 +98,7 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio }) => {
     if (rutaNormalizada.startsWith('/')) {
       rutaNormalizada = rutaNormalizada.substring(1);
     }
-    return `http://localhost:5000/${rutaNormalizada}`;
+    return `${API_URL}/${rutaNormalizada}`;
   };
 
   const handleRejectSubmit = async () => {
@@ -106,7 +108,7 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio }) => {
     }
     
     try {
-      const response = await fetch('http://localhost:5000/api/especialista/auditar', {
+      const response = await fetch(`${API_URL}/api/especialista/auditar`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -135,7 +137,7 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio }) => {
 
   const handleApproveSubmit = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/especialista/auditar', {
+      const response = await fetch(`${API_URL}/api/especialista/auditar`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',

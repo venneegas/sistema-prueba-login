@@ -83,7 +83,7 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
     const fetchNotificaciones = async () => {
       try {
         const id = user.director?.id || user.id;
-        const response = await fetch(`http://localhost:5000/api/notificaciones/${id}`);
+        const response = await fetch(buildApiUrl(`/api/notificaciones/${id}`));
         const data = await response.json();
         if (data.success) {
           setNotificaciones(data.notificaciones);
@@ -105,7 +105,7 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
     if (!isNotificationsOpen && unreadCount > 0) {
       try {
         const id = user.director?.id || user.id;
-        await fetch(`http://localhost:5000/api/notificaciones/${id}/leidas`, { method: 'PUT' });
+        await fetch(buildApiUrl(`/api/notificaciones/${id}/leidas`), { method: 'PUT' });
         
         // Actualizamos estado local
         setNotificaciones(notificaciones.map(n => ({ ...n, leida: true })));
