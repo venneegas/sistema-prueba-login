@@ -4,8 +4,8 @@
 -- Estructura actualizada desde el backup 2026-05-05
 -- ============================================
 
-CREATE DATABASE IF NOT EXISTS ugel_db;
-USE ugel_db;
+-- CREATE DATABASE IF NOT EXISTS ugel_db;
+-- USE ugel_db;
 
 -- ============================================
 -- TABLA 1: instituciones

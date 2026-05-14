@@ -2,6 +2,7 @@ require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
+app.set('trust proxy', 1); // Si estás detrás de un proxy (como Nginx o Heroku), esto es importante para que el rate limiter funcione correctamente con las IPs reales
 const path = require('path');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
