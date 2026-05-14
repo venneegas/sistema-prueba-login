@@ -48,7 +48,8 @@ const DirectorSidebar = ({ activeTab, setActiveTab, onLogoutClick, onChangePassw
         <img 
           src="/logo_ugel.svg" 
           alt="Logo UGEL" 
-          className="h-16 w-auto object-contain drop-shadow-md bg-white/10 rounded-xl p-2" 
+          className="h-16 w-auto object-contain drop-shadow-md" 
+          style={{ filter: 'brightness(0) invert(1)' }}
           onError={(e) => { e.target.style.display = 'none' }}
         />
       </div>
