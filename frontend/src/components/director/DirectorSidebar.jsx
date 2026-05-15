@@ -42,15 +42,14 @@ const DirectorSidebar = ({ activeTab, setActiveTab, onLogoutClick, onChangePassw
   };
 
   return (
-    <aside className="w-64 bg-slate-900 text-white h-full flex flex-col shadow-xl z-20 border-r border-slate-700">
+    <aside className="w-64 bg-white dark:bg-slate-900 text-slate-800 dark:text-white h-full flex flex-col shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-20 border-r border-slate-200 dark:border-slate-800">
       {/* Header con Logo Institucional */}
-      <div className="p-6 border-b border-slate-800 text-center flex justify-center bg-slate-900">
+      <div className="p-6 border-b border-slate-200 dark:border-slate-800 text-center flex justify-center bg-white dark:bg-slate-900">
         <img 
-          src="/logo_ugel.svg" 
+          src="https://ugelsanta.gob.pe/wp-content/uploads/2026/02/Logo_US3.png" 
           alt="Logo UGEL" 
-          className="h-16 w-auto object-contain drop-shadow-md" 
-          style={{ filter: 'brightness(0) invert(1)' }}
-          onError={(e) => { e.target.style.display = 'none' }}
+          className="h-16 w-auto object-contain drop-shadow-sm" 
+          onError={(e) => { e.target.src = 'https://via.placeholder.com/150?text=Logo+UGEL' }}
         />
       </div>
 
@@ -60,10 +59,10 @@ const DirectorSidebar = ({ activeTab, setActiveTab, onLogoutClick, onChangePassw
           <button
             key={item.id}
             onClick={() => setActiveTab(item.id)}
-            className={`w-full flex items-center justify-start space-x-3 px-4 py-3 rounded-xl text-sm text-left transition-colors shadow-sm ${
+            className={`w-full flex items-center justify-start space-x-3 px-4 py-3 rounded-xl text-sm text-left transition-all ${
               activeTab === item.id
-                ? 'bg-blue-600 text-white font-bold'
-                : 'text-slate-300 hover:bg-slate-800 hover:text-white font-semibold'
+                ? 'bg-blue-50 text-blue-700 font-bold shadow-sm dark:bg-blue-600 dark:text-white'
+                : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-semibold dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white'
             }`}
           >
             {item.icon}
@@ -73,18 +72,18 @@ const DirectorSidebar = ({ activeTab, setActiveTab, onLogoutClick, onChangePassw
       </nav>
 
       {/* Sección Inferior - Cerrar Sesión */}
-      <div className="p-4 border-t border-slate-800 bg-slate-900/50 relative">
+      <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 relative">
         
         {/* Popover de Configuración */}
         {isSettingsOpen && (
-          <div className="absolute bottom-full left-4 right-4 mb-2 bg-slate-800 rounded-xl shadow-xl border border-slate-700 overflow-hidden z-50">
+          <div className="absolute bottom-full left-4 right-4 mb-2 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden z-50">
             <div className="p-2 space-y-1">
               <button
                 onClick={() => {
                   onChangePasswordClick();
                   setIsSettingsOpen(false);
                 }}
-                className="w-full flex items-center justify-start space-x-3 px-3 py-2.5 rounded-lg text-sm text-left text-slate-200 hover:bg-slate-700 hover:text-white transition-colors font-medium"
+                className="w-full flex items-center justify-start space-x-3 px-3 py-2.5 rounded-lg text-sm text-left text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white transition-colors font-medium"
               >
                 <Key size={16} className="text-slate-400" />
                 <span>Cambiar Contraseña</span>
@@ -94,14 +93,14 @@ const DirectorSidebar = ({ activeTab, setActiveTab, onLogoutClick, onChangePassw
                   onRequestReplacementClick();
                   setIsSettingsOpen(false);
                 }}
-                className="w-full flex items-center justify-start space-x-3 px-3 py-2.5 rounded-lg text-sm text-left text-slate-200 hover:bg-slate-700 hover:text-white transition-colors font-medium"
+                className="w-full flex items-center justify-start space-x-3 px-3 py-2.5 rounded-lg text-sm text-left text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white transition-colors font-medium"
               >
                 <UserMinus size={16} className="text-slate-400" />
                 <span>Solicitar Reemplazo de Director</span>
               </button>
               <button
                 onClick={toggleDarkMode}
-                className="w-full flex items-center justify-start space-x-3 px-3 py-2.5 rounded-lg text-sm text-left text-slate-200 hover:bg-slate-700 hover:text-white transition-colors font-medium"
+                className="w-full flex items-center justify-start space-x-3 px-3 py-2.5 rounded-lg text-sm text-left text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white transition-colors font-medium"
               >
                 {isDarkMode ? <Sun size={16} className="text-slate-400" /> : <Moon size={16} className="text-slate-400" />}
                 <span>{isDarkMode ? 'Tema: Claro' : 'Tema: Oscuro'}</span>
@@ -111,7 +110,7 @@ const DirectorSidebar = ({ activeTab, setActiveTab, onLogoutClick, onChangePassw
                   setIsSoporteOpen(true);
                   setIsSettingsOpen(false);
                 }}
-                className="w-full flex items-center justify-start space-x-3 px-3 py-2.5 rounded-lg text-sm text-left text-slate-200 hover:bg-slate-700 hover:text-white transition-colors border-t border-slate-700 mt-1 pt-2.5 font-medium"
+                className="w-full flex items-center justify-start space-x-3 px-3 py-2.5 rounded-lg text-sm text-left text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white transition-colors border-t border-slate-100 dark:border-slate-700 mt-1 pt-2.5 font-medium"
               >
                 <HelpCircle size={16} className="text-slate-400" />
                 <span>Soporte Técnico</span>
@@ -123,7 +122,9 @@ const DirectorSidebar = ({ activeTab, setActiveTab, onLogoutClick, onChangePassw
         <button
           onClick={() => setIsSettingsOpen(!isSettingsOpen)}
           className={`w-full flex items-center justify-start space-x-3 px-4 py-3 rounded-xl text-sm text-left transition-colors mb-4 ${
-            isSettingsOpen ? 'bg-slate-800 text-white font-bold' : 'text-slate-300 hover:bg-slate-800 hover:text-white font-semibold'
+            isSettingsOpen 
+              ? 'bg-slate-100 text-slate-900 font-bold dark:bg-slate-800 dark:text-white' 
+              : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-semibold dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white'
           }`}
         >
           <Settings size={18} />
@@ -196,11 +197,11 @@ const DirectorSidebar = ({ activeTab, setActiveTab, onLogoutClick, onChangePassw
 
         {/* Info del Usuario */}
         <div className="flex items-center gap-3 mb-4 px-2">
-          <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center border-2 border-slate-600 shrink-0">
-            <User size={20} className="text-slate-300" />
+          <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-slate-800 flex items-center justify-center border-2 border-blue-200 dark:border-slate-600 shrink-0">
+            <User size={20} className="text-blue-600 dark:text-slate-300" />
           </div>
           <div className="overflow-hidden">
-            <p className="text-sm font-bold truncate text-white">
+            <p className="text-sm font-bold truncate text-slate-800 dark:text-white">
               {(() => {
                 let nom = (user?.director?.nombres || user?.nombre || '').replace(/^Usuario\s+/i, '').trim();
                 let ape = (user?.director?.apellido_paterno || user?.apellido || '').trim();
@@ -218,7 +219,7 @@ const DirectorSidebar = ({ activeTab, setActiveTab, onLogoutClick, onChangePassw
                 return nombres.length > 1 ? `${nombres[0]} ${nombres[1]}` : primerNombre;
               })()}
             </p>
-            <p className="text-xs font-medium text-slate-400 truncate text-ellipsis">
+            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 truncate text-ellipsis">
               {user?.director?.school || user?.colegio || 'Institución Educativa'}
             </p>
           </div>
@@ -226,7 +227,7 @@ const DirectorSidebar = ({ activeTab, setActiveTab, onLogoutClick, onChangePassw
 
         <button 
           onClick={onLogoutClick}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white rounded-xl transition-colors font-bold text-sm"
+          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-500/10 dark:text-red-400 dark:hover:bg-red-500 dark:hover:text-white rounded-xl transition-colors font-bold text-sm"
         >
           <LogOut size={18} />
           <span>Cerrar Sesión</span>
