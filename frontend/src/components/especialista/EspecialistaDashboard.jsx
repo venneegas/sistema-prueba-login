@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ColegioDetalle from './ColegioDetalle';
 import ChangePasswordModal from '../ChangePasswordModal';
+import LogoutModal from '../LogoutModal';
 import EspecialistaSidebar from './EspecialistaSidebar';
 import EspecialistaReportesView from './EspecialistaReportesView';
 import EspecialistaConfiguracionView from './EspecialistaConfiguracionView';
@@ -28,6 +29,7 @@ const EspecialistaDashboard = ({ user, onLogout }) => {
 
   const [isExporting, setIsExporting] = useState(false);
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [modalMensaje, setModalMensaje] = useState(null);
 
@@ -127,7 +129,7 @@ const EspecialistaDashboard = ({ user, onLogout }) => {
         activeView={activeView}
         user={user}
         onChangeView={handleChangeView}
-        onLogout={onLogout}
+        onLogout={() => setIsLogoutModalOpen(true)}
       />
 
       <main className="flex-1 flex flex-col overflow-hidden">
@@ -187,6 +189,12 @@ const EspecialistaDashboard = ({ user, onLogout }) => {
           isOpen={isChangePasswordOpen}
           onClose={() => setIsChangePasswordOpen(false)}
           mode="optional"
+        />
+
+        <LogoutModal
+          isOpen={isLogoutModalOpen}
+          onClose={() => setIsLogoutModalOpen(false)}
+          onConfirm={onLogout}
         />
 
         {/* --- MODAL DE MENSAJES (INFO / ERROR) --- */}
