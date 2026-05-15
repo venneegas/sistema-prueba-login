@@ -1,164 +1,206 @@
-# 📊 Flujo BPMN: Sistema de Gestión Financiera Educativa
+# Prompt base para generar diagrama BPMN del sistema
 
-Este documento describe el flujo de procesos de negocio (BPMN) base del sistema, mapeado a través de 4 carriles (pools/lanes) principales:
-
-1. **👨‍🏫 Director de la I.E.** (Usuario declarante)
-2. **⚙️ Sistema** (Lógica de negocio, frontend/backend)
-3. **🗄️ Base de Datos** (Almacenamiento y persistencia)
-4. **🕵️ Especialista** (Auditor de UGEL)
+Usa este texto como prompt para una IA o herramienta capaz de generar diagramas BPMN. El objetivo es producir un diagrama claro, horizontal y con carriles, similar a un modelo BPMN de proceso institucional.
 
 ---
 
-## 1. Diagrama de Flujo (Mermaid)
+## Prompt listo para copiar
 
-*Nota: Si tu visor de Markdown soporta Mermaid, verás el diagrama renderizado a continuación.*
+Genera un diagrama BPMN 2.0 para el sistema web de Gestion Financiera Educativa de la UGEL.
 
-```mermaid
-flowchart TD
-    %% Definición de Carriles
-    subgraph Director [1. Director de la I.E.]
-        DIR_1([Inicio]) --> DIR_2(Inicia sesión)
-        DIR_3(Cambia contraseña)
-        DIR_4(Selecciona año y trimestre)
-        DIR_5(Registra ingresos mensuales)
-        DIR_6(Registra egresos mensuales)
-        DIR_7(Registra saldos de cuenta bancaria)
-        DIR_8(Sube sustentos PDF)
-        DIR_9(Revisa consolidado trimestral)
-        DIR_10{¿Info completa?}
-        DIR_11(Cierra trimestre)
-        DIR_12(Corrige ingresos/egresos/saldos/sustentos)
-    end
+El diagrama debe representar el flujo completo de declaracion financiera trimestral, desde el inicio de sesion del director hasta la revision final del especialista. Debe estar organizado como un diagrama con piscina principal y carriles horizontales, similar a un modelo BPMN con swimlanes.
 
-    subgraph Sistema [2. Sistema]
-        SYS_1(Valida credenciales)
-        SYS_2{¿Credenciales correctas?}
-        SYS_3(Muestra error)
-        SYS_4{¿Debe cambiar contraseña?}
-        SYS_5(Actualiza contraseña)
-        SYS_6(Consulta estado del trimestre)
-        SYS_7{¿Trimestre cerrado o vencido?}
-        SYS_8(Bloquea edición y permite solo consulta)
-        SYS_9(Valida y guarda ingresos)
-        SYS_10(Valida y guarda egresos)
-        SYS_11(Guarda saldos)
-        SYS_12(Guarda archivos y metadatos)
-        SYS_13(Registra cierre, cambia a 'Enviado' y bloquea)
-        SYS_14(Muestra resumen financiero y PDFs)
-        SYS_15(Cambia estado a 'Aprobado' y notifica al director)
-        SYS_16(Cambia estado a 'Observado' y notifica al director)
-    end
+### Estilo visual requerido
 
-    subgraph BaseDatos [3. Base de Datos]
-        DB_1[(Tabla Usuarios)]
-        DB_2[(Tabla Estados/Cierres)]
-        DB_3[(Tabla Movimientos)]
-        DB_4[(Tablas Saldos y Sustentos)]
-    end
+- Usa una piscina principal titulada: "Sistema web basado en Machine Learning para el control de ingresos y egresos".
+- Dentro de la piscina usa 4 carriles horizontales:
+  1. Director de la I.E.
+  2. Sistema
+  3. Base de Datos
+  4. Especialista UGEL
+- El flujo debe ir de izquierda a derecha.
+- Usa eventos de inicio y fin.
+- Usa tareas rectangulares con bordes redondeados.
+- Usa compuertas exclusivas XOR para decisiones de tipo "Si / No".
+- Usa objetos de base de datos cuando el sistema consulte o guarde informacion.
+- Conecta las actividades con flechas de secuencia.
+- Usa lineas punteadas o asociaciones para representar consultas o persistencia hacia la base de datos.
+- Mantener el diagrama limpio, legible y no demasiado saturado.
+- Las etiquetas deben estar en espanol.
 
-    subgraph Especialista [4. Especialista]
-        ESP_1(Revisa colegios enviados)
-        ESP_2(Abre detalle de institución)
-        ESP_3(Evalúa declaración)
-        ESP_4{¿Declaración correcta?}
-        ESP_5(Aprobar informe)
-        ESP_6(Observar informe con comentario)
-    end
+### Actores y responsabilidades
 
-    %% Rutas - Autenticación
-    DIR_2 --> SYS_1 <--> DB_1
-    SYS_1 --> SYS_2
-    SYS_2 -- No --> SYS_3 --> FIN_1([Fin / Reintentar])
-    SYS_2 -- Sí --> SYS_4
-    
-    SYS_4 -- Sí --> DIR_3 --> SYS_5 <--> DB_1
-    SYS_5 --> DIR_4
-    SYS_4 -- No --> DIR_4
+#### Carril 1: Director de la I.E.
 
-    %% Rutas - Preparación Trimestre
-    DIR_4 --> SYS_6 <--> DB_2
-    SYS_6 --> SYS_7
-    SYS_7 -- Sí --> SYS_8 --> FIN_2([Fin])
-    SYS_7 -- No --> DIR_5
+El Director de la Institucion Educativa es el usuario que declara la informacion financiera trimestral.
 
-    %% Rutas - Declaración
-    DIR_5 --> SYS_9 <--> DB_3
-    SYS_9 --> DIR_6
-    DIR_6 --> SYS_10 <--> DB_3
-    SYS_10 --> DIR_7
-    DIR_7 --> SYS_11 <--> DB_4
-    SYS_11 --> DIR_8
-    DIR_8 --> SYS_12 <--> DB_4
-    SYS_12 --> DIR_9
+Debe realizar estas actividades:
 
-    %% Rutas - Revisión y Cierre
-    DIR_9 --> DIR_10
-    DIR_10 -- No --> DIR_12 --> DIR_5
-    DIR_10 -- Sí --> DIR_11
-    DIR_11 --> SYS_13 <--> DB_2
-    
-    %% Rutas - Auditoría Especialista
-    SYS_13 --> ESP_1
-    ESP_1 --> ESP_2 --> SYS_14
-    SYS_14 <--> DB_3
-    SYS_14 <--> DB_4
-    SYS_14 --> ESP_3
-    ESP_3 --> ESP_4
-    
-    ESP_4 -- Sí --> ESP_5 --> SYS_15 <--> DB_2
-    SYS_15 --> FIN_3([Fin])
-    
-    ESP_4 -- No --> ESP_6 --> SYS_16 <--> DB_2
-    SYS_16 --> FIN_4([Fin / Revisión Posterior])
-```
+1. Accede al sistema.
+2. Inicia sesion.
+3. Cambia contrasena si el sistema lo solicita.
+4. Selecciona anio y trimestre.
+5. Registra ingresos mensuales.
+6. Registra egresos mensuales.
+7. Registra saldos de cuenta bancaria.
+8. Sube sustentos en PDF.
+9. Revisa el consolidado trimestral.
+10. Decide si la informacion esta completa.
+11. Si falta informacion, corrige ingresos, egresos, saldos o sustentos.
+12. Si todo esta correcto, cierra el trimestre.
+
+#### Carril 2: Sistema
+
+El Sistema representa la logica del frontend y backend.
+
+Debe realizar estas actividades:
+
+1. Valida credenciales.
+2. Decide si las credenciales son correctas.
+3. Si las credenciales son incorrectas, muestra error y permite reintentar.
+4. Si las credenciales son correctas, verifica si el usuario debe cambiar contrasena.
+5. Si debe cambiar contrasena, actualiza la contrasena.
+6. Consulta el estado del trimestre.
+7. Decide si el trimestre esta cerrado, vencido o disponible para edicion.
+8. Si esta cerrado o vencido, bloquea la edicion y permite solo consulta.
+9. Si esta disponible, permite continuar con la declaracion.
+10. Valida y guarda ingresos.
+11. Valida y guarda egresos.
+12. Guarda saldos.
+13. Guarda archivos PDF y metadatos de sustentos.
+14. Registra el cierre trimestral.
+15. Cambia el estado del trimestre a "Enviado".
+16. Bloquea la edicion del director.
+17. Muestra al especialista el resumen financiero y los PDFs.
+18. Si el especialista aprueba, cambia el estado a "Aprobado" y notifica al director.
+19. Si el especialista observa, cambia el estado a "Observado", registra comentario, notifica al director y desbloquea la edicion para correccion.
+
+#### Carril 3: Base de Datos
+
+La Base de Datos almacena y devuelve la informacion del sistema.
+
+Debe aparecer como objetos de datos o almacenes de datos relacionados con:
+
+1. Usuarios.
+2. Estados y cierres trimestrales.
+3. Movimientos financieros.
+4. Saldos bancarios.
+5. Sustentos PDF.
+6. Notificaciones.
+
+Representar las consultas y guardados principales:
+
+- Validar credenciales contra Usuarios.
+- Consultar estado del trimestre contra Estados/Cierres.
+- Guardar ingresos y egresos en Movimientos.
+- Guardar saldos en Saldos.
+- Guardar sustentos y metadatos en Sustentos.
+- Actualizar estado del trimestre a Enviado, Observado o Aprobado.
+- Registrar notificaciones al director.
+
+#### Carril 4: Especialista UGEL
+
+El Especialista UGEL es el usuario auditor que revisa las declaraciones enviadas por los directores.
+
+Debe realizar estas actividades:
+
+1. Revisa colegios con trimestres en estado "Enviado".
+2. Abre el detalle de una institucion.
+3. Visualiza resumen financiero y sustentos PDF.
+4. Evalua la declaracion.
+5. Decide si la declaracion es correcta.
+6. Si es correcta, aprueba el informe.
+7. Si no es correcta, observa el informe e ingresa un comentario.
+
+### Flujo principal detallado
+
+1. Evento de inicio: "Accede al sistema".
+2. El Director inicia sesion.
+3. El Sistema valida credenciales consultando la Base de Datos: "Usuarios".
+4. Compuerta XOR: "Credenciales correctas?"
+   - No: el Sistema muestra error. Fin alternativo: "Reintentar login".
+   - Si: continuar.
+5. Compuerta XOR: "Debe cambiar contrasena?"
+   - Si: el Director cambia contrasena, el Sistema actualiza contrasena en Base de Datos y continua.
+   - No: continuar.
+6. El Director selecciona anio y trimestre.
+7. El Sistema consulta el estado del trimestre en Base de Datos: "Estados/Cierres".
+8. Compuerta XOR: "Trimestre cerrado o vencido?"
+   - Si: el Sistema bloquea edicion y permite solo consulta. Fin alternativo.
+   - No: continuar con declaracion.
+9. El Director registra ingresos mensuales.
+10. El Sistema valida y guarda ingresos en Base de Datos: "Movimientos".
+11. El Director registra egresos mensuales.
+12. El Sistema valida y guarda egresos en Base de Datos: "Movimientos".
+13. El Director registra saldos de cuenta bancaria.
+14. El Sistema guarda saldos en Base de Datos: "Saldos".
+15. El Director sube sustentos PDF.
+16. El Sistema guarda archivos y metadatos en Base de Datos: "Sustentos".
+17. El Director revisa el consolidado trimestral.
+18. Compuerta XOR: "Informacion completa?"
+   - No: el Director corrige ingresos, egresos, saldos o sustentos y vuelve a revisar el consolidado.
+   - Si: el Director cierra el trimestre.
+19. El Sistema registra el cierre, cambia el estado a "Enviado" y bloquea la edicion.
+20. El Sistema actualiza Base de Datos: "Estados/Cierres".
+21. El Especialista revisa colegios enviados.
+22. El Especialista abre el detalle de la institucion.
+23. El Sistema consulta movimientos, saldos y sustentos en Base de Datos.
+24. El Sistema muestra resumen financiero y PDFs.
+25. El Especialista evalua la declaracion.
+26. Compuerta XOR: "Declaracion correcta?"
+   - Si: el Especialista aprueba el informe.
+   - No: el Especialista observa el informe e ingresa comentario.
+27. Si aprueba:
+   - El Sistema cambia el estado a "Aprobado".
+   - El Sistema registra notificacion al director.
+   - Fin: "Trimestre aprobado".
+28. Si observa:
+   - El Sistema cambia el estado a "Observado".
+   - El Sistema registra el comentario y notifica al director.
+   - El Sistema desbloquea la edicion para que el director corrija.
+   - El flujo vuelve a la etapa de correccion del Director.
+
+### Reglas importantes del proceso
+
+- Mientras el trimestre esta en "Borrador", el Director puede editar la informacion.
+- Cuando el Director cierra el trimestre, el estado cambia a "Enviado" y el sistema bloquea la edicion.
+- El Especialista solo audita trimestres enviados.
+- Si el Especialista aprueba, el estado cambia a "Aprobado" y el trimestre queda bloqueado definitivamente.
+- Si el Especialista observa, el estado cambia a "Observado", se registra el motivo y se desbloquea la edicion para que el Director corrija.
+- Despues de corregir, el Director vuelve a cerrar el trimestre y el flujo regresa a revision del Especialista.
+
+### Estados del trimestre que deben aparecer
+
+- Borrador: el Director esta registrando o corrigiendo informacion.
+- Enviado: el Director cerro el trimestre y espera revision.
+- Observado: el Especialista encontro errores y solicito correccion.
+- Aprobado: el Especialista valido la declaracion.
+
+### Resultado esperado
+
+Entregar un diagrama BPMN con carriles horizontales que muestre claramente:
+
+- Login y validacion inicial.
+- Cambio obligatorio de contrasena, si aplica.
+- Seleccion de anio y trimestre.
+- Validacion de estado del trimestre.
+- Registro de ingresos, egresos, saldos y sustentos.
+- Revision y cierre trimestral del Director.
+- Auditoria del Especialista.
+- Aprobacion u observacion.
+- Actualizacion de estados en Base de Datos.
+- Notificaciones al Director.
+- Ciclo de correccion cuando el informe es observado.
 
 ---
 
-## 2. Descripción Paso a Paso del Flujo
+## Version resumida del prompt
 
-### Fase A: Inicio y Autenticación
-1. **[Director]** Inicia sesión ingresando sus credenciales.
-2. **[Sistema]** Toma las credenciales y las valida consultando a la **[Base de Datos]**.
-3. **[Sistema]** ¿Credenciales correctas?
-   - **No:** Muestra mensaje de error -> **Fin / Reintentar**.
-   - **Sí:** Verifica el rol del usuario y avanza.
-4. **[Sistema]** Verifica: ¿Debe cambiar contraseña?
-   - **Sí:** **[Director]** cambia la contraseña -> **[Sistema]** actualiza y guarda en la **[Base de Datos]**.
-   - **No:** Continúa directamente.
+Genera un diagrama BPMN 2.0 horizontal con una piscina titulada "Sistema web basado en Machine Learning para el control de ingresos y egresos" y 4 carriles: Director de la I.E., Sistema, Base de Datos y Especialista UGEL.
 
-### Fase B: Configuración del Trimestre
-5. **[Director]** Selecciona el año y trimestre sobre el cual va a declarar.
-6. **[Sistema]** Consulta el estado del trimestre en la **[Base de Datos]**.
-7. **[Sistema]** ¿Trimestre cerrado o vencido?
-   - **Sí:** Bloquea edición y permite solo acceso en modo consulta/exportación -> **Fin**.
-   - **No:** Continúa habilitando la edición.
+El flujo inicia cuando el Director accede al sistema e inicia sesion. El Sistema valida credenciales contra la Base de Datos. Si son incorrectas, muestra error y finaliza en reintento. Si son correctas, verifica si debe cambiar contrasena. Si debe cambiarla, el Director cambia la contrasena y el Sistema la actualiza en la Base de Datos. Luego el Director selecciona anio y trimestre. El Sistema consulta el estado del trimestre. Si esta cerrado o vencido, bloquea la edicion y finaliza en modo consulta. Si esta disponible, el Director registra ingresos, egresos, saldos bancarios y sustentos PDF. El Sistema valida y guarda cada informacion en la Base de Datos. Luego el Director revisa el consolidado. Si la informacion no esta completa, corrige y vuelve a revisar. Si esta completa, cierra el trimestre. El Sistema registra el cierre, cambia el estado a "Enviado" y bloquea la edicion.
 
-### Fase C: Declaración Financiera
-8. **[Director]** Registra ingresos mensuales.
-9. **[Sistema]** Valida y guarda los ingresos en la **[Base de Datos]**.
-10. **[Director]** Registra egresos mensuales.
-11. **[Sistema]** Valida y guarda los egresos en la **[Base de Datos]**.
-12. **[Director]** Registra saldos de cuenta bancaria.
-13. **[Sistema]** Guarda los saldos en la **[Base de Datos]**.
-14. **[Director]** Sube sustentos en PDF.
-15. **[Sistema]** Guarda los archivos y la metadata en la **[Base de Datos]** y almacenamiento de archivos.
+Luego el Especialista UGEL revisa colegios enviados, abre el detalle de una institucion, el Sistema muestra resumen financiero y PDFs consultando la Base de Datos, y el Especialista evalua la declaracion. Si es correcta, aprueba el informe; el Sistema cambia el estado a "Aprobado", notifica al Director y finaliza. Si no es correcta, observa el informe con comentario; el Sistema cambia el estado a "Observado", registra la notificacion, desbloquea la edicion y el flujo vuelve al Director para corregir y cerrar nuevamente.
 
-### Fase D: Consolidación y Envío
-16. **[Director]** Revisa el consolidado trimestral.
-17. **[Director]** ¿Información completa y correcta?
-    - **No:** Corrige ingresos, egresos, saldos o documentos y vuelve a revisar.
-    - **Sí:** Presiona el botón para cerrar el trimestre.
-18. **[Sistema]** Registra el cierre, cambia el estado en la **[Base de Datos]** a **"Enviado"** y bloquea la edición del director.
+Usa eventos de inicio y fin, tareas BPMN, compuertas exclusivas XOR con salidas Si/No, almacenes de datos para Usuarios, Estados/Cierres, Movimientos, Saldos, Sustentos y Notificaciones, y flechas de secuencia de izquierda a derecha.
 
-### Fase E: Revisión y Auditoría
-19. **[Especialista]** Revisa la lista de colegios que están en estado "Enviado".
-20. **[Especialista]** Abre el detalle de una institución específica.
-21. **[Sistema]** Extrae la información de la **[Base de Datos]** y muestra el resumen financiero y los PDFs.
-22. **[Especialista]** Evalúa la declaración.
-23. **[Especialista]** ¿Declaración correcta?
-    - **Sí:** Hace clic en *"Aprobar informe"*.
-      - **[Sistema]** cambia el estado en la **[Base de Datos]** a **"Aprobado"**, notifica al director.
-      - **Fin**.
-    - **No:** Hace clic en *"Observar informe"* e ingresa un comentario con el motivo.
-      - **[Sistema]** cambia el estado en la **[Base de Datos]** a **"Observado"**, desbloquea la vista del director y le notifica.
-      - **Fin / Revisión posterior**.
