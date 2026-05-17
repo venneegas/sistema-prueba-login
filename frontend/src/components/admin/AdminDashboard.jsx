@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Database, LogOut, ShieldAlert, Server, ShieldCheck, Users, Activity, Settings, Key, Network, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Database, LogOut, ShieldAlert, Server, ShieldCheck, Users, Activity, Settings, Key, Network, CheckCircle, AlertTriangle, FileSpreadsheet } from 'lucide-react';
 import DatabaseView from './DatabaseView';
 import UsersView from './UsersView';
 import AuditoriaView from './AuditoriaView';
 import LoginLogsView from './LoginLogsView'; // Importa el nuevo componente para logs de inicio de sesión
 import FlujosView from './FlujosView'; // Importamos el nuevo componente
+import ReportesView from './ReportesView';
 
 const AdminDashboard = ({ user, onLogout }) => {
   const [activeTab, setActiveTab] = useState('database');
@@ -64,6 +65,14 @@ const AdminDashboard = ({ user, onLogout }) => {
           >
             <Network size={20} className={activeTab === 'flujos' ? 'text-amber-400' : ''} />
             <span className={activeTab === 'flujos' ? 'font-bold' : 'font-medium'}>Flujos del Sistema</span>
+          </button>
+
+          <button 
+            onClick={() => setActiveTab('reportes')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'reportes' ? 'bg-blue-800 text-white shadow-md border-l-4 border-amber-400' : 'text-blue-300 hover:bg-blue-900 hover:text-white border-l-4 border-transparent hover:border-blue-400'}`}
+          >
+            <FileSpreadsheet size={20} className={activeTab === 'reportes' ? 'text-amber-400' : ''} />
+            <span className={activeTab === 'reportes' ? 'font-bold' : 'font-medium'}>Reportes y Descargas</span>
           </button>
 
           <button 
@@ -134,6 +143,8 @@ const AdminDashboard = ({ user, onLogout }) => {
           <LoginLogsView showToast={showToast} />
         ) : activeTab === 'flujos' ? (
           <FlujosView showToast={showToast} />
+        ) : activeTab === 'reportes' ? (
+          <ReportesView showToast={showToast} />
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center p-8 bg-slate-50 text-center animate-in fade-in zoom-in duration-300">
             <div className="w-24 h-24 bg-blue-100 text-blue-500 rounded-full flex items-center justify-center mb-6 shadow-inner">
