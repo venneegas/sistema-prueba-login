@@ -1,5 +1,6 @@
 const { pool } = require('../config/db'); 
 const { logAuditoria } = require('../utils/auditLogger');
+const nodemailer = require('nodemailer');
 
 const calcularSaldoInicialCaja = async (directorId, trimestreId, anio) => {
   if (anio < 2026) return 0;
@@ -191,6 +192,12 @@ const auditarDeclaracion = async (req, res) => {
     const queryNotif = `INSERT INTO notificaciones (director_id, titulo, mensaje, tipo) VALUES (?, ?, ?, ?)`;
     await connection.execute(queryNotif, [directorId, titulo, mensaje, tipo]);
 
+    // 3.5 Obtener datos del director para el correo electrónico
+    const [[directorData]] = await connection.execute(
+      'SELECT email, nombres, apellido_paterno FROM directores WHERE id = ?', 
+      [directorId]
+    );
+
     // 4. Registrar auditoría de la evaluación
     try {
       // Intentamos extraer el ID real del Especialista desde el Token
@@ -213,6 +220,47 @@ const auditarDeclaracion = async (req, res) => {
     } catch (auditErr) { console.error('Error en logAuditoria:', auditErr); }
 
     await connection.commit();
+
+    // 5. ENVIAR CORREO CON NODEMAILER (En segundo plano)
+    if (directorData && directorData.email) {
+      try {
+        const transporter = nodemailer.createTransport({
+          host: process.env.EMAIL_HOST || 'mail.ugelsanta.gob.pe',
+          port: process.env.EMAIL_PORT || 465,
+          secure: process.env.EMAIL_SECURE === 'true' || true,
+          auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS
+          }
+        });
+
+        const mailOptions = {
+          from: `"Sistema Financiero UGEL" <${process.env.EMAIL_USER}>`,
+          to: directorData.email,
+          subject: titulo,
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
+              <div style="background-color: ${estado === 'Aprobado' ? '#10b981' : '#f43f5e'}; padding: 20px; text-align: center;">
+                <h2 style="color: white; margin: 0;">${titulo}</h2>
+              </div>
+              <div style="padding: 20px; color: #334155;">
+                <p>Hola <strong>${directorData.nombres} ${directorData.apellido_paterno}</strong>,</p>
+                <p>${mensaje}</p>
+                <p style="margin-top: 30px; font-size: 14px; color: #64748b;">
+                  Por favor, ingresa a tu panel en el <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}" style="color: #2563eb; text-decoration: none;">Sistema de Gestión Financiera</a> para visualizar más detalles o levantar la observación si es necesario.
+                </p>
+              </div>
+            </div>
+          `
+        };
+        
+        // No usamos 'await' para no bloquear la respuesta rápida al Frontend del Especialista
+        transporter.sendMail(mailOptions).catch(err => console.error('Error interno de Nodemailer al enviar correo de auditoría:', err));
+      } catch (mailErr) {
+        console.error('Error configurando Nodemailer:', mailErr);
+      }
+    }
+
     res.status(200).json({ success: true, message: 'Auditoría registrada y notificada con éxito.' });
   } catch (error) {
     await connection.rollback();
