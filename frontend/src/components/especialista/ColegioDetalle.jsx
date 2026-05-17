@@ -237,8 +237,8 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio }) => {
             </div>
           </div>
 
-          {/* Tarjetas de Resumen Financiero (Mock) */}
-          <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 border-b border-slate-200 dark:border-slate-700 pb-2">Resumen Financiero Declarado</h2>
+          {/* Tarjetas de Resumen Financiero */}
+          <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 border-b border-slate-200 dark:border-slate-700 pb-2">Dinero en caja de la I.E</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex items-center gap-4">
               <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
@@ -273,7 +273,7 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio }) => {
                 <DollarSign size={24} />
               </div>
               <div>
-                <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Dinero en Caja</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Saldo Trimestral</p>
                 {loadingFinanzas ? (
                   <Loader2 size={24} className="animate-spin text-slate-400 dark:text-slate-500 mt-1" />
                 ) : (
@@ -281,13 +281,16 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio }) => {
                 )}
               </div>
             </div>
+          </div>
 
+          <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 border-b border-slate-200 dark:border-slate-700 pb-2 mt-8">Dinero en Cuenta Corriente</h2>
+          <div className="grid grid-cols-1 gap-6">
             <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex items-center gap-4">
               <div className="w-12 h-12 rounded-full bg-teal-100 dark:bg-teal-900/30 flex items-center justify-center text-teal-600 dark:text-teal-400">
                 <Building2 size={24} />
               </div>
               <div>
-                <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Dinero en Banco</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Dinero en Cuenta Corriente</p>
                 {loadingFinanzas ? (
                   <Loader2 size={24} className="animate-spin text-slate-400 dark:text-slate-500 mt-1" />
                 ) : (
@@ -296,13 +299,13 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio }) => {
               </div>
             </div>
 
-            <div className="md:col-span-2 bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-blue-200 dark:border-blue-800 flex items-center gap-4 relative overflow-hidden">
+            <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-blue-200 dark:border-blue-800 flex items-center gap-4 relative overflow-hidden">
               <div className="absolute top-0 left-0 w-1 h-full bg-blue-500"></div>
               <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
                 <DollarSign size={24} />
               </div>
               <div>
-                <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">Saldo Actual Banco (Consolidado)</p>
+                <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">Saldo Total al cierre del Trimestre</p>
                 {loadingFinanzas ? (
                   <Loader2 size={24} className="animate-spin text-blue-400 mt-1" />
                 ) : (
