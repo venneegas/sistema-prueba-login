@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { HardDrive, Database, ShieldAlert, Download } from 'lucide-react';
 import { buildApiUrl } from '../../config/api';
 
-const DatabaseView = () => {
+const DatabaseView = ({ showToast }) => {
   const [isDownloading, setIsDownloading] = useState(false);
 
   const handleDownloadBackup = async () => {
@@ -26,9 +26,10 @@ const DatabaseView = () => {
       window.URL.revokeObjectURL(url);
       
       setIsDownloading(false);
+      showToast('Copia de seguridad descargada con éxito.');
     } catch (error) {
       console.error('Error descargando backup:', error);
-      alert('Error: ' + error.message);
+      showToast('Error: ' + error.message, 'error');
       setIsDownloading(false);
     }
   };

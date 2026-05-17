@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Database, LogOut, ShieldAlert, Server, ShieldCheck, Users, Activity, Settings, Key, Network } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Database, LogOut, ShieldAlert, Server, ShieldCheck, Users, Activity, Settings, Key, Network, CheckCircle, AlertTriangle } from 'lucide-react';
 import DatabaseView from './DatabaseView';
 import UsersView from './UsersView';
 import AuditoriaView from './AuditoriaView';
@@ -8,6 +8,21 @@ import FlujosView from './FlujosView'; // Importamos el nuevo componente
 
 const AdminDashboard = ({ user, onLogout }) => {
   const [activeTab, setActiveTab] = useState('database');
+  const [toast, setToast] = useState({ show: false, message: '', type: 'success' }); // ESTADO GLOBAL DEL TOAST
+
+  // Auto-ocultar el toast global después de 3 segundos
+  useEffect(() => {
+    if (toast.show) {
+      const timer = setTimeout(() => {
+        setToast(prev => ({ ...prev, show: false }));
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
+
+  const showToast = (message, type = 'success') => {
+    setToast({ show: true, message, type });
+  };
 
   return (
     <div className="flex h-screen bg-slate-50">
@@ -110,15 +125,15 @@ const AdminDashboard = ({ user, onLogout }) => {
       {/* Contenido Principal - Blanco y limpio */}
       <main className="flex-1 flex flex-col overflow-hidden">
         {activeTab === 'database' ? (
-          <DatabaseView />
+          <DatabaseView showToast={showToast} />
         ) : activeTab === 'usuarios' ? (
-          <UsersView />
+          <UsersView showToast={showToast} />
         ) : activeTab === 'auditoria' ? (
-          <AuditoriaView />
+          <AuditoriaView showToast={showToast} />
         ) : activeTab === 'sesiones' ? (
-          <LoginLogsView />
+          <LoginLogsView showToast={showToast} />
         ) : activeTab === 'flujos' ? (
-          <FlujosView />
+          <FlujosView showToast={showToast} />
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center p-8 bg-slate-50 text-center animate-in fade-in zoom-in duration-300">
             <div className="w-24 h-24 bg-blue-100 text-blue-500 rounded-full flex items-center justify-center mb-6 shadow-inner">
@@ -129,6 +144,18 @@ const AdminDashboard = ({ user, onLogout }) => {
           </div>
         )}
       </main>
+
+      {/* Toast Notification Global */}
+      {toast.show && (
+        <div className="fixed bottom-6 right-6 z-[70] animate-in slide-in-from-bottom-5 fade-in duration-300">
+          <div className={`flex items-center gap-3 px-5 py-3.5 rounded-xl shadow-2xl text-sm font-bold text-white ${
+            toast.type === 'success' ? 'bg-emerald-600' : 'bg-rose-600'
+          }`}>
+            {toast.type === 'success' ? <CheckCircle size={20} /> : <AlertTriangle size={20} />}
+            {toast.message}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

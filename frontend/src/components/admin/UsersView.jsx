@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Search, Plus, Edit, Trash2, Shield, User, ShieldCheck, RefreshCw, X, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Users, Search, Plus, Edit, Trash2, Shield, User, ShieldCheck, RefreshCw, X, AlertTriangle } from 'lucide-react';
 import { buildApiUrl } from '../../config/api';
 
-const UsersView = () => {
+const UsersView = ({ showToast }) => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -577,18 +577,6 @@ const UsersView = () => {
                 Sí, descartar
               </button>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Toast Notification */}
-      {toast.show && (
-        <div className="fixed bottom-6 right-6 z-[70] animate-in slide-in-from-bottom-5 fade-in duration-300">
-          <div className={`flex items-center gap-3 px-5 py-3.5 rounded-xl shadow-2xl text-sm font-bold text-white ${
-            toast.type === 'success' ? 'bg-emerald-600' : 'bg-rose-600'
-          }`}>
-            {toast.type === 'success' ? <CheckCircle size={20} /> : <AlertTriangle size={20} />}
-            {toast.message}
           </div>
         </div>
       )}
