@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Search, Plus, Edit, Trash2, Shield, User, ShieldCheck, RefreshCw, X } from 'lucide-react';
+import { Users, Search, Plus, Edit, Trash2, Shield, User, ShieldCheck, RefreshCw, X, AlertTriangle, CheckCircle } from 'lucide-react';
 import { buildApiUrl } from '../../config/api';
 
 const UsersView = () => {
@@ -14,10 +14,13 @@ const UsersView = () => {
   // Estados para el Modal
   const [showModal, setShowModal] = useState(false);
   const [editingUserId, setEditingUserId] = useState(null);
-  const [formData, setFormData] = useState({ nombre: '', email: '', password: '', rol: 'especialista' });
+  const [formData, setFormData] = useState({ nombre: '', apellido: '', dni: '', colegio: '', email: '', password: '', rol: 'especialista' });
+  const [initialFormData, setInitialFormData] = useState(null); // NUEVO: Para detectar cambios sin guardar
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false); // NUEVO: Estado para el modal de confirmación
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [modalError, setModalError] = useState(null);
   const [currentUserId, setCurrentUserId] = useState(null);
+  const [toast, setToast] = useState({ show: false, message: '', type: 'success' }); // NUEVO: Estado para el Toast
 
   useEffect(() => {
     // Obtener el ID del usuario activo desde el token JWT
@@ -76,6 +79,60 @@ const UsersView = () => {
     setCurrentPage(1);
   }, [searchTerm, roleFilter, itemsPerPage]);
 
+  // Auto-ocultar el toast después de 3 segundos
+  useEffect(() => {
+    if (toast.show) {
+      const timer = setTimeout(() => {
+        setToast(prev => ({ ...prev, show: false }));
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
+
+  const showToast = (message, type = 'success') => {
+    setToast({ show: true, message, type });
+  };
+
+  // Cerrar modal/panel lateral con la tecla Escape y bloquear scroll del body
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        if (showConfirmDialog) {
+          setShowConfirmDialog(false); // Si la alerta está abierta, el Escape solo cierra la alerta
+          return;
+        }
+        const isDirty = initialFormData && JSON.stringify(formData) !== JSON.stringify(initialFormData);
+        if (isDirty) {
+          setShowConfirmDialog(true);
+        } else {
+          setShowModal(false);
+        }
+      }
+    };
+
+    if (showModal) {
+      window.addEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'hidden'; // Bloquea el scroll del fondo
+    } else {
+      document.body.style.overflow = 'unset'; // Restaura el scroll si se cierra
+    }
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'unset'; // Restaura el scroll si el componente se desmonta
+    };
+  }, [showModal, formData, initialFormData, showConfirmDialog]);
+
+  // NUEVO: Función centralizada para cerrar el modal verificando cambios
+  const handleCloseModal = () => {
+    const isDirty = initialFormData && JSON.stringify(formData) !== JSON.stringify(initialFormData);
+    if (isDirty) {
+      setShowConfirmDialog(true);
+    } else {
+      setShowModal(false);
+    }
+  };
+
   // Manejar el envío del formulario (Crear o Editar)
   const handleSubmitUser = async (e) => {
     e.preventDefault();
@@ -107,8 +164,9 @@ const UsersView = () => {
       if (data.success) {
         setShowModal(false);
         setEditingUserId(null);
-        setFormData({ nombre: '', email: '', password: '', rol: 'especialista' }); // resetear form
+        setFormData({ nombre: '', apellido: '', dni: '', colegio: '', email: '', password: '', rol: 'especialista' }); // resetear form
         fetchUsers(); // Recargar la tabla
+        showToast(editingUserId ? 'Usuario actualizado exitosamente.' : 'Usuario creado exitosamente.');
       } else {
         setModalError(data.message || 'Error al guardar el usuario.');
       }
@@ -138,12 +196,13 @@ const UsersView = () => {
       const data = await response.json();
       if (data.success) {
         fetchUsers();
+        showToast('Usuario eliminado o suspendido exitosamente.');
       } else {
-        alert(data.message || 'Error al procesar la solicitud.');
+        showToast(data.message || 'Error al procesar la solicitud.', 'error');
       }
     } catch (err) {
       console.error(err);
-      alert('Error de red al intentar comunicarse con el servidor.');
+      showToast('Error de red al intentar comunicarse con el servidor.', 'error');
     }
   };
 
@@ -180,8 +239,10 @@ const UsersView = () => {
           </button>
           <button 
             onClick={() => {
+              const defaultForm = { nombre: '', apellido: '', dni: '', colegio: '', email: '', password: '', rol: 'especialista' };
               setEditingUserId(null);
-              setFormData({ nombre: '', email: '', password: '', rol: 'especialista' });
+              setFormData(defaultForm);
+              setInitialFormData(defaultForm);
               setShowModal(true);
             }}
             className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-sm"
@@ -276,7 +337,17 @@ const UsersView = () => {
                             <button 
                               onClick={() => {
                                 setEditingUserId(u.id);
-                                setFormData({ nombre: u.nombre, email: u.email, password: '', rol: u.rol });
+                              const editForm = { 
+                                nombre: u.nombre || '', 
+                                apellido: u.apellido || '', 
+                                dni: u.dni || '', 
+                                colegio: u.colegio || '', 
+                                email: u.email || '', 
+                                password: '', 
+                                rol: u.rol || 'especialista' 
+                              };
+                              setFormData(editForm);
+                              setInitialFormData(editForm);
                                 setShowModal(true);
                               }}
                               className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Editar Usuario">
@@ -347,70 +418,177 @@ const UsersView = () => {
         </div>
       </div>
 
-      {/* Modal para Crear Usuario */}
+      {/* Panel Lateral (Drawer) para Crear/Editar Usuario */}
       {showModal && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
-            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-              <h3 className="text-lg font-bold text-slate-800">
+        <div className="fixed inset-0 z-50 flex justify-end">
+          {/* Fondo oscuro desenfocado */}
+          <div 
+            className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity"
+            onClick={handleCloseModal}
+          ></div>
+
+          {/* Contenedor del panel lateral */}
+          <div className="relative w-full max-w-md bg-white shadow-2xl flex flex-col animate-in slide-in-from-right duration-300 h-full">
+            
+            {/* Cabecera del Panel */}
+            <div className="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+              <h3 className="text-xl font-bold text-slate-800">
                 {editingUserId ? 'Editar Usuario' : 'Crear Nuevo Usuario'}
               </h3>
-              <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100 transition-colors">
+              <button onClick={handleCloseModal} className="text-slate-400 hover:text-slate-600 p-2 rounded-lg hover:bg-slate-100 transition-colors">
                 <X size={20} />
               </button>
             </div>
 
-            <form onSubmit={handleSubmitUser} className="p-6 space-y-4">
-              {modalError && (
-                <div className="p-3 bg-rose-50 text-rose-600 border border-rose-200 rounded-lg text-sm font-medium">
-                  {modalError}
+            {/* Cuerpo del Formulario Scrollable */}
+            <div className="flex-1 overflow-y-auto">
+              <form id="user-drawer-form" onSubmit={handleSubmitUser} className="p-6 space-y-6">
+                {modalError && (
+                  <div className="p-3 bg-rose-50 text-rose-600 border border-rose-200 rounded-lg text-sm font-medium">
+                    {modalError}
+                  </div>
+                )}
+
+                {/* Selector de Rol siempre arriba */}
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-1.5">Rol de Sistema</label>
+                  <select required
+                    value={formData.rol} onChange={(e) => setFormData({...formData, rol: e.target.value})}
+                    className="w-full px-4 py-2.5 bg-blue-50/50 border border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-sm transition-all font-bold text-blue-700">
+                    <option value="especialista">Especialista UGEL</option>
+                    <option value="admin">Administrador (TI)</option>
+                    <option value="director">Director de I.E.</option>
+                  </select>
                 </div>
-              )}
 
-              <div>
-                <label className="block text-sm font-bold text-slate-700 mb-1.5">Nombre Completo</label>
-                <input type="text" required
-                  value={formData.nombre} onChange={(e) => setFormData({...formData, nombre: e.target.value})}
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-sm transition-all"
-                  placeholder="Ej. Ana María López" />
-              </div>
+                <div className="space-y-4">
+                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100 pb-2">
+                    Datos Personales
+                  </h4>
+                  
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-1.5">Nombre(s)</label>
+                    <input type="text" required
+                      value={formData.nombre} onChange={(e) => setFormData({...formData, nombre: e.target.value})}
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-sm transition-all"
+                      placeholder={formData.rol === 'director' ? "Ej. Juan Luis" : "Ej. Ana María López"} />
+                  </div>
 
-              <div>
-                <label className="block text-sm font-bold text-slate-700 mb-1.5">Correo Electrónico</label>
-                <input type="email" required
-                  value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})}
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-sm transition-all"
-                  placeholder="correo@ugel.edu.pe" />
-              </div>
+                  {formData.rol === 'director' && (
+                    <>
+                      <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+                        <label className="block text-sm font-bold text-slate-700 mb-1.5">Apellidos</label>
+                        <input type="text" required={formData.rol === 'director'}
+                          value={formData.apellido} onChange={(e) => setFormData({...formData, apellido: e.target.value})}
+                          className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-sm transition-all"
+                          placeholder="Ej. Pérez Silva" />
+                      </div>
+                      
+                      <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+                        <label className="block text-sm font-bold text-slate-700 mb-1.5">DNI</label>
+                        <input type="text" required={formData.rol === 'director'} maxLength="8" pattern="\d{8}"
+                          value={formData.dni} onChange={(e) => setFormData({...formData, dni: e.target.value})}
+                          className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-sm transition-all"
+                          placeholder="8 dígitos" />
+                      </div>
 
-              <div>
-                <label className="block text-sm font-bold text-slate-700 mb-1.5">
-                  {editingUserId ? 'Nueva Contraseña (Opcional)' : 'Contraseña Temporal'}
-                </label>
-                <input type="password" required={!editingUserId} minLength="6"
-                  value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})}
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-sm transition-all"
-                  placeholder={editingUserId ? "Dejar en blanco para no cambiar" : "Mínimo 6 caracteres"} />
-              </div>
+                      <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+                        <label className="block text-sm font-bold text-slate-700 mb-1.5">Institución Educativa (Colegio)</label>
+                        <input type="text" required={formData.rol === 'director'}
+                          value={formData.colegio} onChange={(e) => setFormData({...formData, colegio: e.target.value})}
+                          className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-sm transition-all"
+                          placeholder="Ej. I.E. Jorge Chávez" />
+                      </div>
+                    </>
+                  )}
+                </div>
 
-              <div>
-                <label className="block text-sm font-bold text-slate-700 mb-1.5">Rol de Sistema</label>
-                <select required
-                  value={formData.rol} onChange={(e) => setFormData({...formData, rol: e.target.value})}
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-sm transition-all font-medium text-slate-700">
-                  <option value="especialista">Especialista UGEL</option>
-                  <option value="admin">Administrador (TI)</option>
-                  <option value="director">Director de I.E.</option>
-                </select>
-              </div>
+                <div className="space-y-4">
+                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100 pb-2">
+                    Credenciales de Acceso
+                  </h4>
+                  
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-1.5">Correo Electrónico (Usuario)</label>
+                    <input type="email" required
+                      value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})}
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-sm transition-all"
+                      placeholder="correo@ugel.edu.pe" />
+                  </div>
 
-              <div className="pt-2 flex gap-3">
-                <button type="button" onClick={() => setShowModal(false)} className="flex-1 px-4 py-2.5 text-slate-600 bg-slate-100 hover:bg-slate-200 font-bold rounded-xl transition-colors">Cancelar</button>
-                <button type="submit" disabled={isSubmitting} className="flex-1 px-4 py-2.5 text-white bg-blue-600 hover:bg-blue-700 font-bold rounded-xl transition-colors disabled:opacity-50">
-                  {isSubmitting ? 'Guardando...' : (editingUserId ? 'Actualizar Usuario' : 'Crear Usuario')}
-                </button>
-              </div>
-            </form>
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-1.5">
+                      {editingUserId ? 'Nueva Contraseña (Opcional)' : 'Contraseña Temporal'}
+                    </label>
+                    <input type="password" required={!editingUserId} minLength="6"
+                      value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})}
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-sm transition-all"
+                      placeholder={editingUserId ? "Dejar en blanco para no cambiar" : "Mínimo 6 caracteres"} />
+                  </div>
+                </div>
+              </form>
+            </div>
+
+            {/* Pie del Panel - Botones fijos abajo */}
+            <div className="p-6 border-t border-slate-100 bg-slate-50 flex gap-3 mt-auto shrink-0">
+              <button type="button" onClick={handleCloseModal} className="flex-1 px-4 py-3 text-slate-600 bg-white border border-slate-200 hover:bg-slate-100 font-bold rounded-xl transition-colors shadow-sm">
+                Cancelar
+              </button>
+              <button type="submit" form="user-drawer-form" disabled={isSubmitting} className="flex-1 px-4 py-3 text-white bg-blue-600 hover:bg-blue-700 font-bold rounded-xl transition-colors disabled:opacity-50 shadow-sm">
+                {isSubmitting ? 'Guardando...' : (editingUserId ? 'Actualizar Usuario' : 'Crear Usuario')}
+              </button>
+            </div>
+            
+          </div>
+        </div>
+      )}
+
+      {/* Modal Personalizado de Confirmación (Reemplazo de window.confirm) */}
+      {showConfirmDialog && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+          {/* Fondo oscuro extra para resaltar la alerta */}
+          <div 
+            className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" 
+            onClick={() => setShowConfirmDialog(false)}
+          ></div>
+          
+          <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl relative z-10 animate-in zoom-in-95 duration-200">
+            <div className="w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mb-4">
+              <AlertTriangle size={24} />
+            </div>
+            <h3 className="text-xl font-bold text-slate-800 mb-2">¿Descartar cambios?</h3>
+            <p className="text-slate-600 mb-6 text-sm leading-relaxed">
+              Tienes cambios sin guardar. Si cierras ahora, se perderá la información que has modificado.
+            </p>
+            <div className="flex gap-3">
+              <button 
+                onClick={() => setShowConfirmDialog(false)}
+                className="flex-1 px-4 py-2.5 text-slate-600 bg-slate-100 hover:bg-slate-200 font-bold rounded-xl transition-colors text-sm"
+              >
+                Continuar editando
+              </button>
+              <button 
+                onClick={() => {
+                  setShowConfirmDialog(false);
+                  setShowModal(false);
+                }}
+                className="flex-1 px-4 py-2.5 text-white bg-rose-600 hover:bg-rose-700 font-bold rounded-xl transition-colors text-sm shadow-sm"
+              >
+                Sí, descartar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Toast Notification */}
+      {toast.show && (
+        <div className="fixed bottom-6 right-6 z-[70] animate-in slide-in-from-bottom-5 fade-in duration-300">
+          <div className={`flex items-center gap-3 px-5 py-3.5 rounded-xl shadow-2xl text-sm font-bold text-white ${
+            toast.type === 'success' ? 'bg-emerald-600' : 'bg-rose-600'
+          }`}>
+            {toast.type === 'success' ? <CheckCircle size={20} /> : <AlertTriangle size={20} />}
+            {toast.message}
           </div>
         </div>
       )}
