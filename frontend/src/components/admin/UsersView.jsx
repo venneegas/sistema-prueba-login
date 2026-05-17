@@ -20,7 +20,6 @@ const UsersView = ({ showToast }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [modalError, setModalError] = useState(null);
   const [currentUserId, setCurrentUserId] = useState(null);
-  const [toast, setToast] = useState({ show: false, message: '', type: 'success' }); // NUEVO: Estado para el Toast
 
   useEffect(() => {
     // Obtener el ID del usuario activo desde el token JWT
@@ -78,20 +77,6 @@ const UsersView = ({ showToast }) => {
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, roleFilter, itemsPerPage]);
-
-  // Auto-ocultar el toast después de 3 segundos
-  useEffect(() => {
-    if (toast.show) {
-      const timer = setTimeout(() => {
-        setToast(prev => ({ ...prev, show: false }));
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [toast]);
-
-  const showToast = (message, type = 'success') => {
-    setToast({ show: true, message, type });
-  };
 
   // Cerrar modal/panel lateral con la tecla Escape y bloquear scroll del body
   useEffect(() => {
