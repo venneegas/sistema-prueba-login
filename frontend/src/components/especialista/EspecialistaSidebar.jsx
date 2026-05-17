@@ -4,7 +4,7 @@ import { Key, LayoutDashboard, LogOut, PieChart, Settings, User, UserCheck, File
 const menuItems = [
   { id: 'explorador', label: 'Explorador', icon: LayoutDashboard },
   { id: 'estadisticas', label: 'Estadísticas', icon: PieChart },
-  { id: 'reportes', label: 'Reportes y Descargas', icon: FileSpreadsheet },
+  { id: 'reportes', label: 'Reportes y Descargas', icon: FileSpreadsheet }, // Módulo de exportación añadido
   { id: 'solicitudes', label: 'Solicitudes', icon: Key },
   { id: 'configuracion', label: 'Configuración', icon: Settings }
 ];
