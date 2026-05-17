@@ -13,8 +13,6 @@ const EspecialistaReportesView = ({
   pctSubidos,
   pctAprobados,
   pctObservados,
-  onExportarGlobal,
-  isExporting,
   reporteGlobal,
   reporteLoading,
   reporteError
@@ -24,7 +22,7 @@ const EspecialistaReportesView = ({
       <header className="bg-white dark:bg-slate-800 shadow-sm px-8 py-5 flex items-center justify-between z-10 border-b border-slate-200 dark:border-slate-700">
         <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-3">
           <PieChart className="text-blue-600" size={28} />
-          Reportes y Estadísticas
+          Estadísticas Financieras
         </h1>
       </header>
 
@@ -160,32 +158,6 @@ const EspecialistaReportesView = ({
               <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
                 Reportes enviados que presentaron inconsistencias ({stats.observados} de {stats.subidos}).
               </p>
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-blue-900 to-blue-950 p-8 md:p-10 rounded-2xl shadow-md text-white flex flex-col md:flex-row items-center justify-between relative overflow-hidden mt-6">
-            <div className="absolute -right-12 -top-24 text-blue-800/30">
-              <FileText size={250} />
-            </div>
-            <div className="relative z-10 mb-6 md:mb-0 md:pr-8 text-center md:text-left flex-1">
-              <h3 className="text-2xl font-bold mb-3 flex items-center justify-center md:justify-start gap-3">
-                <Download className="text-blue-300" size={28} />
-                Reporte Consolidado Financiero
-              </h3>
-              <p className="text-blue-100 text-sm md:text-base max-w-3xl leading-relaxed">
-                Descarga la sabana de datos maestra en formato Excel (.xlsx). Incluye el estado actual de auditoria,
-                totales declarados de ingresos y egresos, y el saldo final bancario de todas las instituciones educativas.
-              </p>
-            </div>
-            <div className="relative z-10 w-full md:w-auto flex-shrink-0">
-              <button
-                onClick={onExportarGlobal}
-                disabled={isExporting}
-                className="w-full md:w-auto flex items-center justify-center gap-3 px-8 py-4 bg-blue-500 hover:bg-blue-400 text-white rounded-xl font-bold text-lg transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
-              >
-                {isExporting ? <Loader2 size={24} className="animate-spin" /> : <FileText size={24} />}
-                {isExporting ? 'Generando Archivo...' : 'Exportar a Excel'}
-              </button>
             </div>
           </div>
 

@@ -1,9 +1,10 @@
 import React from 'react';
-import { Key, LayoutDashboard, LogOut, PieChart, Settings, User, UserCheck } from 'lucide-react';
+import { Key, LayoutDashboard, LogOut, PieChart, Settings, User, UserCheck, FileSpreadsheet } from 'lucide-react';
 
 const menuItems = [
   { id: 'explorador', label: 'Explorador', icon: LayoutDashboard },
-  { id: 'reportes', label: 'Estadísticas', icon: PieChart },
+  { id: 'estadisticas', label: 'Estadísticas', icon: PieChart },
+  { id: 'reportes', label: 'Reportes y Descargas', icon: FileSpreadsheet },
   { id: 'solicitudes', label: 'Solicitudes', icon: Key },
   { id: 'configuracion', label: 'Configuración', icon: Settings }
 ];
