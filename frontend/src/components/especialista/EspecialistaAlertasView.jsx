@@ -101,7 +101,7 @@ const EspecialistaAlertasView = ({
             Alertas
           </h1>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            Plantilla para la deteccion automatica de anomalias financieras con Isolation Forest.
+            Plantilla para la detección automática de anomalías financieras con Isolation Forest.
           </p>
         </div>
 
@@ -109,8 +109,8 @@ const EspecialistaAlertasView = ({
           <div className="flex items-center gap-3 rounded-xl border border-blue-100 dark:border-slate-700 bg-blue-50/60 dark:bg-slate-900 px-4 py-2.5 text-sm">
             <Clock3 size={18} className="text-blue-600 dark:text-blue-400" />
             <div>
-              <p className="font-bold text-slate-700 dark:text-slate-200">Ultima actualizacion</p>
-              <p className="text-slate-500 dark:text-slate-400">Pendiente de ejecucion</p>
+              <p className="font-bold text-slate-700 dark:text-slate-200">Última actualización</p>
+              <p className="text-slate-500 dark:text-slate-400">Pendiente de ejecución</p>
             </div>
           </div>
           <button
@@ -133,10 +133,10 @@ const EspecialistaAlertasView = ({
                 <DatabaseZap size={20} />
               </div>
               <div>
-                <h2 className="font-bold text-slate-800 dark:text-slate-100">Modulo preparado para el modelo</h2>
+                <h2 className="font-bold text-slate-800 dark:text-slate-100">Módulo preparado para el modelo</h2>
                 <p className="text-sm text-slate-600 dark:text-slate-300 mt-1 max-w-3xl">
-                  Aun no se muestran resultados porque el modelo Isolation Forest y el volumen de datos historicos
-                  todavia no estan disponibles para producir alertas confiables.
+                  Aún no se muestran resultados porque el modelo Isolation Forest y el volumen de datos históricos
+                  todavía no están disponibles para producir alertas confiables.
                 </p>
               </div>
             </div>
@@ -183,7 +183,7 @@ const EspecialistaAlertasView = ({
               </label>
 
               <label className="lg:col-span-2">
-                <span className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Anio</span>
+                <span className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Año</span>
                 <select
                   value={anioActual}
                   onChange={(e) => onAnioChange(Number(e.target.value))}
@@ -196,7 +196,7 @@ const EspecialistaAlertasView = ({
               </label>
 
               <label className="lg:col-span-2">
-                <span className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Tipo de anomalia</span>
+                <span className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Tipo de anomalía</span>
                 <select
                   value={filtros.tipo}
                   onChange={(e) => setFiltros({ ...filtros, tipo: e.target.value })}
@@ -245,13 +245,13 @@ const EspecialistaAlertasView = ({
                 <thead>
                   <tr className="bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider">
                     <th className="p-4 font-bold">Fecha y hora</th>
-                    <th className="p-4 font-bold">Tipo de anomalia</th>
-                    <th className="p-4 font-bold">Descripcion</th>
-                    <th className="p-4 font-bold">Entidad / modulo</th>
+                    <th className="p-4 font-bold">Tipo de anomalía</th>
+                    <th className="p-4 font-bold">Descripción</th>
+                    <th className="p-4 font-bold">Entidad / módulo</th>
                     <th className="p-4 font-bold text-right">Monto involucrado</th>
                     <th className="p-4 font-bold text-center">Nivel de riesgo</th>
                     <th className="p-4 font-bold text-center">Puntaje</th>
-                    <th className="p-4 font-bold text-center">Accion</th>
+                    <th className="p-4 font-bold text-center">Acción</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -262,9 +262,9 @@ const EspecialistaAlertasView = ({
                           <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-300 mb-4">
                             <FileSearch size={30} />
                           </div>
-                          <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">No hay alertas de anomalias para mostrar</h3>
+                          <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">No hay alertas de anomalías para mostrar</h3>
                           <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-                            La tabla quedara lista para listar resultados cuando el modelo procese datos suficientes del periodo {periodoLabel}.
+                            La tabla quedará lista para listar resultados cuando el modelo procese datos suficientes del periodo {periodoLabel}.
                           </p>
                         </div>
                       </td>
@@ -281,9 +281,9 @@ const EspecialistaAlertasView = ({
                 <Info size={18} />
               </div>
               <div>
-                <h3 className="font-bold text-slate-800 dark:text-slate-100">Sobre las alertas de anomalias</h3>
+                <h3 className="font-bold text-slate-800 dark:text-slate-100">Sobre las alertas de anomalías</h3>
                 <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                  Este apartado esta preparado para mostrar patrones inusuales en ingresos, egresos y saldos comparados con el comportamiento historico.
+                  Este apartado está preparado para mostrar patrones inusuales en ingresos, egresos y saldos comparados con el comportamiento histórico.
                 </p>
               </div>
             </div>
