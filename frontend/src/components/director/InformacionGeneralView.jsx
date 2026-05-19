@@ -139,7 +139,7 @@ const InformacionGeneralView = ({ director }) => {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Nombre del Tesorero(a)</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Nombre completo</label>
                 <input
                   type="text"
                   name="nombre_tesorero"
@@ -151,7 +151,7 @@ const InformacionGeneralView = ({ director }) => {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">DNI del Tesorero(a)</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">DNI</label>
                 <input
                   type="text"
                   name="dni_tesorero"
@@ -165,7 +165,7 @@ const InformacionGeneralView = ({ director }) => {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Celular del Tesorero(a)</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Celular</label>
                 <input
                   type="text"
                   name="celular_tesorero"

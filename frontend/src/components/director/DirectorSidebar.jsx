@@ -159,7 +159,7 @@ const DirectorSidebar = ({ activeTab, setActiveTab, onLogoutClick, onChangePassw
                     </div>
                     <div>
                       <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Teléfono / WhatsApp</p>
-                      <p className="text-sm font-bold text-slate-800 dark:text-slate-200">943096816</p>
+                      <p className="text-sm font-bold text-slate-800 dark:text-slate-200">986675438</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-4">

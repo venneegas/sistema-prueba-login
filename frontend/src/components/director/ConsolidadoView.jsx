@@ -41,7 +41,6 @@ const ConsolidadoView = ({
 
   // Variables de estado para los inputs de la Seccion 2
   const [saldosBanco, setSaldosBanco] = useState({
-    inicial: '',
     mes0: '',
     mes1: '',
     mes2: '',
@@ -211,13 +210,12 @@ const ConsolidadoView = ({
 
         if (res.ok && data.success && data.data) {
           setSaldosBanco({
-            inicial: data.data.saldo_inicial || '',
             mes0: data.data.saldo_mes1 || '',
             mes1: data.data.saldo_mes2 || '',
             mes2: data.data.saldo_mes3 || '',
           });
         } else {
-          setSaldosBanco({ inicial: '', mes0: '', mes1: '', mes2: '' });
+          setSaldosBanco({ mes0: '', mes1: '', mes2: '' });
         }
       } catch (err) {
         console.error('Error cargando saldos del banco', err);
@@ -248,7 +246,7 @@ const ConsolidadoView = ({
           anio: Number(anio),
           // Convertimos al formato que probablemente espera tu base de datos
           saldos: {
-            saldo_inicial: saldosBanco.inicial || 0,
+            saldo_inicial: 0,
             saldo_mes1: saldosBanco.mes0 || 0,
             saldo_mes2: saldosBanco.mes1 || 0,
             saldo_mes3: saldosBanco.mes2 || 0
@@ -309,10 +307,10 @@ const ConsolidadoView = ({
       theme: 'grid'
     });
 
-    const tabla2Body = [
-      ['Saldo inicial en CTA. CTE.', `S/. ${formatCurrency(saldosBanco.inicial || 0)}`],
-      ...actual.meses.map((mes, index) => [`Saldo al terminar ${mes}`, `S/. ${formatCurrency(saldosBanco[`mes${index}`] || 0)}`])
-    ];
+    const tabla2Body = actual.meses.map((mes, index) => [
+      `Saldo al terminar ${mes}`,
+      `S/. ${formatCurrency(saldosBanco[`mes${index}`] || 0)}`
+    ]);
 
     autoTable(doc, {
       startY: doc.lastAutoTable.finalY + 10,
@@ -394,7 +392,6 @@ const ConsolidadoView = ({
     
     ws.addRow([]);
     addSectionHeader('2. DETALLE DE LOS MOVIMIENTOS DE LA CUENTA CORRIENTE');
-    ws.addRow(['Saldo inicial en CTA. CTE.', Number(saldosBanco.inicial || 0)]);
     actual.meses.forEach((mes, index) => ws.addRow([`Saldo al terminar ${mes}`, Number(saldosBanco[`mes${index}`] || 0)]));
     
     ws.addRow([]);
@@ -511,26 +508,6 @@ const ConsolidadoView = ({
                 </td>
               </tr>
 
-              <tr className={trEditableClass}>
-                <td className={tdLabelClass}>Saldo inicial en CTA. CTE.</td>
-                <td className={tdInputContainerClass}>
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    onKeyDown={(e) => { if (e.key === '-' || e.key === 'e') e.preventDefault(); }}
-                    value={saldosBanco.inicial}
-                    onChange={(e) => {
-                      if (Number(e.target.value) >= 0) {
-                        handleSaldoChange('inicial', e.target.value);
-                      }
-                    }}
-                    disabled={trimestreCerrado}
-                    className="w-full h-full px-4 py-3 bg-transparent text-right outline-none disabled:cursor-not-allowed disabled:bg-slate-50 disabled:opacity-70"
-                    placeholder="0.00"
-                  />
-                </td>
-              </tr>
               {actual.meses.map((mes, index) => (
                 <tr key={`cc-${mes}`} className={trEditableClass}>
                   <td className={tdLabelClass}>Saldo al terminar {mes}</td>
