@@ -103,7 +103,6 @@ const InformacionGeneralView = ({ director }) => {
   };
 
   const datosDirector = [
-    { label: 'Nombre de la I.E.', value: director?.school || director?.colegio || 'No disponible' },
     { label: 'Director(a)', value: obtenerNombreCompleto(director) },
     { label: 'DNI', value: director?.dni || 'No disponible' },
     { label: 'Celular', value: director?.celular || 'No disponible' },
@@ -115,7 +114,6 @@ const InformacionGeneralView = ({ director }) => {
       {/* 1. Tarjeta de Datos del Director (Solo Lectura) */}
       <div className="bg-white p-6 md:p-8 rounded-[28px] shadow-[0_24px_60px_-30px_rgba(15,23,42,0.45)] border border-slate-200">
         <h2 className="text-xl font-bold text-gray-800 mb-2">DATOS DEL DIRECTOR</h2>
-        <p className="text-sm text-gray-500 mb-6">Información personal y de contacto</p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {datosDirector.map((item) => (
@@ -130,8 +128,7 @@ const InformacionGeneralView = ({ director }) => {
       {/* 2. Tarjeta de Datos del Comité (Formulario) */}
       <div className="bg-white p-6 md:p-8 rounded-[28px] shadow-[0_24px_60px_-30px_rgba(15,23,42,0.45)] border border-slate-200">
         <div className="mb-6">
-          <h2 className="text-xl font-bold text-gray-800 mb-2">DATOS INSTITUCIONALES Y COMITÉ</h2>
-          <p className="text-sm text-gray-500">Completa la información del tesorero y la cuenta bancaria</p>
+          <h2 className="text-xl font-bold text-gray-800 mb-2">DATOS DEL TESORERO(A)</h2>
         </div>
 
         {loading ? (
@@ -181,29 +178,6 @@ const InformacionGeneralView = ({ director }) => {
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Entidad Bancaria</label>
-                <input
-                  type="text"
-                  name="banco"
-                  value={formData.banco}
-                  onChange={handleInputChange}
-                  className="w-full rounded-xl border border-gray-300 px-4 py-3 shadow-sm bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all hover:border-gray-400"
-                  placeholder="Ej: Banco de la Nación"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Número de Cuenta Corriente</label>
-                <input
-                  type="text"
-                  name="numero_cuenta_corriente"
-                  value={formData.numero_cuenta_corriente}
-                  onChange={handleInputChange}
-                  className="w-full rounded-xl border border-gray-300 px-4 py-3 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all hover:border-gray-400 bg-white"
-                  placeholder="Número de cuenta"
-                />
-              </div>
             </div>
 
             {/* Alertas dinámicas */}
@@ -228,6 +202,59 @@ const InformacionGeneralView = ({ director }) => {
                   <>
                     <Save size={20} />
                     Guardar Información
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
+
+      {/* 3. Tarjeta de Cuenta Corriente */}
+      <div className="bg-white p-6 md:p-8 rounded-[28px] shadow-[0_24px_60px_-30px_rgba(15,23,42,0.45)] border border-slate-200">
+        <div className="mb-6">
+          <h2 className="text-xl font-bold text-gray-800 mb-2">CUENTA CORRIENTE - BANCO DE LA NACION</h2>
+        </div>
+
+        {loading ? (
+          <div className="flex justify-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="max-w-xl">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Número</label>
+              <input
+                type="text"
+                name="numero_cuenta_corriente"
+                value={formData.numero_cuenta_corriente}
+                onChange={handleInputChange}
+                className="w-full rounded-xl border border-gray-300 px-4 py-3 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all hover:border-gray-400 bg-white"
+                placeholder="Número de cuenta corriente"
+              />
+            </div>
+
+            {message && (
+              <div className={`p-4 rounded-lg text-sm font-medium ${message.type === 'success' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+                {message.text}
+              </div>
+            )}
+
+            <div className="flex justify-end pt-6 border-t border-gray-100 mt-8">
+              <button
+                type="submit"
+                disabled={saving || !director?.id}
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-3 rounded-xl font-bold shadow-md hover:shadow-lg hover:from-blue-700 hover:to-indigo-700 transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center gap-2"
+              >
+                {saving ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    Guardando...
+                  </>
+                ) : (
+                  <>
+                    <Save size={20} />
+                    Guardar
                   </>
                 )}
               </button>
