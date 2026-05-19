@@ -7,6 +7,7 @@ import EspecialistaReportesView from './EspecialistaReportesView';
 import EspecialistaConfiguracionView from './EspecialistaConfiguracionView';
 import EspecialistaExploradorView from './EspecialistaExploradorView';
 import EspecialistaSolicitudesPage from './EspecialistaSolicitudesPage';
+import EspecialistaAlertasView from './EspecialistaAlertasView';
 import ReportesView from './ReportesView';
 import useEspecialistaColegios from '../../hooks/useEspecialistaColegios';
 import useEspecialistaReporteGlobal from '../../hooks/useEspecialistaReporteGlobal';
@@ -133,6 +134,14 @@ const EspecialistaDashboard = ({ user, onLogout }) => {
             reporteGlobal={reporteGlobal}
             reporteLoading={reporteLoading}
             reporteError={reporteError}
+          />
+        ) : activeView === 'alertas' ? (
+          <EspecialistaAlertasView
+            anioActual={anioActual}
+            aniosDisponibles={aniosDisponibles}
+            trimestreSeleccionado={trimestreSeleccionado}
+            onAnioChange={setAnioActual}
+            onTrimestreChange={setTrimestreSeleccionado}
           />
         ) : activeView === 'reportes' ? (
           <ReportesView
