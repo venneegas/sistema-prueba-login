@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, FolderOpen, UploadCloud, LogOut, Settings, Key, Moon, Sun, HelpCircle, UserMinus, User, X, Phone, Mail, Clock } from 'lucide-react';
+import { LayoutDashboard, FolderOpen, UploadCloud, LogOut, Settings, Key, Moon, Sun, HelpCircle, UserMinus, User, X, Phone, Mail, Clock, UserRound } from 'lucide-react';
 
 const DirectorSidebar = ({ activeTab, setActiveTab, onLogoutClick, onChangePasswordClick, onRequestReplacementClick, user }) => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -125,6 +125,28 @@ const DirectorSidebar = ({ activeTab, setActiveTab, onLogoutClick, onChangePassw
             </div>
           </div>
         )}
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('informacion')}
+          className={`group mb-3 flex w-full items-center gap-3 rounded-2xl border px-3 py-3 text-left transition-all duration-200 ${
+            activeTab === 'informacion'
+              ? 'border-blue-200 bg-blue-50 text-blue-700 shadow-sm dark:border-blue-500/40 dark:bg-blue-600 dark:text-white'
+              : 'border-slate-200 bg-white text-slate-700 hover:border-blue-200 hover:bg-blue-50/80 hover:text-blue-700 hover:shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-white'
+          }`}
+        >
+          <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-colors ${
+            activeTab === 'informacion'
+              ? 'bg-blue-600 text-white dark:bg-white dark:text-blue-700'
+              : 'bg-slate-100 text-slate-500 group-hover:bg-white group-hover:text-blue-600 dark:bg-slate-800 dark:text-slate-300'
+          }`}>
+            <UserRound size={20} />
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm font-bold">Perfil</p>
+            <p className="truncate text-xs font-medium opacity-70">Director e instituciÃ³n</p>
+          </div>
+        </button>
 
         <button
           onClick={() => setIsSettingsOpen(!isSettingsOpen)}

@@ -421,17 +421,17 @@ const ConsolidadoView = ({
     URL.revokeObjectURL(link.href);
   };
 
-  const tdLabelClass = 'border border-slate-300 px-4 py-3 text-sm text-slate-700';
-  const tdValueClass = 'border border-slate-300 px-4 py-3 text-sm text-right font-mono text-slate-900';
-  const sectionHeaderClass = 'bg-gradient-to-r from-sky-600 to-cyan-600 text-white px-4 py-2 font-bold text-sm uppercase tracking-[0.18em] border border-sky-700 text-left';
+  const tdLabelClass = 'border-b border-slate-200 px-5 py-3.5 text-sm text-slate-700';
+  const tdValueClass = 'border-b border-slate-200 px-5 py-3.5 text-sm text-right font-mono font-semibold text-slate-900';
+  const sectionHeaderClass = 'bg-sky-700 text-white px-5 py-3 font-bold text-sm uppercase tracking-[0.16em] text-left';
 
   const trEditableClass = trimestreCerrado
     ? 'hover:bg-slate-50/80 transition-colors'
-    : 'bg-amber-50/40 hover:bg-amber-100/50 transition-colors';
+    : 'bg-amber-50/30 hover:bg-amber-100/40 transition-colors';
 
   const tdInputContainerClass = trimestreCerrado
-    ? 'border border-slate-300 p-0 text-sm text-right font-mono text-slate-900 focus-within:ring-2 focus-within:ring-inset focus-within:ring-sky-500'
-    : 'border border-slate-300 p-0 text-sm text-right font-mono text-slate-900 focus-within:ring-2 focus-within:ring-inset focus-within:ring-amber-500';
+    ? 'border-b border-slate-200 p-0 text-sm text-right font-mono text-slate-900 focus-within:ring-2 focus-within:ring-inset focus-within:ring-sky-500'
+    : 'border-b border-slate-200 p-0 text-sm text-right font-mono text-slate-900 focus-within:ring-2 focus-within:ring-inset focus-within:ring-amber-500';
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
@@ -452,7 +452,7 @@ const ConsolidadoView = ({
           </div>
         </div>
 
-        <div className="overflow-hidden rounded-[26px] border border-slate-300 shadow-sm">
+        <div className="overflow-hidden rounded-[22px] border border-slate-200 shadow-sm">
           <table className="w-full border-collapse bg-white">
             <thead>
               <tr>
@@ -460,7 +460,7 @@ const ConsolidadoView = ({
               </tr>
             </thead>
             <tbody>
-              <tr><td colSpan="2" className="bg-sky-100 font-bold px-4 py-2 text-xs border border-sky-300 text-sky-800 uppercase">INGRESOS</td></tr>
+              <tr><td colSpan="2" className="border-b border-sky-100 bg-sky-50 px-5 py-2.5 text-xs font-bold uppercase tracking-wide text-sky-800">INGRESOS</td></tr>
               <tr>
                 <td className={tdLabelClass}>+ Saldo inicial del trimestre</td>
                 <td className={tdValueClass}>{formatCurrency(saldoInicialCaja)}</td>
@@ -472,11 +472,11 @@ const ConsolidadoView = ({
                 </tr>
               ))}
               <tr className="bg-sky-50/60 font-bold">
-                <td className="border border-slate-300 px-4 py-3 text-right text-xs text-sky-900">Total Ingresos del {actual.label}</td>
+                <td className="border-b border-sky-100 px-5 py-3.5 text-right text-xs font-bold uppercase tracking-wide text-sky-900">Total Ingresos del {actual.label}</td>
                 <td className={tdValueClass}>{formatCurrency(totalIngresos)}</td>
               </tr>
 
-              <tr><td colSpan="2" className="bg-rose-100 font-bold px-4 py-2 text-xs border border-rose-300 text-rose-800 uppercase">EGRESOS</td></tr>
+              <tr><td colSpan="2" className="border-b border-rose-100 bg-rose-50 px-5 py-2.5 text-xs font-bold uppercase tracking-wide text-rose-800">EGRESOS</td></tr>
               {actual.meses.map((mes, index) => (
                 <tr key={mes} className="hover:bg-rose-50/80 transition-colors">
                   <td className={tdLabelClass}>- Correspondiente a {mes}</td>
@@ -484,19 +484,19 @@ const ConsolidadoView = ({
                 </tr>
               ))}
               <tr className="bg-rose-50/70 font-bold">
-                <td className="border border-slate-300 px-4 py-3 text-right text-xs text-rose-900">Total Egresos del {actual.label}</td>
+                <td className="border-b border-rose-100 px-5 py-3.5 text-right text-xs font-bold uppercase tracking-wide text-rose-900">Total Egresos del {actual.label}</td>
                 <td className={tdValueClass}>{formatCurrency(totalEgresos)}</td>
               </tr>
 
               <tr className="bg-slate-900 text-white font-bold">
-                <td className="border border-slate-700 px-4 py-3 text-right">Saldo final del Trimestre</td>
-                <td className="border border-slate-700 px-4 py-3 text-right font-mono">{formatCurrency(dineroEnCaja)}</td>
+                <td className="px-5 py-3.5 text-right">Saldo final del Trimestre</td>
+                <td className="px-5 py-3.5 text-right font-mono">{formatCurrency(dineroEnCaja)}</td>
               </tr>
 
               <tr><td colSpan="2" className={sectionHeaderClass}>2. DETALLE DE LOS MOVIMIENTOS DE LA CUENTA CORRIENTE</td></tr>
               <tr>
-                <td colSpan="2" className="p-0 border border-slate-300">
-                  <div className="flex justify-between items-center text-[11px] px-4 py-2 bg-slate-50 text-slate-600">
+                <td colSpan="2" className="border-b border-slate-200 p-0">
+                  <div className="flex justify-between items-center text-[11px] px-5 py-2.5 bg-slate-50 text-slate-600">
                     <span>Segun el Estado de Cuenta mensual emitido por el Banco de la Nacion:</span>
                     {!trimestreCerrado && (
                       <span className="flex items-center gap-1.5 font-bold text-amber-700 bg-amber-100/80 px-2.5 py-0.5 rounded-md border border-amber-200">
@@ -532,7 +532,7 @@ const ConsolidadoView = ({
               ))}
 
               <tr>
-                <td colSpan="2" className="bg-slate-50 border border-slate-300 px-4 py-3 text-right">
+                <td colSpan="2" className="border-b border-slate-200 bg-slate-50 px-5 py-3.5 text-right">
                   <div className="flex items-center justify-end gap-4">
                     <Toast message={mensajeSaldos} type="success" onClose={() => setMensajeSaldos('')} />
                     <Toast message={errorSaldos} type="error" onClose={() => setErrorSaldos('')} />
@@ -550,20 +550,20 @@ const ConsolidadoView = ({
 
               <tr><td colSpan="2" className={sectionHeaderClass}>3. CONSOLIDADO</td></tr>
               <tr className="hover:bg-slate-50/80 transition-colors">
-                <td className="border border-slate-300 px-4 py-3 text-sm text-slate-700">Dinero en Caja</td>
-                <td className="border border-slate-300 px-4 py-3 text-sm text-right font-mono text-slate-900 bg-emerald-50/30">
+                <td className="border-b border-slate-200 px-5 py-3.5 text-sm text-slate-700">Dinero en Caja</td>
+                <td className="border-b border-slate-200 bg-emerald-50/30 px-5 py-3.5 text-right font-mono text-sm font-semibold text-slate-900">
                   {formatCurrency(dineroEnCaja)}
                 </td>
               </tr>
               <tr className="hover:bg-slate-50/80 transition-colors">
-                <td className="border border-slate-300 px-4 py-3 text-sm text-slate-700">Dinero en Cuenta Corriente del Banco de la Nacion *</td>
-                <td className="border border-slate-300 px-4 py-3 text-sm text-right font-mono text-slate-900 bg-sky-50/30">
+                <td className="border-b border-slate-200 px-5 py-3.5 text-sm text-slate-700">Dinero en Cuenta Corriente del Banco de la Nacion *</td>
+                <td className="border-b border-slate-200 bg-sky-50/30 px-5 py-3.5 text-right font-mono text-sm font-semibold text-slate-900">
                   {formatCurrency(dineroEnBanco)}
                 </td>
               </tr>
               <tr className="bg-slate-900 text-white font-bold">
-              <td className="border border-slate-700 px-4 py-3 text-right">Saldo de Dinero, al {actual.fin} {anio}</td>
-                <td className="border border-slate-700 px-4 py-3 text-right font-mono text-sky-400">
+              <td className="px-5 py-3.5 text-right">Saldo de Dinero, al {actual.fin} {anio}</td>
+                <td className="px-5 py-3.5 text-right font-mono text-sky-400">
                   {formatCurrency(saldoDineroTotal)}
                 </td>
               </tr>
