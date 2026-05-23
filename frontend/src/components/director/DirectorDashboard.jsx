@@ -239,7 +239,7 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="flex h-screen bg-slate-100 dark:bg-gray-900">
       <DirectorSidebar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -249,11 +249,15 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
         user={user}
       />
 
-      <main className="flex-1 overflow-y-auto p-10">
-        <div className="mb-8 flex justify-between items-center bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700">
+      <main className="flex-1 overflow-y-auto bg-[radial-gradient(circle_at_top_left,_rgba(37,99,235,0.08),_transparent_30%),linear-gradient(180deg,_#f8fbff_0%,_#eef3f8_100%)] p-8 dark:bg-none dark:bg-gray-900">
+        <div className="mx-auto max-w-7xl">
+        <div className="mb-6 flex justify-between items-center bg-white/90 dark:bg-slate-800 p-5 rounded-2xl shadow-[0_14px_40px_-28px_rgba(15,23,42,0.8)] border border-slate-200/80 dark:border-slate-700 backdrop-blur">
           <div>
-            <h1 className="text-2xl font-bold text-gray-800 dark:text-slate-100 uppercase tracking-tight">
-              Panel de Director: {user.director?.school || 'N/A'}
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-blue-600 dark:text-blue-300">
+              Panel de Director
+            </p>
+            <h1 className="mt-1 text-2xl font-extrabold text-slate-900 dark:text-slate-100 uppercase tracking-tight">
+              {user.director?.school || 'N/A'}
             </h1>
             {cambioObligatorioPendiente && (
               <p className="text-sm text-amber-700 mt-1">
@@ -440,6 +444,7 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
             {activeTab === 'informacion' && <InformacionGeneralView director={user.director} />}
           </>
         )}
+        </div>
 
         <LogoutModal
           isOpen={isLogoutModalOpen}

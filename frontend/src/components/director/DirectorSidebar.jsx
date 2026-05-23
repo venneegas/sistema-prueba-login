@@ -42,7 +42,7 @@ const DirectorSidebar = ({ activeTab, setActiveTab, onLogoutClick, onChangePassw
   };
 
   return (
-    <aside className="w-64 bg-white dark:bg-slate-900 text-slate-800 dark:text-white h-full flex flex-col shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-20 border-r border-slate-200 dark:border-slate-800">
+    <aside className="w-64 bg-white dark:bg-slate-900 text-slate-800 dark:text-white h-full flex flex-col shadow-[10px_0_35px_-28px_rgba(15,23,42,0.9)] z-20 border-r border-slate-200 dark:border-slate-800">
       {/* Header con Logo Institucional */}
       <div className="p-6 border-b border-slate-200 dark:border-slate-800 text-center flex justify-center bg-white dark:bg-slate-900">
         <img 
@@ -54,18 +54,25 @@ const DirectorSidebar = ({ activeTab, setActiveTab, onLogoutClick, onChangePassw
       </div>
 
       {/* Navegación Principal */}
-      <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+      <nav className="flex-1 p-4 space-y-1.5 overflow-y-auto">
         {menuItems.map((item) => (
           <button
             key={item.id}
             onClick={() => setActiveTab(item.id)}
-            className={`w-full flex items-center justify-start space-x-3 px-4 py-3 rounded-xl text-sm text-left transition-all ${
+            className={`group relative w-full flex items-center justify-start gap-3 overflow-hidden px-4 py-3 rounded-xl text-sm text-left transition-all duration-200 ${
               activeTab === item.id
-                ? 'bg-blue-50 text-blue-700 font-bold shadow-sm dark:bg-blue-600 dark:text-white'
-                : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-semibold dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white'
+                ? 'bg-blue-50 text-blue-700 font-bold shadow-sm ring-1 ring-blue-100 dark:bg-blue-600 dark:text-white dark:ring-blue-500/40'
+                : 'text-slate-600 hover:bg-blue-50/80 hover:text-blue-700 hover:shadow-sm font-semibold dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white'
             }`}
           >
-            {item.icon}
+            <span
+              className={`absolute left-0 top-2 bottom-2 w-1 rounded-r-full transition-all duration-200 ${
+                activeTab === item.id ? 'bg-blue-600 opacity-100' : 'bg-blue-500 opacity-0 group-hover:opacity-100'
+              }`}
+            />
+            <span className={`shrink-0 transition-transform duration-200 ${activeTab === item.id ? 'translate-x-0.5' : 'group-hover:translate-x-0.5'}`}>
+              {item.icon}
+            </span>
             <span>{item.label}</span>
           </button>
         ))}
@@ -121,13 +128,18 @@ const DirectorSidebar = ({ activeTab, setActiveTab, onLogoutClick, onChangePassw
 
         <button
           onClick={() => setIsSettingsOpen(!isSettingsOpen)}
-          className={`w-full flex items-center justify-start space-x-3 px-4 py-3 rounded-xl text-sm text-left transition-colors mb-4 ${
+          className={`group relative w-full flex items-center justify-start gap-3 overflow-hidden px-4 py-3 rounded-xl text-sm text-left transition-all duration-200 mb-4 ${
             isSettingsOpen 
-              ? 'bg-slate-100 text-slate-900 font-bold dark:bg-slate-800 dark:text-white' 
-              : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-semibold dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white'
+              ? 'bg-slate-100 text-slate-900 font-bold ring-1 ring-slate-200 dark:bg-slate-800 dark:text-white dark:ring-slate-700' 
+              : 'text-slate-600 hover:bg-blue-50/80 hover:text-blue-700 hover:shadow-sm font-semibold dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white'
           }`}
         >
-          <Settings size={18} />
+          <span
+            className={`absolute left-0 top-2 bottom-2 w-1 rounded-r-full transition-all duration-200 ${
+              isSettingsOpen ? 'bg-slate-500 opacity-100' : 'bg-blue-500 opacity-0 group-hover:opacity-100'
+            }`}
+          />
+          <Settings size={18} className="transition-transform duration-200 group-hover:translate-x-0.5" />
           <span>Configuración</span>
         </button>
 

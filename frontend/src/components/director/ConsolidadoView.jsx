@@ -434,8 +434,8 @@ const ConsolidadoView = ({
     : 'border border-slate-300 p-0 text-sm text-right font-mono text-slate-900 focus-within:ring-2 focus-within:ring-inset focus-within:ring-amber-500';
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
-      <div className="bg-white p-8 rounded-[28px] shadow-[0_24px_60px_-30px_rgba(15,23,42,0.45)] border border-slate-200">
+    <div className="mx-auto max-w-6xl space-y-6">
+      <div className="bg-white/95 p-7 rounded-[28px] shadow-[0_24px_60px_-34px_rgba(15,23,42,0.55)] border border-slate-200/90">
         <div className="mb-6 rounded-3xl border border-slate-300 bg-slate-50/80 p-5 shadow-sm">
           <div className="grid grid-cols-12 gap-2 text-sm">
             <div className="col-span-3 rounded-2xl font-bold bg-slate-200 p-3 border border-slate-300">Trimestre:</div>
