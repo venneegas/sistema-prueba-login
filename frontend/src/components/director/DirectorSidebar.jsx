@@ -66,16 +66,13 @@ const DirectorSidebar = ({
     }
   };
 
-  const configButtonClass = 'group flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-left text-sm font-bold text-slate-700 transition-all duration-200 hover:border-blue-200 hover:bg-blue-50/80 hover:text-blue-700 hover:shadow-sm dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-white';
-  const configIconClass = 'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500 transition-colors group-hover:bg-white group-hover:text-blue-600 dark:bg-slate-800 dark:text-slate-300';
-
   const sectionLabelClass = 'px-4 pt-4 pb-1 text-[11px] font-extrabold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500';
 
-  const renderNavItem = (item) => (
+  const renderSidebarAction = (item) => (
     <button
       key={item.id}
       type="button"
-      onClick={() => setActiveTab(item.id)}
+      onClick={item.onClick || (() => setActiveTab(item.id))}
       className={`group relative w-full flex items-center justify-start gap-3 overflow-hidden px-4 py-3 rounded-xl text-sm text-left transition-all duration-200 ${
         activeTab === item.id
           ? 'bg-blue-50 text-blue-700 font-bold shadow-sm ring-1 ring-blue-100 dark:bg-blue-600 dark:text-white dark:ring-blue-500/40'
@@ -107,55 +104,21 @@ const DirectorSidebar = ({
 
       <nav className="flex-1 p-4 space-y-1.5 overflow-y-auto">
         <p className={sectionLabelClass}>Movimientos</p>
-        {movimientoItems.map(renderNavItem)}
+        {movimientoItems.map(renderSidebarAction)}
 
         <p className={sectionLabelClass}>Datos</p>
-        {datosItems.map(renderNavItem)}
+        {datosItems.map(renderSidebarAction)}
+
+        <p className={sectionLabelClass}>Configuracion</p>
+        {[
+          { id: 'solicitud', label: 'SOLICITUD', icon: <UserMinus size={18} />, onClick: onRequestReplacementClick },
+          { id: 'credenciales', label: 'CREDENCIALES', icon: <Key size={18} />, onClick: onChangePasswordClick },
+          { id: 'tema', label: isDarkMode ? 'TEMA CLARO' : 'TEMA OSCURO', icon: isDarkMode ? <Sun size={18} /> : <Moon size={18} />, onClick: toggleDarkMode },
+          { id: 'soporte', label: 'SOPORTE', icon: <HelpCircle size={18} />, onClick: () => setIsSoporteOpen(true) },
+        ].map(renderSidebarAction)}
       </nav>
 
       <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-[#091426] relative">
-        <div className="mb-4 space-y-2">
-          <p className="px-1 text-xs font-extrabold uppercase tracking-[0.18em] text-blue-700 dark:text-blue-300">
-            Configuracion
-          </p>
-
-          <button
-            type="button"
-            onClick={onRequestReplacementClick}
-            className={configButtonClass}
-          >
-            <span className={configIconClass}><UserMinus size={18} /></span>
-            <span>Solicitud</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={onChangePasswordClick}
-            className={configButtonClass}
-          >
-            <span className={configIconClass}><Key size={18} /></span>
-            <span>Credenciales</span>
-          </button>
-
-          <div className="grid grid-cols-2 gap-2 pt-1">
-            <button
-              type="button"
-              onClick={toggleDarkMode}
-              className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-xs font-bold text-slate-600 transition-all hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
-            >
-              {isDarkMode ? <Sun size={16} /> : <Moon size={16} />}
-              <span>Tema</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setIsSoporteOpen(true)}
-              className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-xs font-bold text-slate-600 transition-all hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
-            >
-              <HelpCircle size={16} />
-              <span>Soporte</span>
-            </button>
-          </div>
-        </div>
 
         {isSoporteOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
