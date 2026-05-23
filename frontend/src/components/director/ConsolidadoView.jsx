@@ -452,6 +452,32 @@ const ConsolidadoView = ({
           </div>
         </div>
 
+        {(mensajeCierre || errorCierre || trimestreCerrado) && (
+          <div
+            className={`mb-6 rounded-2xl border px-5 py-4 text-sm shadow-sm ${
+              errorCierre
+                ? 'border-red-200 bg-red-50 text-red-800'
+                : 'border-emerald-200 bg-emerald-50 text-emerald-800'
+            }`}
+          >
+            <div className="flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
+              <div>
+                <p className="font-bold">
+                  {errorCierre ? 'No se pudo consultar el estado del trimestre' : 'Trimestre cerrado'}
+                </p>
+                <p className="mt-1 leading-relaxed">
+                  {errorCierre || mensajeCierre || `Este periodo fue cerrado${cerradoEn ? ` el ${formatearFechaCierre(cerradoEn)}` : ''}.`}
+                </p>
+              </div>
+              {!errorCierre && (
+                <span className="mt-2 w-fit rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold uppercase tracking-wide text-emerald-700 md:mt-0">
+                  Solo consulta
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+
         <div className="overflow-hidden rounded-[22px] border border-slate-200 shadow-sm">
           <table className="w-full border-collapse bg-white">
             <thead>
@@ -572,36 +598,20 @@ const ConsolidadoView = ({
         </div>
 
         <div className="mt-8 space-y-4">
-          {mensajeCierre && (
-            <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-              {mensajeCierre}
+          {trimestreCerrado ? (
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm font-semibold text-slate-600">
+              Este trimestre ya no admite modificaciones. Puedes descargar el consolidado en PDF o Excel.
             </div>
+          ) : (
+            <button
+              type="button"
+              onClick={onCerrarTrimestre}
+              disabled={cerrandoTrimestre}
+              className="w-full rounded-2xl bg-red-700 py-4 text-lg font-bold uppercase tracking-wide text-white shadow-lg transition-all hover:bg-red-800 disabled:cursor-wait disabled:bg-slate-400"
+            >
+              {cerrandoTrimestre ? 'Cerrando...' : 'Cerrar Trimestre'}
+            </button>
           )}
-
-          {errorCierre && (
-            <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-              {errorCierre}
-            </div>
-          )}
-
-          {trimestreCerrado && (
-            <div className="rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700">
-              Trimestre cerrado{cerradoEn ? ` el ${formatearFechaCierre(cerradoEn)}` : ''}.
-            </div>
-          )}
-
-          <button
-            type="button"
-            onClick={onCerrarTrimestre}
-            disabled={trimestreCerrado || cerrandoTrimestre}
-            className={`w-full rounded-2xl py-4 text-lg font-bold uppercase tracking-wide transition-all ${
-              trimestreCerrado
-                ? 'cursor-not-allowed bg-slate-400 text-white'
-                : 'bg-red-700 text-white shadow-lg hover:bg-red-800'
-            }`}
-          >
-            {cerrandoTrimestre ? 'Cerrando...' : 'Cerrar Trimestre'}
-          </button>
 
           <div className="flex gap-4 pt-4 border-t border-slate-200 mt-6">
             <button
