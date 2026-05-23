@@ -10,6 +10,7 @@ import {
   HelpCircle,
   UserMinus,
   User,
+  WalletCards,
   X,
   Phone,
   Mail,
@@ -40,12 +41,17 @@ const DirectorSidebar = ({
     }
   }, []);
 
-  const menuItems = [
+  const movimientoItems = [
     { id: 'general', label: 'CONSOLIDADO', icon: <LayoutDashboard size={18} /> },
     { id: 'ingresos', label: 'INGRESOS', icon: <FolderOpen size={18} /> },
     { id: 'egresos', label: 'EGRESOS', icon: <FolderOpen size={18} /> },
     { id: 'facturas', label: 'SUBIR PDF', icon: <UploadCloud size={18} /> },
+  ];
+
+  const datosItems = [
     { id: 'informacion', label: 'PERFIL', icon: <UserRound size={18} /> },
+    { id: 'tesorero', label: 'TESORERO', icon: <User size={18} /> },
+    { id: 'cuenta', label: 'CUENTA', icon: <WalletCards size={18} /> },
   ];
 
   const toggleDarkMode = () => {
@@ -60,12 +66,37 @@ const DirectorSidebar = ({
     }
   };
 
-  const configButtonClass = 'group flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-left text-sm font-bold text-slate-700 transition-all duration-200 hover:border-blue-200 hover:bg-blue-50/80 hover:text-blue-700 hover:shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-white';
+  const configButtonClass = 'group flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-left text-sm font-bold text-slate-700 transition-all duration-200 hover:border-blue-200 hover:bg-blue-50/80 hover:text-blue-700 hover:shadow-sm dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-white';
   const configIconClass = 'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500 transition-colors group-hover:bg-white group-hover:text-blue-600 dark:bg-slate-800 dark:text-slate-300';
 
+  const sectionLabelClass = 'px-4 pt-4 pb-1 text-[11px] font-extrabold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500';
+
+  const renderNavItem = (item) => (
+    <button
+      key={item.id}
+      type="button"
+      onClick={() => setActiveTab(item.id)}
+      className={`group relative w-full flex items-center justify-start gap-3 overflow-hidden px-4 py-3 rounded-xl text-sm text-left transition-all duration-200 ${
+        activeTab === item.id
+          ? 'bg-blue-50 text-blue-700 font-bold shadow-sm ring-1 ring-blue-100 dark:bg-blue-600 dark:text-white dark:ring-blue-500/40'
+          : 'text-slate-600 hover:bg-blue-50/80 hover:text-blue-700 hover:shadow-sm font-semibold dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white'
+      }`}
+    >
+      <span
+        className={`absolute left-0 top-2 bottom-2 w-1 rounded-r-full transition-all duration-200 ${
+          activeTab === item.id ? 'bg-blue-600 opacity-100' : 'bg-blue-500 opacity-0 group-hover:opacity-100'
+        }`}
+      />
+      <span className={`shrink-0 transition-transform duration-200 ${activeTab === item.id ? 'translate-x-0.5' : 'group-hover:translate-x-0.5'}`}>
+        {item.icon}
+      </span>
+      <span>{item.label}</span>
+    </button>
+  );
+
   return (
-    <aside className="w-64 bg-white dark:bg-slate-900 text-slate-800 dark:text-white h-full flex flex-col shadow-[10px_0_35px_-28px_rgba(15,23,42,0.9)] z-20 border-r border-slate-200 dark:border-slate-800">
-      <div className="p-6 border-b border-slate-200 dark:border-slate-800 text-center flex justify-center bg-white dark:bg-slate-900">
+    <aside className="w-64 bg-white dark:bg-[#07111f] text-slate-800 dark:text-white h-full flex flex-col shadow-[10px_0_35px_-28px_rgba(15,23,42,0.9)] z-20 border-r border-slate-200 dark:border-slate-800">
+      <div className="p-6 border-b border-slate-200 dark:border-slate-800 text-center flex justify-center bg-white dark:bg-[#07111f]">
         <img
           src="https://ugelsanta.gob.pe/wp-content/uploads/2026/02/Logo_US3.png"
           alt="Logo UGEL"
@@ -75,31 +106,14 @@ const DirectorSidebar = ({
       </div>
 
       <nav className="flex-1 p-4 space-y-1.5 overflow-y-auto">
-        {menuItems.map((item) => (
-          <button
-            key={item.id}
-            type="button"
-            onClick={() => setActiveTab(item.id)}
-            className={`group relative w-full flex items-center justify-start gap-3 overflow-hidden px-4 py-3 rounded-xl text-sm text-left transition-all duration-200 ${
-              activeTab === item.id
-                ? 'bg-blue-50 text-blue-700 font-bold shadow-sm ring-1 ring-blue-100 dark:bg-blue-600 dark:text-white dark:ring-blue-500/40'
-                : 'text-slate-600 hover:bg-blue-50/80 hover:text-blue-700 hover:shadow-sm font-semibold dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white'
-            }`}
-          >
-            <span
-              className={`absolute left-0 top-2 bottom-2 w-1 rounded-r-full transition-all duration-200 ${
-                activeTab === item.id ? 'bg-blue-600 opacity-100' : 'bg-blue-500 opacity-0 group-hover:opacity-100'
-              }`}
-            />
-            <span className={`shrink-0 transition-transform duration-200 ${activeTab === item.id ? 'translate-x-0.5' : 'group-hover:translate-x-0.5'}`}>
-              {item.icon}
-            </span>
-            <span>{item.label}</span>
-          </button>
-        ))}
+        <p className={sectionLabelClass}>Movimientos</p>
+        {movimientoItems.map(renderNavItem)}
+
+        <p className={sectionLabelClass}>Datos</p>
+        {datosItems.map(renderNavItem)}
       </nav>
 
-      <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 relative">
+      <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-[#091426] relative">
         <div className="mb-4 space-y-2">
           <p className="px-1 text-xs font-extrabold uppercase tracking-[0.18em] text-blue-700 dark:text-blue-300">
             Configuracion

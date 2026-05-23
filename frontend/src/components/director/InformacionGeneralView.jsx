@@ -12,7 +12,7 @@ const obtenerNombreCompleto = (director) => {
   return partes.length > 0 ? partes.join(' ') : 'No disponible';
 };
 
-const InformacionGeneralView = ({ director }) => {
+const InformacionGeneralView = ({ director, section = 'perfil' }) => {
   const [formData, setFormData] = useState({
     nombre_tesorero: '',
     dni_tesorero: '',
@@ -109,10 +109,14 @@ const InformacionGeneralView = ({ director }) => {
     { label: 'Correo', value: director?.email || director?.correo || 'No disponible' },
   ];
 
+  const cardClass = 'bg-white p-6 md:p-8 rounded-[28px] shadow-[0_24px_60px_-30px_rgba(15,23,42,0.45)] border border-slate-200';
+  const inputClass = 'w-full rounded-xl border border-gray-300 px-4 py-3 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all hover:border-gray-400 bg-white';
+
   return (
     <div className="py-8 px-4 max-w-5xl mx-auto space-y-8">
       {/* 1. Tarjeta de Datos del Director (Solo Lectura) */}
-      <div className="bg-white p-6 md:p-8 rounded-[28px] shadow-[0_24px_60px_-30px_rgba(15,23,42,0.45)] border border-slate-200">
+      {section === 'perfil' && (
+      <div className={cardClass}>
         <h2 className="text-xl font-bold text-gray-800 mb-2">DATOS DEL DIRECTOR</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -124,9 +128,11 @@ const InformacionGeneralView = ({ director }) => {
           ))}
         </div>
       </div>
+      )}
 
       {/* 2. Tarjeta de Datos del Comité (Formulario) */}
-      <div className="bg-white p-6 md:p-8 rounded-[28px] shadow-[0_24px_60px_-30px_rgba(15,23,42,0.45)] border border-slate-200">
+      {section === 'tesorero' && (
+      <div className={cardClass}>
         <div className="mb-6">
           <h2 className="text-xl font-bold text-gray-800 mb-2">DATOS DEL TESORERO(A)</h2>
         </div>
@@ -145,7 +151,7 @@ const InformacionGeneralView = ({ director }) => {
                   name="nombre_tesorero"
                   value={formData.nombre_tesorero}
                   onChange={handleInputChange}
-                  className="w-full rounded-xl border border-gray-300 px-4 py-3 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all hover:border-gray-400 bg-white"
+                  className={inputClass}
                   placeholder="Nombre completo"
                 />
               </div>
@@ -157,7 +163,7 @@ const InformacionGeneralView = ({ director }) => {
                   name="dni_tesorero"
                   value={formData.dni_tesorero}
                   onChange={handleInputChange}
-                  className="w-full rounded-xl border border-gray-300 px-4 py-3 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all hover:border-gray-400 bg-white"
+                  className={inputClass}
                   placeholder="8 dígitos"
                   maxLength="8"
                   inputMode="numeric"
@@ -171,7 +177,7 @@ const InformacionGeneralView = ({ director }) => {
                   name="celular_tesorero"
                   value={formData.celular_tesorero}
                   onChange={handleInputChange}
-                  className="w-full rounded-xl border border-gray-300 px-4 py-3 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all hover:border-gray-400 bg-white"
+                  className={inputClass}
                   placeholder="9 dígitos"
                   maxLength="9"
                   inputMode="numeric"
@@ -209,9 +215,11 @@ const InformacionGeneralView = ({ director }) => {
           </form>
         )}
       </div>
+      )}
 
       {/* 3. Tarjeta de Cuenta Corriente */}
-      <div className="bg-white p-6 md:p-8 rounded-[28px] shadow-[0_24px_60px_-30px_rgba(15,23,42,0.45)] border border-slate-200">
+      {section === 'cuenta' && (
+      <div className={cardClass}>
         <div className="mb-6">
           <h2 className="text-xl font-bold text-gray-800 mb-2">CUENTA CORRIENTE - BANCO DE LA NACION</h2>
         </div>
@@ -229,7 +237,7 @@ const InformacionGeneralView = ({ director }) => {
                 name="numero_cuenta_corriente"
                 value={formData.numero_cuenta_corriente}
                 onChange={handleInputChange}
-                className="w-full rounded-xl border border-gray-300 px-4 py-3 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all hover:border-gray-400 bg-white"
+                className={inputClass}
                 placeholder="Número de cuenta corriente"
               />
             </div>
@@ -262,6 +270,7 @@ const InformacionGeneralView = ({ director }) => {
           </form>
         )}
       </div>
+      )}
     </div>
   );
 };
