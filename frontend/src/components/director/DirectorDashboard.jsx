@@ -66,10 +66,22 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
   };
 
   const currentSysYear = new Date().getFullYear();
+  const trimestreActualSistema = obtenerTrimestreActual();
   const [anioActual, setAnioActual] = useState(currentSysYear >= 2026 ? currentSysYear : 2026);
   
   const anioTope = Math.max(2026, currentSysYear) + 1; // Un año al futuro por si acaso
   const aniosDisponibles = Array.from({ length: anioTope - 2026 + 1 }, (_, i) => 2026 + i);
+  const trimestresDisponibles = [
+    { id: '1', label: '1er Trimestre' },
+    { id: '2', label: '2do Trimestre' },
+    { id: '3', label: '3er Trimestre' },
+    { id: '4', label: '4to Trimestre' },
+  ];
+  const maxTrimestrePermitido = anioActual < currentSysYear
+    ? 4
+    : anioActual === currentSysYear
+      ? Number(trimestreActualSistema)
+      : 0;
   
   // Cálculos en tiempo real para las fechas de cierre
   const fechaLimite = obtenerFechaLimite(trimestreId, anioActual);
@@ -159,6 +171,17 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
       setIsChangePasswordOpen(true);
     }
   }, [cambioObligatorioPendiente]);
+
+  useEffect(() => {
+    if (anioActual > currentSysYear) {
+      setAnioActual(currentSysYear >= 2026 ? currentSysYear : 2026);
+      return;
+    }
+
+    if (Number(trimestreId) > maxTrimestrePermitido) {
+      setTrimestreId(String(maxTrimestrePermitido || 1));
+    }
+  }, [anioActual, currentSysYear, maxTrimestrePermitido, trimestreId]);
 
   useEffect(() => {
     const cargarEstadoCierre = async () => {
@@ -281,7 +304,7 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
         className="bg-blue-50 dark:bg-slate-700 border border-blue-200 dark:border-slate-600 text-blue-700 dark:text-slate-200 py-2 px-4 rounded-lg font-bold outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-60"
       >
         {aniosDisponibles.map((anio) => (
-          <option key={anio} value={anio}>{anio}</option>
+          <option key={anio} value={anio} disabled={anio > currentSysYear}>{anio}</option>
         ))}
       </select>
 
@@ -291,10 +314,15 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
               disabled={cambioObligatorioPendiente}
               className="bg-blue-50 dark:bg-slate-700 border border-blue-200 dark:border-slate-600 text-blue-700 dark:text-slate-200 py-2 px-4 rounded-lg font-bold outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-60"
             >
-              <option value="1">1er Trimestre</option>
-              <option value="2">2do Trimestre</option>
-              <option value="3">3er Trimestre</option>
-              <option value="4">4to Trimestre</option>
+              {trimestresDisponibles.map((trimestre) => (
+                <option
+                  key={trimestre.id}
+                  value={trimestre.id}
+                  disabled={Number(trimestre.id) > maxTrimestrePermitido}
+                >
+                  {trimestre.label}
+                </option>
+              ))}
             </select>
             
             {/* Dropdown de Notificaciones (Alertas + BD) */}
