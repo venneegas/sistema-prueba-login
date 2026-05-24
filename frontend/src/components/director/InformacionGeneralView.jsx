@@ -1,16 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Save } from 'lucide-react';
 import { buildApiUrl } from '../../config/api';
-
-const obtenerNombreCompleto = (director) => {
-  const partes = [
-    director?.nombres,
-    director?.apellido_paterno,
-    director?.apellido_materno,
-  ].filter(Boolean);
-
-  return partes.length > 0 ? partes.join(' ') : 'No disponible';
-};
+import PerfilDirectorView from './perfil/PerfilDirectorView';
 
 const InformacionGeneralView = ({ director, section = 'perfil' }) => {
   const [formData, setFormData] = useState({
@@ -102,34 +93,15 @@ const InformacionGeneralView = ({ director, section = 'perfil' }) => {
     }
   };
 
-  const datosDirector = [
-    { label: 'Director(a)', value: obtenerNombreCompleto(director) },
-    { label: 'DNI', value: director?.dni || 'No disponible' },
-    { label: 'Celular', value: director?.celular || 'No disponible' },
-    { label: 'Correo', value: director?.email || director?.correo || 'No disponible' },
-  ];
-
   const cardClass = 'bg-white p-6 md:p-8 rounded-[28px] shadow-[0_24px_60px_-30px_rgba(15,23,42,0.45)] border border-slate-200';
   const inputClass = 'w-full rounded-xl border border-gray-300 px-4 py-3 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all hover:border-gray-400 bg-white';
 
+  if (section === 'perfil') {
+    return <PerfilDirectorView director={director} />;
+  }
+
   return (
     <div className="py-8 px-4 max-w-5xl mx-auto space-y-8">
-      {/* 1. Tarjeta de Datos del Director (Solo Lectura) */}
-      {section === 'perfil' && (
-      <div className={cardClass}>
-        <h2 className="text-xl font-bold text-gray-800 mb-2">DATOS DEL DIRECTOR</h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {datosDirector.map((item) => (
-            <div key={item.label} className="rounded-xl border border-gray-200 bg-gradient-to-b from-gray-50 to-white px-5 py-4 shadow-sm hover:shadow-md transition-all">
-              <p className="text-xs uppercase tracking-wide text-gray-500 font-semibold">{item.label}</p>
-              <p className="text-base font-semibold text-gray-800 mt-1 break-words">{item.value}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-      )}
-
       {/* 2. Tarjeta de Datos del Comité (Formulario) */}
       {section === 'tesorero' && (
       <div className={cardClass}>

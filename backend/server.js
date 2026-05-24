@@ -13,6 +13,7 @@ const especialistaRoutes = require('./routes/especialistaRoutes');
 const notificacionesRoutes = require('./routes/notificacionesRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const solicitudesRoutes = require('./routes/solicitudesRoutes');
+const perfilRoutes = require('./routes/perfilRoutes');
 
 
 const app = express();
@@ -56,6 +57,7 @@ app.use('/api/notificaciones', notificacionesRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/solicitudes-reemplazo', solicitudesRoutes);
 app.use('/api/comprobantes', require('./routes/comprobantes'));
+app.use('/api/perfil', perfilRoutes);
 
 // Ruta de prueba
 app.get('/', (req, res) => {
