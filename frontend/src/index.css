@@ -7,3 +7,25 @@ input::-ms-reveal,
 input::-ms-clear {
   display: none;
 }
+
+@keyframes director-view-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.director-view-enter {
+  animation: director-view-enter 220ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .director-view-enter {
+    animation: none;
+  }
+}

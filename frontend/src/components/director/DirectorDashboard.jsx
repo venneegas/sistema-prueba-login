@@ -399,7 +399,7 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
             </p>
           </div>
         ) : (
-          <>
+          <div key={activeTab} className="director-view-enter">
             {activeTab === 'general' && (
               <ConsolidadoView
                 trimestreId={trimestreId}
@@ -450,7 +450,7 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
 
             {activeTab === 'informacion' && <InformacionGeneralView director={user.director} section="perfil" />}
             {activeTab === 'tesoreria' && <InformacionGeneralView director={user.director} section="tesoreria" />}
-          </>
+          </div>
         )}
         </div>
 
