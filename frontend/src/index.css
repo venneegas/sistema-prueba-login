@@ -31,7 +31,7 @@ input::-ms-clear {
 }
 
 .welcome-splash {
-  animation: welcome-splash-enter 240ms ease-out both;
+  opacity: 1;
 }
 
 .welcome-splash--leaving {
@@ -40,16 +40,6 @@ input::-ms-clear {
 
 .welcome-splash__content {
   animation: welcome-splash-content 520ms ease-out 120ms both;
-}
-
-@keyframes welcome-splash-enter {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
 }
 
 @keyframes welcome-splash-exit {
