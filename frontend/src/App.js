@@ -3,10 +3,12 @@ import LoginForm from './components/LoginForm';
 import DirectorDashboard from './components/director/DirectorDashboard';
 import EspecialistaDashboard from './components/especialista/EspecialistaDashboard';
 import AdminDashboard from './components/admin/AdminDashboard';
+import WelcomeSplash from './components/WelcomeSplash';
 
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showWelcomeSplash, setShowWelcomeSplash] = useState(false);
 
   useEffect(() => {
     // Recuperar sesión persistente si el usuario da F5
@@ -23,12 +25,14 @@ function App() {
 
   const handleLoginSuccess = (userData) => {
     setUser(userData);
+    setShowWelcomeSplash(true);
   };
 
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setUser(null);
+    setShowWelcomeSplash(false);
   };
 
   if (loading) {
@@ -43,23 +47,34 @@ function App() {
   // 2. ENRUTADOR POR ROLES: Si es Especialista
   if (user.rol === 'especialista') {
     return (
-      <EspecialistaDashboard user={user} onLogout={handleLogout} />
+      <>
+        <EspecialistaDashboard user={user} onLogout={handleLogout} />
+        {showWelcomeSplash && <WelcomeSplash user={user} onDone={() => setShowWelcomeSplash(false)} />}
+      </>
     );
   }
 
   // 3. ENRUTADOR POR ROLES: Si es Administrador del Sistema
   if (user.rol === 'admin') {
-    return <AdminDashboard user={user} onLogout={handleLogout} />;
+    return (
+      <>
+        <AdminDashboard user={user} onLogout={handleLogout} />
+        {showWelcomeSplash && <WelcomeSplash user={user} onDone={() => setShowWelcomeSplash(false)} />}
+      </>
+    );
   }
 
   // 4. ENRUTADOR POR ROLES: Si es Director
   if (user.rol === 'director') {
     return (
-      <DirectorDashboard 
-        user={user} 
-        onLogout={handleLogout} 
-        onUserUpdate={setUser} 
-      />
+      <>
+        <DirectorDashboard 
+          user={user} 
+          onLogout={handleLogout} 
+          onUserUpdate={setUser} 
+        />
+        {showWelcomeSplash && <WelcomeSplash user={user} onDone={() => setShowWelcomeSplash(false)} />}
+      </>
     );
   }
 

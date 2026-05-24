@@ -139,9 +139,9 @@ const DirectorSidebar = ({
         {!isCollapsed && <p className={sectionLabelClass}>Configuracion</p>}
         {[
           { id: 'solicitud', label: 'SOLICITUD', description: 'Solicita el reemplazo del director o responsable registrado.', icon: <UserMinus size={18} />, onClick: onRequestReplacementClick },
-          { id: 'credenciales', label: 'CREDENCIALES', description: 'Cambia la contrasena de acceso de tu cuenta.', icon: <Key size={18} />, onClick: onChangePasswordClick },
+          { id: 'credenciales', label: 'CREDENCIALES', description: 'Cambia la contraseña de acceso de tu cuenta.', icon: <Key size={18} />, onClick: onChangePasswordClick },
           { id: 'tema', label: isDarkMode ? 'TEMA CLARO' : 'TEMA OSCURO', description: 'Alterna la apariencia entre modo claro y oscuro.', icon: isDarkMode ? <Sun size={18} /> : <Moon size={18} />, onClick: toggleDarkMode },
-          { id: 'soporte', label: 'SOPORTE', description: 'Consulta telefono, correo y horario de atencion UGEL.', icon: <HelpCircle size={18} />, onClick: () => setIsSoporteOpen(true) },
+          { id: 'soporte', label: 'SOPORTE', description: 'Consulta teléfono, correo y horario de atención UGEL.', icon: <HelpCircle size={18} />, onClick: () => setIsSoporteOpen(true) },
         ].map(renderSidebarAction)}
       </nav>
 
@@ -153,7 +153,7 @@ const DirectorSidebar = ({
               <div className="flex items-center justify-between p-5 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
                 <h3 className="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
                   <HelpCircle className="text-blue-500" size={20} />
-                  Soporte Tecnico UGEL
+                  Soporte Técnico UGEL
                 </h3>
                 <button
                   type="button"
@@ -174,7 +174,7 @@ const DirectorSidebar = ({
                       <Phone size={20} />
                     </div>
                     <div>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Telefono / WhatsApp</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Teléfono / WhatsApp</p>
                       <p className="text-sm font-bold text-slate-800 dark:text-slate-200">986675438</p>
                     </div>
                   </div>
@@ -183,7 +183,7 @@ const DirectorSidebar = ({
                       <Mail size={20} />
                     </div>
                     <div>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Correo Electronico</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Correo Electrónico</p>
                       <p className="text-sm font-bold text-slate-800 dark:text-slate-200 break-all">recursos_propios_ie@ugelsanta.gob.pe</p>
                     </div>
                   </div>
@@ -192,7 +192,7 @@ const DirectorSidebar = ({
                       <Clock size={20} />
                     </div>
                     <div>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Horario de Atencion</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Horario de Atención</p>
                       <p className="text-sm font-bold text-slate-800 dark:text-slate-200">Lunes a Viernes de 8:00 AM a 5:00 PM</p>
                     </div>
                   </div>
@@ -236,7 +236,7 @@ const DirectorSidebar = ({
               })()}
             </p>
             <p className="text-xs font-medium text-slate-500 dark:text-slate-400 truncate text-ellipsis">
-              {user?.director?.school || user?.colegio || 'Institucion Educativa'}
+              {user?.director?.school || user?.colegio || 'Institución Educativa'}
             </p>
           </div>}
         </div>
@@ -244,11 +244,11 @@ const DirectorSidebar = ({
         <button
           type="button"
           onClick={onLogoutClick}
-          title={isCollapsed ? 'Cerrar Sesion' : undefined}
+          title={isCollapsed ? 'Cerrar Sesión' : undefined}
           className={`w-full flex items-center justify-center gap-2 ${isCollapsed ? 'px-0 py-3' : 'px-4 py-2.5'} bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-500/10 dark:text-red-400 dark:hover:bg-red-500 dark:hover:text-white rounded-xl transition-colors font-bold text-sm`}
         >
           <LogOut size={18} />
-          {!isCollapsed && <span>Cerrar Sesion</span>}
+          {!isCollapsed && <span>Cerrar Sesión</span>}
         </button>
       </div>
     </aside>
