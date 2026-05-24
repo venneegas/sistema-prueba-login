@@ -46,15 +46,15 @@ const DirectorSidebar = ({
   }, []);
 
   const movimientoItems = [
-    { id: 'general', label: 'CONSOLIDADO', icon: <LayoutDashboard size={18} /> },
-    { id: 'ingresos', label: 'INGRESOS', icon: <FolderOpen size={18} /> },
-    { id: 'egresos', label: 'EGRESOS', icon: <FolderOpen size={18} /> },
-    { id: 'facturas', label: 'SUBIR PDF', icon: <UploadCloud size={18} /> },
+    { id: 'general', label: 'CONSOLIDADO', description: 'Revisa el resumen trimestral de ingresos, egresos y saldo.', icon: <LayoutDashboard size={18} /> },
+    { id: 'ingresos', label: 'INGRESOS', description: 'Registra y consulta los ingresos del trimestre.', icon: <FolderOpen size={18} /> },
+    { id: 'egresos', label: 'EGRESOS', description: 'Registra y consulta los egresos sustentados.', icon: <FolderOpen size={18} /> },
+    { id: 'facturas', label: 'SUBIR PDF', description: 'Adjunta los sustentos PDF para su revision.', icon: <UploadCloud size={18} /> },
   ];
 
   const datosItems = [
-    { id: 'informacion', label: 'PERFIL', icon: <UserRound size={18} /> },
-    { id: 'tesoreria', label: 'TESORERIA', icon: <WalletCards size={18} /> },
+    { id: 'informacion', label: 'PERFIL', description: 'Actualiza la foto del director y el escudo institucional.', icon: <UserRound size={18} /> },
+    { id: 'tesoreria', label: 'TESORERIA', description: 'Registra datos del tesorero y cuenta corriente.', icon: <WalletCards size={18} /> },
   ];
 
   const toggleDarkMode = () => {
@@ -71,30 +71,43 @@ const DirectorSidebar = ({
 
   const sectionLabelClass = 'px-4 pt-4 pb-1 text-[11px] font-extrabold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500';
 
-  const renderSidebarAction = (item) => (
-    <button
-      key={item.id}
-      type="button"
-      onClick={item.onClick || (() => setActiveTab(item.id))}
-      title={isCollapsed ? item.label : undefined}
-      className={`group relative w-full flex items-center overflow-hidden rounded-xl text-sm text-left transition-all duration-200 ${
-        isCollapsed ? 'justify-center px-0 py-3' : 'justify-start gap-3 px-4 py-3'
-      } ${
-        activeTab === item.id
-          ? 'bg-blue-50 text-blue-700 font-bold shadow-sm ring-1 ring-blue-100 dark:bg-blue-600 dark:text-white dark:ring-blue-500/40'
-          : 'text-slate-600 hover:bg-blue-50/80 hover:text-blue-700 hover:shadow-sm font-semibold dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white'
-      }`}
-    >
-      <span
-        className={`absolute left-0 top-2 bottom-2 w-1 rounded-r-full transition-all duration-200 ${
-          activeTab === item.id ? 'bg-blue-600 opacity-100' : 'bg-blue-500 opacity-0 group-hover:opacity-100'
-        }`}
-      />
-      <span className={`shrink-0 transition-transform duration-200 ${activeTab === item.id ? 'translate-x-0.5' : 'group-hover:translate-x-0.5'}`}>
-        {item.icon}
+  const renderTooltip = (item) => (
+    <span className="pointer-events-none absolute left-[calc(100%+0.75rem)] top-1/2 z-50 w-64 -translate-y-1/2 translate-x-1 rounded-xl border border-slate-200 bg-white px-4 py-3 text-left opacity-0 shadow-[0_18px_45px_-22px_rgba(15,23,42,0.6)] transition-all duration-150 group-hover/sidebar-item:translate-x-0 group-hover/sidebar-item:opacity-100 group-focus-within/sidebar-item:translate-x-0 group-focus-within/sidebar-item:opacity-100 dark:border-slate-700 dark:bg-slate-900">
+      <span className="block text-[11px] font-extrabold uppercase tracking-[0.16em] text-blue-600 dark:text-blue-300">
+        {item.label}
       </span>
-      {!isCollapsed && <span>{item.label}</span>}
-    </button>
+      <span className="mt-1 block text-xs font-medium leading-5 text-slate-600 dark:text-slate-300">
+        {item.description}
+      </span>
+    </span>
+  );
+
+  const renderSidebarAction = (item) => (
+    <div key={item.id} className="group/sidebar-item relative">
+      <button
+        type="button"
+        onClick={item.onClick || (() => setActiveTab(item.id))}
+        aria-label={item.description ? `${item.label}: ${item.description}` : item.label}
+        className={`group relative w-full flex items-center overflow-hidden rounded-xl text-sm text-left transition-all duration-200 ${
+          isCollapsed ? 'justify-center px-0 py-3' : 'justify-start gap-3 px-4 py-3'
+        } ${
+          activeTab === item.id
+            ? 'bg-blue-50 text-blue-700 font-bold shadow-sm ring-1 ring-blue-100 dark:bg-blue-600 dark:text-white dark:ring-blue-500/40'
+            : 'text-slate-600 hover:bg-blue-50/80 hover:text-blue-700 hover:shadow-sm font-semibold dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white'
+        }`}
+      >
+        <span
+          className={`absolute left-0 top-2 bottom-2 w-1 rounded-r-full transition-all duration-200 ${
+            activeTab === item.id ? 'bg-blue-600 opacity-100' : 'bg-blue-500 opacity-0 group-hover:opacity-100'
+          }`}
+        />
+        <span className={`shrink-0 transition-transform duration-200 ${activeTab === item.id ? 'translate-x-0.5' : 'group-hover:translate-x-0.5'}`}>
+          {item.icon}
+        </span>
+        {!isCollapsed && <span>{item.label}</span>}
+      </button>
+      {item.description && renderTooltip(item)}
+    </div>
   );
 
   return (
@@ -116,7 +129,7 @@ const DirectorSidebar = ({
         </button>
       </div>
 
-      <nav className={`${isCollapsed ? 'p-3' : 'p-4'} flex-1 space-y-1.5 overflow-y-auto`}>
+      <nav className={`${isCollapsed ? 'p-3' : 'p-4'} flex-1 space-y-1.5 overflow-visible`}>
         {!isCollapsed && <p className={sectionLabelClass}>Movimientos</p>}
         {movimientoItems.map(renderSidebarAction)}
 
@@ -125,10 +138,10 @@ const DirectorSidebar = ({
 
         {!isCollapsed && <p className={sectionLabelClass}>Configuracion</p>}
         {[
-          { id: 'solicitud', label: 'SOLICITUD', icon: <UserMinus size={18} />, onClick: onRequestReplacementClick },
-          { id: 'credenciales', label: 'CREDENCIALES', icon: <Key size={18} />, onClick: onChangePasswordClick },
-          { id: 'tema', label: isDarkMode ? 'TEMA CLARO' : 'TEMA OSCURO', icon: isDarkMode ? <Sun size={18} /> : <Moon size={18} />, onClick: toggleDarkMode },
-          { id: 'soporte', label: 'SOPORTE', icon: <HelpCircle size={18} />, onClick: () => setIsSoporteOpen(true) },
+          { id: 'solicitud', label: 'SOLICITUD', description: 'Solicita el reemplazo del director o responsable registrado.', icon: <UserMinus size={18} />, onClick: onRequestReplacementClick },
+          { id: 'credenciales', label: 'CREDENCIALES', description: 'Cambia la contrasena de acceso de tu cuenta.', icon: <Key size={18} />, onClick: onChangePasswordClick },
+          { id: 'tema', label: isDarkMode ? 'TEMA CLARO' : 'TEMA OSCURO', description: 'Alterna la apariencia entre modo claro y oscuro.', icon: isDarkMode ? <Sun size={18} /> : <Moon size={18} />, onClick: toggleDarkMode },
+          { id: 'soporte', label: 'SOPORTE', description: 'Consulta telefono, correo y horario de atencion UGEL.', icon: <HelpCircle size={18} />, onClick: () => setIsSoporteOpen(true) },
         ].map(renderSidebarAction)}
       </nav>
 
