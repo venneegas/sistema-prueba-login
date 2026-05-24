@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Bell, PanelLeftOpen } from 'lucide-react';
+import { Bell } from 'lucide-react';
 import DirectorSidebar from './DirectorSidebar';
 import LogoutModal from '../LogoutModal';
 import ChangePasswordModal from '../ChangePasswordModal';
@@ -53,7 +53,7 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
   const [errorCierre, setErrorCierre] = useState('');
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [notificaciones, setNotificaciones] = useState([]);
-  const [isSidebarVisible, setIsSidebarVisible] = useState(true);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const dropdownRef = useRef(null);
 
   const cambioObligatorioPendiente = Boolean(user?.debeCambiarPassword);
@@ -245,32 +245,20 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
 
   return (
     <div className="flex h-screen bg-slate-100 dark:bg-[#111827]">
-      {isSidebarVisible && (
-        <DirectorSidebar
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          onLogoutClick={() => setIsLogoutModalOpen(true)}
-          onChangePasswordClick={() => setIsChangePasswordOpen(true)}
-          onRequestReplacementClick={() => setIsSolicitudReemplazoOpen(true)}
-          onHideSidebar={() => setIsSidebarVisible(false)}
-          user={user}
-        />
-      )}
+      <DirectorSidebar
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        onLogoutClick={() => setIsLogoutModalOpen(true)}
+        onChangePasswordClick={() => setIsChangePasswordOpen(true)}
+        onRequestReplacementClick={() => setIsSolicitudReemplazoOpen(true)}
+        isCollapsed={isSidebarCollapsed}
+        onToggleCollapse={() => setIsSidebarCollapsed((prev) => !prev)}
+        user={user}
+      />
 
       <main className="flex-1 overflow-y-auto bg-[radial-gradient(circle_at_top_left,_rgba(37,99,235,0.08),_transparent_30%),linear-gradient(180deg,_#f8fbff_0%,_#eef3f8_100%)] p-8 dark:bg-none dark:bg-[#111827]">
         <div className="mx-auto max-w-7xl">
         <div className="mb-6 flex justify-between items-center bg-white/90 dark:bg-slate-800/95 p-5 rounded-2xl shadow-[0_14px_40px_-28px_rgba(15,23,42,0.8)] border border-slate-200/80 dark:border-slate-700 backdrop-blur">
-          <div className="flex items-center gap-4">
-            {!isSidebarVisible && (
-              <button
-                type="button"
-                onClick={() => setIsSidebarVisible(true)}
-                className="flex h-11 w-11 items-center justify-center rounded-xl border border-blue-200 bg-blue-50 text-blue-700 transition-all hover:bg-blue-100 hover:shadow-sm dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
-                title="Mostrar menu"
-              >
-                <PanelLeftOpen size={21} />
-              </button>
-            )}
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-blue-600 dark:text-blue-300">
               Panel de Director
@@ -283,7 +271,6 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
                 Debes cambiar tu contrasena temporal antes de usar el sistema.
               </p>
             )}
-          </div>
           </div>
 
           <div className="flex items-center gap-4">

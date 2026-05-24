@@ -13,6 +13,7 @@ import {
   WalletCards,
   X,
   PanelLeftClose,
+  PanelLeftOpen,
   Phone,
   Mail,
   Clock,
@@ -25,7 +26,8 @@ const DirectorSidebar = ({
   onLogoutClick,
   onChangePasswordClick,
   onRequestReplacementClick,
-  onHideSidebar,
+  isCollapsed = false,
+  onToggleCollapse,
   user,
 }) => {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -74,7 +76,10 @@ const DirectorSidebar = ({
       key={item.id}
       type="button"
       onClick={item.onClick || (() => setActiveTab(item.id))}
-      className={`group relative w-full flex items-center justify-start gap-3 overflow-hidden px-4 py-3 rounded-xl text-sm text-left transition-all duration-200 ${
+      title={isCollapsed ? item.label : undefined}
+      className={`group relative w-full flex items-center overflow-hidden rounded-xl text-sm text-left transition-all duration-200 ${
+        isCollapsed ? 'justify-center px-0 py-3' : 'justify-start gap-3 px-4 py-3'
+      } ${
         activeTab === item.id
           ? 'bg-blue-50 text-blue-700 font-bold shadow-sm ring-1 ring-blue-100 dark:bg-blue-600 dark:text-white dark:ring-blue-500/40'
           : 'text-slate-600 hover:bg-blue-50/80 hover:text-blue-700 hover:shadow-sm font-semibold dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white'
@@ -88,37 +93,37 @@ const DirectorSidebar = ({
       <span className={`shrink-0 transition-transform duration-200 ${activeTab === item.id ? 'translate-x-0.5' : 'group-hover:translate-x-0.5'}`}>
         {item.icon}
       </span>
-      <span>{item.label}</span>
+      {!isCollapsed && <span>{item.label}</span>}
     </button>
   );
 
   return (
-    <aside className="w-64 bg-white dark:bg-[#07111f] text-slate-800 dark:text-white h-full flex flex-col shadow-[10px_0_35px_-28px_rgba(15,23,42,0.9)] z-20 border-r border-slate-200 dark:border-slate-800">
-      <div className="relative p-6 border-b border-slate-200 dark:border-slate-800 text-center flex justify-center bg-white dark:bg-[#07111f]">
+    <aside className={`${isCollapsed ? 'w-20' : 'w-64'} bg-white dark:bg-[#07111f] text-slate-800 dark:text-white h-full flex flex-col shadow-[10px_0_35px_-28px_rgba(15,23,42,0.9)] z-20 border-r border-slate-200 dark:border-slate-800 transition-all duration-300`}>
+      <div className={`${isCollapsed ? 'px-3 py-5' : 'p-6'} relative border-b border-slate-200 dark:border-slate-800 text-center flex justify-center bg-white dark:bg-[#07111f]`}>
         <img
           src="https://ugelsanta.gob.pe/wp-content/uploads/2026/02/Logo_US3.png"
           alt="Logo UGEL"
-          className="h-16 w-auto object-contain drop-shadow-sm"
+          className={`${isCollapsed ? 'h-10 w-10 object-cover object-left' : 'h-16 w-auto object-contain'} drop-shadow-sm transition-all duration-300`}
           onError={(e) => { e.target.src = 'https://via.placeholder.com/150?text=Logo+UGEL'; }}
         />
         <button
           type="button"
-          onClick={onHideSidebar}
-          className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-all hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-slate-800 dark:hover:text-white"
-          title="Ocultar menu"
+          onClick={onToggleCollapse}
+          className={`${isCollapsed ? 'right-1 top-1 h-7 w-7' : 'right-3 top-3 h-8 w-8'} absolute flex items-center justify-center rounded-lg text-slate-400 transition-all hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-slate-800 dark:hover:text-white`}
+          title={isCollapsed ? 'Expandir menu' : 'Contraer menu'}
         >
-          <PanelLeftClose size={18} />
+          {isCollapsed ? <PanelLeftOpen size={17} /> : <PanelLeftClose size={18} />}
         </button>
       </div>
 
-      <nav className="flex-1 p-4 space-y-1.5 overflow-y-auto">
-        <p className={sectionLabelClass}>Movimientos</p>
+      <nav className={`${isCollapsed ? 'p-3' : 'p-4'} flex-1 space-y-1.5 overflow-y-auto`}>
+        {!isCollapsed && <p className={sectionLabelClass}>Movimientos</p>}
         {movimientoItems.map(renderSidebarAction)}
 
-        <p className={sectionLabelClass}>Datos</p>
+        {!isCollapsed && <p className={sectionLabelClass}>Datos</p>}
         {datosItems.map(renderSidebarAction)}
 
-        <p className={sectionLabelClass}>Configuracion</p>
+        {!isCollapsed && <p className={sectionLabelClass}>Configuracion</p>}
         {[
           { id: 'solicitud', label: 'SOLICITUD', icon: <UserMinus size={18} />, onClick: onRequestReplacementClick },
           { id: 'credenciales', label: 'CREDENCIALES', icon: <Key size={18} />, onClick: onChangePasswordClick },
@@ -127,7 +132,7 @@ const DirectorSidebar = ({
         ].map(renderSidebarAction)}
       </nav>
 
-      <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-[#091426] relative">
+      <div className={`${isCollapsed ? 'p-3' : 'p-4'} border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-[#091426] relative`}>
 
         {isSoporteOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
@@ -194,11 +199,11 @@ const DirectorSidebar = ({
           </div>
         )}
 
-        <div className="flex items-center gap-3 mb-4 px-2">
+        <div className={`${isCollapsed ? 'justify-center px-0' : 'gap-3 px-2'} flex items-center mb-4`}>
           <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-slate-800 flex items-center justify-center border-2 border-blue-200 dark:border-slate-600 shrink-0">
             <User size={20} className="text-blue-600 dark:text-slate-300" />
           </div>
-          <div className="overflow-hidden">
+          {!isCollapsed && <div className="overflow-hidden">
             <p className="text-sm font-bold truncate text-slate-800 dark:text-white">
               {(() => {
                 const nom = (user?.director?.nombres || user?.nombre || '').replace(/^Usuario\s+/i, '').trim();
@@ -220,16 +225,17 @@ const DirectorSidebar = ({
             <p className="text-xs font-medium text-slate-500 dark:text-slate-400 truncate text-ellipsis">
               {user?.director?.school || user?.colegio || 'Institucion Educativa'}
             </p>
-          </div>
+          </div>}
         </div>
 
         <button
           type="button"
           onClick={onLogoutClick}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-500/10 dark:text-red-400 dark:hover:bg-red-500 dark:hover:text-white rounded-xl transition-colors font-bold text-sm"
+          title={isCollapsed ? 'Cerrar Sesion' : undefined}
+          className={`w-full flex items-center justify-center gap-2 ${isCollapsed ? 'px-0 py-3' : 'px-4 py-2.5'} bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-500/10 dark:text-red-400 dark:hover:bg-red-500 dark:hover:text-white rounded-xl transition-colors font-bold text-sm`}
         >
           <LogOut size={18} />
-          <span>Cerrar Sesion</span>
+          {!isCollapsed && <span>Cerrar Sesion</span>}
         </button>
       </div>
     </aside>

@@ -101,7 +101,6 @@ const InformacionGeneralView = ({ director, section = 'perfil' }) => {
         <div className="space-y-6">
           <div className="px-1">
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-blue-600">Tesoreria</p>
-            <h2 className="mt-1 text-2xl font-black text-gray-800">Datos del tesorero y cuenta corriente</h2>
           </div>
 
           {loading ? (
