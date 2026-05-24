@@ -92,7 +92,8 @@ const InformacionGeneralView = ({ director, section = 'perfil' }) => {
     return <PerfilDirectorView director={director} />;
   }
 
-  const inputClass = 'w-full rounded-xl border border-gray-300 bg-white px-4 py-3 shadow-sm outline-none transition-all hover:border-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500';
+  const labelClass = 'mb-2 block text-[11px] font-extrabold uppercase tracking-[0.16em] text-slate-400';
+  const inputClass = 'w-full rounded-2xl border border-slate-200 bg-white px-5 py-4 text-[15px] font-bold leading-6 text-slate-950 shadow-sm outline-none transition-all placeholder:font-semibold placeholder:text-slate-400 hover:border-blue-200 hover:shadow-md focus:border-blue-400 focus:ring-2 focus:ring-blue-500/30';
 
   return (
     <div className="py-8 px-4 max-w-5xl mx-auto space-y-8">
@@ -113,7 +114,7 @@ const InformacionGeneralView = ({ director, section = 'perfil' }) => {
                 <h3 className="text-sm font-extrabold uppercase tracking-wide text-slate-900">Tesorero(a)</h3>
                 <div className="mt-5 grid grid-cols-1 gap-6 md:grid-cols-2">
                   <div>
-                    <label className="mb-2 block text-sm font-semibold text-gray-700">Nombre completo</label>
+                    <label className={labelClass}>Nombre completo</label>
                     <input
                       type="text"
                       name="nombre_tesorero"
@@ -125,7 +126,7 @@ const InformacionGeneralView = ({ director, section = 'perfil' }) => {
                   </div>
 
                   <div>
-                    <label className="mb-2 block text-sm font-semibold text-gray-700">DNI</label>
+                    <label className={labelClass}>DNI</label>
                     <input
                       type="text"
                       name="dni_tesorero"
@@ -139,7 +140,7 @@ const InformacionGeneralView = ({ director, section = 'perfil' }) => {
                   </div>
 
                   <div>
-                    <label className="mb-2 block text-sm font-semibold text-gray-700">Celular</label>
+                    <label className={labelClass}>Celular</label>
                     <input
                       type="text"
                       name="celular_tesorero"
@@ -158,7 +159,7 @@ const InformacionGeneralView = ({ director, section = 'perfil' }) => {
                 <h3 className="text-sm font-extrabold uppercase tracking-wide text-slate-900">Cuenta corriente</h3>
                 <div className="mt-5 grid grid-cols-1 gap-6 md:grid-cols-2">
                   <div>
-                    <label className="mb-2 block text-sm font-semibold text-gray-700">Banco</label>
+                    <label className={labelClass}>Banco</label>
                     <input
                       type="text"
                       name="banco"
@@ -170,7 +171,7 @@ const InformacionGeneralView = ({ director, section = 'perfil' }) => {
                   </div>
 
                   <div>
-                    <label className="mb-2 block text-sm font-semibold text-gray-700">Numero de cuenta corriente</label>
+                    <label className={labelClass}>Numero de cuenta corriente</label>
                     <input
                       type="text"
                       name="numero_cuenta_corriente"
