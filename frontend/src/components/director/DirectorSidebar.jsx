@@ -103,7 +103,7 @@ const DirectorSidebar = ({
         <img
           src="https://ugelsanta.gob.pe/wp-content/uploads/2026/02/Logo_US3.png"
           alt="Logo UGEL"
-          className={`${isCollapsed ? 'h-10 w-10 object-cover object-left' : 'h-16 w-auto object-contain'} drop-shadow-sm transition-all duration-300`}
+          className={`${isCollapsed ? 'mt-1 h-10 w-12 object-contain' : 'h-16 w-auto object-contain'} drop-shadow-sm transition-all duration-300`}
           onError={(e) => { e.target.src = 'https://via.placeholder.com/150?text=Logo+UGEL'; }}
         />
         <button

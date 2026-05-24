@@ -127,9 +127,6 @@ const PerfilDirectorView = ({ director }) => {
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.2em] text-blue-600">Perfil del director</p>
                 <h2 className="mt-2 text-3xl font-black leading-tight text-slate-950">{obtenerNombreCompleto(director)}</h2>
-                <p className="mt-2 text-sm font-semibold uppercase tracking-wide text-slate-500">
-                  {director?.school || 'Institucion Educativa'}
-                </p>
                 {loading && <p className="mt-2 text-sm font-semibold text-slate-400">Cargando perfil...</p>}
               </div>
             </div>
