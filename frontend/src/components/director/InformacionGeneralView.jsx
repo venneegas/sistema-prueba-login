@@ -98,20 +98,25 @@ const InformacionGeneralView = ({ director, section = 'perfil' }) => {
   return (
     <div className="py-8 px-4 max-w-5xl mx-auto space-y-8">
       {section === 'tesoreria' && (
-        <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_24px_60px_-30px_rgba(15,23,42,0.45)] md:p-8">
-          <div className="mb-6">
+        <div className="space-y-6">
+          <div className="px-1">
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-blue-600">Tesoreria</p>
             <h2 className="mt-1 text-2xl font-black text-gray-800">Datos del tesorero y cuenta corriente</h2>
           </div>
 
           {loading ? (
+            <div className="rounded-[28px] border border-slate-200 bg-white p-8 shadow-[0_24px_60px_-30px_rgba(15,23,42,0.45)]">
             <div className="flex justify-center py-8">
               <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
             </div>
+            </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-5">
-                <h3 className="text-sm font-extrabold uppercase tracking-wide text-slate-900">Tesorero(a)</h3>
+              <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_24px_60px_-30px_rgba(15,23,42,0.45)] md:p-8">
+                <div className="mb-5">
+                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">Responsable</p>
+                  <h3 className="mt-1 text-xl font-black text-slate-900">Tesorero(a)</h3>
+                </div>
                 <div className="mt-5 grid grid-cols-1 gap-6 md:grid-cols-2">
                   <div>
                     <label className={labelClass}>Nombre completo</label>
@@ -155,8 +160,11 @@ const InformacionGeneralView = ({ director, section = 'perfil' }) => {
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-5">
-                <h3 className="text-sm font-extrabold uppercase tracking-wide text-slate-900">Cuenta corriente</h3>
+              <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_24px_60px_-30px_rgba(15,23,42,0.45)] md:p-8">
+                <div className="mb-5">
+                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">Banco</p>
+                  <h3 className="mt-1 text-xl font-black text-slate-900">Cuenta corriente</h3>
+                </div>
                 <div className="mt-5 grid grid-cols-1 gap-6 md:grid-cols-2">
                   <div>
                     <label className={labelClass}>Banco</label>
@@ -195,7 +203,7 @@ const InformacionGeneralView = ({ director, section = 'perfil' }) => {
                 </div>
               )}
 
-              <div className="mt-8 flex justify-end border-t border-gray-100 pt-6">
+              <div className="flex justify-end rounded-[24px] border border-slate-200 bg-white px-6 py-5 shadow-[0_18px_45px_-34px_rgba(15,23,42,0.55)]">
                 <button
                   type="submit"
                   disabled={saving || !director?.id}

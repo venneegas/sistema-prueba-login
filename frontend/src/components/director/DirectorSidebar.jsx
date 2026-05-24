@@ -12,6 +12,7 @@ import {
   User,
   WalletCards,
   X,
+  PanelLeftClose,
   Phone,
   Mail,
   Clock,
@@ -24,6 +25,7 @@ const DirectorSidebar = ({
   onLogoutClick,
   onChangePasswordClick,
   onRequestReplacementClick,
+  onHideSidebar,
   user,
 }) => {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -92,13 +94,21 @@ const DirectorSidebar = ({
 
   return (
     <aside className="w-64 bg-white dark:bg-[#07111f] text-slate-800 dark:text-white h-full flex flex-col shadow-[10px_0_35px_-28px_rgba(15,23,42,0.9)] z-20 border-r border-slate-200 dark:border-slate-800">
-      <div className="p-6 border-b border-slate-200 dark:border-slate-800 text-center flex justify-center bg-white dark:bg-[#07111f]">
+      <div className="relative p-6 border-b border-slate-200 dark:border-slate-800 text-center flex justify-center bg-white dark:bg-[#07111f]">
         <img
           src="https://ugelsanta.gob.pe/wp-content/uploads/2026/02/Logo_US3.png"
           alt="Logo UGEL"
           className="h-16 w-auto object-contain drop-shadow-sm"
           onError={(e) => { e.target.src = 'https://via.placeholder.com/150?text=Logo+UGEL'; }}
         />
+        <button
+          type="button"
+          onClick={onHideSidebar}
+          className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-all hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-slate-800 dark:hover:text-white"
+          title="Ocultar menu"
+        >
+          <PanelLeftClose size={18} />
+        </button>
       </div>
 
       <nav className="flex-1 p-4 space-y-1.5 overflow-y-auto">
