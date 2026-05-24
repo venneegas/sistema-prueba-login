@@ -37,7 +37,11 @@ const leerRespuestaJson = async (response) => {
 
 const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
   const [activeTab, setActiveTab] = useState('general');
-  const [trimestreId, setTrimestreId] = useState('1');
+  const obtenerTrimestreActual = () => {
+    const mesActual = new Date().getMonth();
+    return String(Math.floor(mesActual / 3) + 1);
+  };
+  const [trimestreId, setTrimestreId] = useState(obtenerTrimestreActual);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
   const [isCerrarTrimestreOpen, setIsCerrarTrimestreOpen] = useState(false);

@@ -95,7 +95,6 @@ const PerfilDirectorView = ({ director }) => {
   };
 
   const datosDirector = [
-    { label: 'Director(a)', value: obtenerNombreCompleto(director) },
     { label: 'DNI', value: director?.dni || 'No disponible' },
     { label: 'Celular', value: director?.celular || 'No disponible' },
     { label: 'Correo', value: director?.email || director?.correo || 'No disponible' },
@@ -172,11 +171,11 @@ const PerfilDirectorView = ({ director }) => {
           />
         </div>
 
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
           {datosDirector.map((item) => (
-            <div key={item.label} className="rounded-xl border border-gray-200 bg-gradient-to-b from-gray-50 to-white px-5 py-4 shadow-sm hover:shadow-md transition-all">
-              <p className="text-xs uppercase tracking-wide text-gray-500 font-semibold">{item.label}</p>
-              <p className="text-base font-semibold text-gray-800 mt-1 break-words">{item.value}</p>
+            <div key={item.label} className="rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm transition-all hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md">
+              <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-slate-400">{item.label}</p>
+              <p className="mt-2 break-words text-[15px] font-bold leading-6 text-slate-950">{item.value}</p>
             </div>
           ))}
         </div>
