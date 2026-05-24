@@ -561,17 +561,17 @@ const ConsolidadoView = ({
               ))}
 
               <tr>
-                <td colSpan="2" className="border-b border-slate-200 bg-slate-50 px-5 py-3.5 text-right">
-                  <div className="flex items-center justify-end gap-4">
+                <td colSpan="2" className="border-b border-slate-200 bg-white px-5 py-3.5 text-right">
+                  <div className="flex items-center justify-end gap-3">
                     <Toast message={mensajeSaldos} type="success" onClose={() => setMensajeSaldos('')} />
                     <Toast message={errorSaldos} type="error" onClose={() => setErrorSaldos('')} />
                     <button
                       type="button"
                       onClick={guardarSaldos}
                       disabled={trimestreCerrado || savingSaldos}
-                      className="flex items-center gap-2 bg-sky-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-sky-700 transition-all shadow-md disabled:bg-slate-400 disabled:cursor-not-allowed"
+                      className="inline-flex items-center gap-2 rounded-xl border border-sky-200 bg-white px-4 py-2.5 text-sm font-extrabold text-sky-700 shadow-sm transition-all hover:-translate-y-0.5 hover:border-sky-300 hover:bg-sky-50 hover:shadow-md disabled:translate-y-0 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400 disabled:shadow-none"
                     >
-                      <Save size={18} /> {savingSaldos ? 'Guardando...' : 'Guardar Saldos Banco'}
+                      <Save size={17} /> {savingSaldos ? 'Guardando...' : 'Guardar saldos'}
                     </button>
                   </div>
                 </td>
