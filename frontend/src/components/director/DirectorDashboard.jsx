@@ -442,8 +442,7 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
             )}
 
             {activeTab === 'informacion' && <InformacionGeneralView director={user.director} section="perfil" />}
-            {activeTab === 'tesorero' && <InformacionGeneralView director={user.director} section="tesorero" />}
-            {activeTab === 'cuenta' && <InformacionGeneralView director={user.director} section="cuenta" />}
+            {activeTab === 'tesoreria' && <InformacionGeneralView director={user.director} section="tesoreria" />}
           </>
         )}
         </div>

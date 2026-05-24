@@ -9,13 +9,12 @@ const InformacionGeneralView = ({ director, section = 'perfil' }) => {
     dni_tesorero: '',
     celular_tesorero: '',
     numero_cuenta_corriente: '',
-    banco: 'Banco de la Nación'
+    banco: 'Banco de la Nacion',
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState(null);
 
-  // Efecto para cargar los datos del backend al abrir la pantalla
   useEffect(() => {
     if (director?.id) {
       fetchDatos();
@@ -30,15 +29,14 @@ const InformacionGeneralView = ({ director, section = 'perfil' }) => {
       setLoading(true);
       const response = await fetch(buildApiUrl(`/api/datos-institucionales/${director.id}`));
       const result = await response.json();
-      
+
       if (result.success && result.data) {
-        // Si el backend devuelve datos, poblamos el formulario
         setFormData({
           nombre_tesorero: result.data.nombre_tesorero || '',
           dni_tesorero: result.data.dni_tesorero || '',
           celular_tesorero: result.data.celular_tesorero || '',
           numero_cuenta_corriente: result.data.numero_cuenta_corriente || '',
-          banco: result.data.banco || 'Banco de la Nación'
+          banco: result.data.banco || 'Banco de la Nacion',
         });
       }
     } catch (error) {
@@ -51,16 +49,13 @@ const InformacionGeneralView = ({ director, section = 'perfil' }) => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
 
-    // Validación estricta para que DNI y celular solo acepten números
     if (name === 'dni_tesorero' || name === 'celular_tesorero') {
-      if (value !== '' && !/^\d+$/.test(value)) {
-        return; // Ignorar el cambio si se ingresa algo que no es un dígito
-      }
+      if (value !== '' && !/^\d+$/.test(value)) return;
     }
 
     setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -86,162 +81,141 @@ const InformacionGeneralView = ({ director, section = 'perfil' }) => {
       }
     } catch (error) {
       console.error('Error al guardar:', error);
-      setMessage({ type: 'error', text: 'Error de conexión con el servidor.' });
+      setMessage({ type: 'error', text: 'Error de conexion con el servidor.' });
     } finally {
       setSaving(false);
-      setTimeout(() => setMessage(null), 4000); // Ocultar alerta después de 4s
+      setTimeout(() => setMessage(null), 4000);
     }
   };
-
-  const cardClass = 'bg-white p-6 md:p-8 rounded-[28px] shadow-[0_24px_60px_-30px_rgba(15,23,42,0.45)] border border-slate-200';
-  const inputClass = 'w-full rounded-xl border border-gray-300 px-4 py-3 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all hover:border-gray-400 bg-white';
 
   if (section === 'perfil') {
     return <PerfilDirectorView director={director} />;
   }
 
+  const inputClass = 'w-full rounded-xl border border-gray-300 bg-white px-4 py-3 shadow-sm outline-none transition-all hover:border-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500';
+
   return (
     <div className="py-8 px-4 max-w-5xl mx-auto space-y-8">
-      {/* 2. Tarjeta de Datos del Comité (Formulario) */}
-      {section === 'tesorero' && (
-      <div className={cardClass}>
-        <div className="mb-6">
-          <h2 className="text-xl font-bold text-gray-800 mb-2">DATOS DEL TESORERO(A)</h2>
-        </div>
-
-        {loading ? (
-          <div className="flex justify-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      {section === 'tesoreria' && (
+        <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_24px_60px_-30px_rgba(15,23,42,0.45)] md:p-8">
+          <div className="mb-6">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-blue-600">Tesoreria</p>
+            <h2 className="mt-1 text-2xl font-black text-gray-800">Datos del tesorero y cuenta corriente</h2>
           </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Nombre completo</label>
-                <input
-                  type="text"
-                  name="nombre_tesorero"
-                  value={formData.nombre_tesorero}
-                  onChange={handleInputChange}
-                  className={inputClass}
-                  placeholder="Nombre completo"
-                />
-              </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">DNI</label>
-                <input
-                  type="text"
-                  name="dni_tesorero"
-                  value={formData.dni_tesorero}
-                  onChange={handleInputChange}
-                  className={inputClass}
-                  placeholder="8 dígitos"
-                  maxLength="8"
-                  inputMode="numeric"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Celular</label>
-                <input
-                  type="text"
-                  name="celular_tesorero"
-                  value={formData.celular_tesorero}
-                  onChange={handleInputChange}
-                  className={inputClass}
-                  placeholder="9 dígitos"
-                  maxLength="9"
-                  inputMode="numeric"
-                />
-              </div>
-
+          {loading ? (
+            <div className="flex justify-center py-8">
+              <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
             </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-5">
+                <h3 className="text-sm font-extrabold uppercase tracking-wide text-slate-900">Tesorero(a)</h3>
+                <div className="mt-5 grid grid-cols-1 gap-6 md:grid-cols-2">
+                  <div>
+                    <label className="mb-2 block text-sm font-semibold text-gray-700">Nombre completo</label>
+                    <input
+                      type="text"
+                      name="nombre_tesorero"
+                      value={formData.nombre_tesorero}
+                      onChange={handleInputChange}
+                      className={inputClass}
+                      placeholder="Nombre completo"
+                    />
+                  </div>
 
-            {/* Alertas dinámicas */}
-            {message && (
-              <div className={`p-4 rounded-lg text-sm font-medium ${message.type === 'success' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
-                {message.text}
+                  <div>
+                    <label className="mb-2 block text-sm font-semibold text-gray-700">DNI</label>
+                    <input
+                      type="text"
+                      name="dni_tesorero"
+                      value={formData.dni_tesorero}
+                      onChange={handleInputChange}
+                      className={inputClass}
+                      placeholder="8 digitos"
+                      maxLength="8"
+                      inputMode="numeric"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-sm font-semibold text-gray-700">Celular</label>
+                    <input
+                      type="text"
+                      name="celular_tesorero"
+                      value={formData.celular_tesorero}
+                      onChange={handleInputChange}
+                      className={inputClass}
+                      placeholder="9 digitos"
+                      maxLength="9"
+                      inputMode="numeric"
+                    />
+                  </div>
+                </div>
               </div>
-            )}
 
-            <div className="flex justify-end pt-6 border-t border-gray-100 mt-8">
-              <button
-                type="submit"
-                disabled={saving || !director?.id}
-                className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-3 rounded-xl font-bold shadow-md hover:shadow-lg hover:from-blue-700 hover:to-indigo-700 transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center gap-2"
-              >
-                {saving ? (
-                  <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                    Guardando...
-                  </>
-                ) : (
-                  <>
-                    <Save size={20} />
-                    Guardar Información
-                  </>
-                )}
-              </button>
-            </div>
-          </form>
-        )}
-      </div>
-      )}
+              <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-5">
+                <h3 className="text-sm font-extrabold uppercase tracking-wide text-slate-900">Cuenta corriente</h3>
+                <div className="mt-5 grid grid-cols-1 gap-6 md:grid-cols-2">
+                  <div>
+                    <label className="mb-2 block text-sm font-semibold text-gray-700">Banco</label>
+                    <input
+                      type="text"
+                      name="banco"
+                      value={formData.banco}
+                      onChange={handleInputChange}
+                      className={inputClass}
+                      placeholder="Banco de la Nacion"
+                    />
+                  </div>
 
-      {/* 3. Tarjeta de Cuenta Corriente */}
-      {section === 'cuenta' && (
-      <div className={cardClass}>
-        <div className="mb-6">
-          <h2 className="text-xl font-bold text-gray-800 mb-2">CUENTA CORRIENTE - BANCO DE LA NACION</h2>
+                  <div>
+                    <label className="mb-2 block text-sm font-semibold text-gray-700">Numero de cuenta corriente</label>
+                    <input
+                      type="text"
+                      name="numero_cuenta_corriente"
+                      value={formData.numero_cuenta_corriente}
+                      onChange={handleInputChange}
+                      className={inputClass}
+                      placeholder="Numero de cuenta corriente"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {message && (
+                <div className={`rounded-lg border p-4 text-sm font-medium ${
+                  message.type === 'success'
+                    ? 'border-green-200 bg-green-50 text-green-700'
+                    : 'border-red-200 bg-red-50 text-red-700'
+                }`}
+                >
+                  {message.text}
+                </div>
+              )}
+
+              <div className="mt-8 flex justify-end border-t border-gray-100 pt-6">
+                <button
+                  type="submit"
+                  disabled={saving || !director?.id}
+                  className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-3 font-bold text-white shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:from-blue-700 hover:to-indigo-700 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50 disabled:transform-none"
+                >
+                  {saving ? (
+                    <>
+                      <div className="h-5 w-5 animate-spin rounded-full border-b-2 border-white"></div>
+                      Guardando...
+                    </>
+                  ) : (
+                    <>
+                      <Save size={20} />
+                      Guardar Tesoreria
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          )}
         </div>
-
-        {loading ? (
-          <div className="flex justify-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="max-w-xl">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Número</label>
-              <input
-                type="text"
-                name="numero_cuenta_corriente"
-                value={formData.numero_cuenta_corriente}
-                onChange={handleInputChange}
-                className={inputClass}
-                placeholder="Número de cuenta corriente"
-              />
-            </div>
-
-            {message && (
-              <div className={`p-4 rounded-lg text-sm font-medium ${message.type === 'success' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
-                {message.text}
-              </div>
-            )}
-
-            <div className="flex justify-end pt-6 border-t border-gray-100 mt-8">
-              <button
-                type="submit"
-                disabled={saving || !director?.id}
-                className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-3 rounded-xl font-bold shadow-md hover:shadow-lg hover:from-blue-700 hover:to-indigo-700 transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center gap-2"
-              >
-                {saving ? (
-                  <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                    Guardando...
-                  </>
-                ) : (
-                  <>
-                    <Save size={20} />
-                    Guardar
-                  </>
-                )}
-              </button>
-            </div>
-          </form>
-        )}
-      </div>
       )}
     </div>
   );

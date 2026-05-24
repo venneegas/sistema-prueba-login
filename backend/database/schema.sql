@@ -297,7 +297,27 @@ CREATE TABLE IF NOT EXISTS tesoreria (
   COMMENT='Datos adicionales de la institucion y comite';
 
 -- ============================================
--- TABLA 12: saldos
+-- TABLA 12: perfil
+-- ============================================
+CREATE TABLE IF NOT EXISTS perfil (
+  id              INT AUTO_INCREMENT PRIMARY KEY,
+  director_id     INT NOT NULL COMMENT 'FK al director propietario del perfil',
+  foto_director   VARCHAR(500) DEFAULT NULL COMMENT 'Ruta publica de la foto del director',
+  escudo_colegio  VARCHAR(500) DEFAULT NULL COMMENT 'Ruta publica del escudo de la institucion',
+  creado_en       TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  actualizado_en  TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+  UNIQUE KEY uk_perfil_director (director_id),
+  CONSTRAINT fk_perfil_director
+    FOREIGN KEY (director_id)
+    REFERENCES directores(id)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  COMMENT='Imagenes y datos visuales del perfil del director';
+
+-- ============================================
+-- TABLA 13: saldos
 -- ============================================
 CREATE TABLE IF NOT EXISTS saldos (
   id                 INT AUTO_INCREMENT PRIMARY KEY,
@@ -324,7 +344,7 @@ CREATE TABLE IF NOT EXISTS saldos (
   COMMENT='Saldos mensuales de la cuenta corriente por trimestre';
 
 -- ============================================
--- TABLA 13: notificaciones
+-- TABLA 14: notificaciones
 -- ============================================
 CREATE TABLE IF NOT EXISTS notificaciones (
   id                 INT AUTO_INCREMENT PRIMARY KEY,
@@ -344,7 +364,7 @@ CREATE TABLE IF NOT EXISTS notificaciones (
   COMMENT='Notificaciones visibles para directores';
 
 -- ============================================
--- TABLA 14: solicitudes
+-- TABLA 15: solicitudes
 -- ============================================
 CREATE TABLE IF NOT EXISTS solicitudes (
   id                 INT AUTO_INCREMENT PRIMARY KEY,

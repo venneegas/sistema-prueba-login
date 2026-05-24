@@ -50,8 +50,7 @@ const DirectorSidebar = ({
 
   const datosItems = [
     { id: 'informacion', label: 'PERFIL', icon: <UserRound size={18} /> },
-    { id: 'tesorero', label: 'TESORERO', icon: <User size={18} /> },
-    { id: 'cuenta', label: 'CUENTA', icon: <WalletCards size={18} /> },
+    { id: 'tesoreria', label: 'TESORERIA', icon: <WalletCards size={18} /> },
   ];
 
   const toggleDarkMode = () => {
