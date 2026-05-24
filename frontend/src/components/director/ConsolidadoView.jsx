@@ -424,6 +424,9 @@ const ConsolidadoView = ({
   const tdLabelClass = 'border-b border-slate-200 px-5 py-3.5 text-sm text-slate-700';
   const tdValueClass = 'border-b border-slate-200 px-5 py-3.5 text-sm text-right font-mono font-semibold text-slate-900';
   const sectionHeaderClass = 'bg-sky-700 text-white px-5 py-3 font-bold text-sm uppercase tracking-[0.16em] text-left';
+  const finalRowClass = 'bg-[#12314a] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]';
+  const finalLabelClass = 'px-5 py-3.5 text-right text-sm font-extrabold tracking-tight';
+  const finalValueClass = 'px-5 py-3.5 text-right font-mono text-sm font-extrabold text-cyan-200';
 
   const trEditableClass = trimestreCerrado
     ? 'hover:bg-slate-50/80 transition-colors'
@@ -486,7 +489,7 @@ const ConsolidadoView = ({
               </tr>
             </thead>
             <tbody>
-              <tr><td colSpan="2" className="border-b border-sky-100 bg-sky-50 px-5 py-2.5 text-xs font-bold uppercase tracking-wide text-sky-800">INGRESOS</td></tr>
+              <tr><td colSpan="2" className="border-b border-sky-100 bg-sky-50/70 px-5 py-2.5 text-xs font-extrabold uppercase tracking-wide text-sky-800">INGRESOS</td></tr>
               <tr>
                 <td className={tdLabelClass}>+ Saldo inicial del trimestre</td>
                 <td className={tdValueClass}>{formatCurrency(saldoInicialCaja)}</td>
@@ -497,26 +500,26 @@ const ConsolidadoView = ({
                   <td className={tdValueClass}>{formatCurrency(movimientos.ingresos[index])}</td>
                 </tr>
               ))}
-              <tr className="bg-sky-50/60 font-bold">
-                <td className="border-b border-sky-100 px-5 py-3.5 text-right text-xs font-bold uppercase tracking-wide text-sky-900">Total Ingresos del {actual.label}</td>
+              <tr className="bg-sky-50/40 font-bold">
+                <td className="border-b border-sky-100 px-5 py-3.5 text-right text-xs font-extrabold uppercase tracking-wide text-sky-900">Total Ingresos del {actual.label}</td>
                 <td className={tdValueClass}>{formatCurrency(totalIngresos)}</td>
               </tr>
 
-              <tr><td colSpan="2" className="border-b border-rose-100 bg-rose-50 px-5 py-2.5 text-xs font-bold uppercase tracking-wide text-rose-800">EGRESOS</td></tr>
+              <tr><td colSpan="2" className="border-b border-rose-100 bg-rose-50/70 px-5 py-2.5 text-xs font-extrabold uppercase tracking-wide text-rose-800">EGRESOS</td></tr>
               {actual.meses.map((mes, index) => (
                 <tr key={mes} className="hover:bg-rose-50/80 transition-colors">
                   <td className={tdLabelClass}>- Correspondiente a {mes}</td>
                   <td className={tdValueClass}>{formatCurrency(movimientos.egresos[index])}</td>
                 </tr>
               ))}
-              <tr className="bg-rose-50/70 font-bold">
-                <td className="border-b border-rose-100 px-5 py-3.5 text-right text-xs font-bold uppercase tracking-wide text-rose-900">Total Egresos del {actual.label}</td>
+              <tr className="bg-rose-50/45 font-bold">
+                <td className="border-b border-rose-100 px-5 py-3.5 text-right text-xs font-extrabold uppercase tracking-wide text-rose-900">Total Egresos del {actual.label}</td>
                 <td className={tdValueClass}>{formatCurrency(totalEgresos)}</td>
               </tr>
 
-              <tr className="bg-slate-900 text-white font-bold">
-                <td className="px-5 py-3.5 text-right">Saldo final del Trimestre</td>
-                <td className="px-5 py-3.5 text-right font-mono">{formatCurrency(dineroEnCaja)}</td>
+              <tr className={finalRowClass}>
+                <td className={finalLabelClass}>Saldo final del trimestre</td>
+                <td className={finalValueClass}>{formatCurrency(dineroEnCaja)}</td>
               </tr>
 
               <tr><td colSpan="2" className={sectionHeaderClass}>2. DETALLE DE LOS MOVIMIENTOS DE LA CUENTA CORRIENTE</td></tr>
@@ -587,9 +590,9 @@ const ConsolidadoView = ({
                   {formatCurrency(dineroEnBanco)}
                 </td>
               </tr>
-              <tr className="bg-slate-900 text-white font-bold">
-              <td className="px-5 py-3.5 text-right">Saldo de Dinero, al {actual.fin} {anio}</td>
-                <td className="px-5 py-3.5 text-right font-mono text-sky-400">
+              <tr className={finalRowClass}>
+              <td className={finalLabelClass}>Saldo de dinero, al {actual.fin} {anio}</td>
+                <td className={finalValueClass}>
                   {formatCurrency(saldoDineroTotal)}
                 </td>
               </tr>
