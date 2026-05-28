@@ -9,7 +9,7 @@ const InformacionGeneralView = ({ director, section = 'perfil' }) => {
     dni_tesorero: '',
     celular_tesorero: '',
     numero_cuenta_corriente: '',
-    banco: 'Banco de la Nacion',
+    banco: 'Banco de la Nación',
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
