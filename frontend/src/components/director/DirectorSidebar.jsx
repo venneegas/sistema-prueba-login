@@ -53,7 +53,7 @@ const DirectorSidebar = ({
   ];
 
   const datosItems = [
-    { id: 'informacion', label: 'PERFIL', description: 'Actualiza la foto del director y el escudo institucional.', icon: <UserRound size={18} /> },
+    { id: 'informacion', label: 'DIRECCIÓN', description: 'Actualiza los datos visibles de la dirección y el escudo institucional.', icon: <UserRound size={18} /> },
     { id: 'tesoreria', label: 'TESORERIA', description: 'Registra datos del tesorero y cuenta corriente.', icon: <WalletCards size={18} /> },
   ];
 
