@@ -634,7 +634,7 @@ const EgresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestreC
                 <th className="border border-rose-700/50 px-4 py-3 align-middle text-center text-[11px] font-black uppercase leading-5 tracking-[0.14em] text-white/95 w-28">Fecha</th>
                 <th className="border border-rose-700/50 px-4 py-3 align-middle text-center text-[11px] font-black uppercase leading-5 tracking-[0.14em] text-white/95 w-40">Tipo Comprobante</th>
                 <th className="border border-rose-700/50 px-4 py-3 align-middle text-center text-[11px] font-black uppercase leading-5 tracking-[0.14em] text-white/95 w-36">N° Comprobante</th>
-                <th className="border border-rose-700/50 px-4 py-3 align-middle text-left text-[11px] font-black uppercase leading-5 tracking-[0.14em] text-white/95">Concepto</th>
+                <th className="border border-rose-700/50 px-4 py-3 align-middle text-center text-[11px] font-black uppercase leading-5 tracking-[0.14em] text-white/95">Concepto</th>
                 <th className="border border-rose-700/50 px-4 py-3 align-middle text-right text-[11px] font-black uppercase leading-5 tracking-[0.14em] text-white/95 w-36">Importe (S/.)</th>
                 <th className="border border-rose-700/50 px-4 py-3 align-middle text-center text-[11px] font-black uppercase leading-5 tracking-[0.14em] text-white/95 w-24">Acción</th>
               </tr>

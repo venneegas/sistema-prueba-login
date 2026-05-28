@@ -629,12 +629,12 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
         <div className="overflow-x-auto rounded-[26px] border border-slate-300 shadow-sm">
           <table className="w-full border-collapse bg-white text-sm">
             <thead>
-              <tr className="bg-gradient-to-r from-blue-600 to-sky-600 text-white">
+              <tr className="bg-blue-600 text-white">
                 <th className="border border-blue-700/50 px-4 py-3 align-middle text-center text-[11px] font-black uppercase leading-5 tracking-[0.14em] text-white/95 w-12">N°</th>
                 <th className="border border-blue-700/50 px-4 py-3 align-middle text-center text-[11px] font-black uppercase leading-5 tracking-[0.14em] text-white/95 w-28">Fecha</th>
                 <th className="border border-blue-700/50 px-4 py-3 align-middle text-center text-[11px] font-black uppercase leading-5 tracking-[0.14em] text-white/95 w-40">Tipo Comprobante</th>
                 <th className="border border-blue-700/50 px-4 py-3 align-middle text-center text-[11px] font-black uppercase leading-5 tracking-[0.14em] text-white/95 w-36">N° Comprobante</th>
-                <th className="border border-blue-700/50 px-4 py-3 align-middle text-left text-[11px] font-black uppercase leading-5 tracking-[0.14em] text-white/95">Concepto</th>
+                <th className="border border-blue-700/50 px-4 py-3 align-middle text-center text-[11px] font-black uppercase leading-5 tracking-[0.14em] text-white/95">Concepto</th>
                 <th className="border border-blue-700/50 px-4 py-3 align-middle text-right text-[11px] font-black uppercase leading-5 tracking-[0.14em] text-white/95 w-36">Importe (S/.)</th>
                 <th className="border border-blue-700/50 px-4 py-3 align-middle text-center text-[11px] font-black uppercase leading-5 tracking-[0.14em] text-white/95 w-24">Acción</th>
               </tr>
