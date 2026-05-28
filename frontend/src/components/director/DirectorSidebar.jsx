@@ -73,7 +73,7 @@ const DirectorSidebar = ({
   const sectionLabelClass = 'px-4 pt-4 pb-1 text-[11px] font-extrabold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500';
 
   const renderTooltip = (item) => (
-    <span className="pointer-events-none absolute left-[calc(100%+0.75rem)] top-1/2 z-50 w-64 -translate-y-1/2 translate-x-1 rounded-xl border border-slate-200 bg-white px-4 py-3 text-left opacity-0 shadow-[0_18px_45px_-22px_rgba(15,23,42,0.6)] transition-all duration-150 group-hover/sidebar-item:translate-x-0 group-hover/sidebar-item:opacity-100 group-focus-within/sidebar-item:translate-x-0 group-focus-within/sidebar-item:opacity-100 dark:border-slate-700 dark:bg-slate-900">
+    <span className="pointer-events-none absolute left-[calc(100%+0.75rem)] top-1/2 z-50 w-64 -translate-y-1/2 translate-x-1 rounded-xl border border-slate-200 bg-white px-4 py-3 text-left opacity-0 shadow-[0_18px_45px_-22px_rgba(15,23,42,0.6)] transition-all duration-150 group-hover/sidebar-item:translate-x-0 group-hover/sidebar-item:opacity-100 dark:border-slate-700 dark:bg-slate-900">
       <span className="block text-[11px] font-extrabold uppercase tracking-[0.16em] text-blue-600 dark:text-blue-300">
         {item.label}
       </span>
@@ -88,6 +88,7 @@ const DirectorSidebar = ({
       <button
         type="button"
         onClick={item.onClick || (() => setActiveTab(item.id))}
+        onMouseDown={(event) => event.currentTarget.blur()}
         aria-label={item.description ? `${item.label}: ${item.description}` : item.label}
         className={`group relative w-full flex items-center overflow-hidden rounded-xl text-sm text-left transition-all duration-200 ${
           isCollapsed ? 'justify-center px-0 py-3' : 'justify-start gap-3 px-4 py-3'
