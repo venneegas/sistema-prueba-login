@@ -166,7 +166,7 @@ const DirectorSidebar = ({
 
               <div className="p-6">
                 <p className="text-sm text-slate-600 dark:text-slate-300 mb-6 font-medium">
-                  Comunicate con nosotros si tienes problemas o consultas.
+                  Comunícate con nosotros si tienes problemas o consultas.
                 </p>
                 <div className="space-y-4">
                   <div className="flex items-center gap-4">

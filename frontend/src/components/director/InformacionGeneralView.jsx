@@ -100,7 +100,7 @@ const InformacionGeneralView = ({ director, section = 'perfil' }) => {
       {section === 'tesoreria' && (
         <div className="space-y-6">
           <div className="px-1">
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-blue-600">Tesoreria</p>
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-blue-600">Tesorería</p>
           </div>
 
           {loading ? (
@@ -178,14 +178,14 @@ const InformacionGeneralView = ({ director, section = 'perfil' }) => {
                   </div>
 
                   <div>
-                    <label className={labelClass}>Numero de cuenta corriente</label>
+                    <label className={labelClass}>Número de cuenta corriente</label>
                     <input
                       type="text"
                       name="numero_cuenta_corriente"
                       value={formData.numero_cuenta_corriente}
                       onChange={handleInputChange}
                       className={inputClass}
-                      placeholder="Numero de cuenta corriente"
+                      placeholder="Número de cuenta corriente"
                     />
                   </div>
                 </div>
@@ -216,7 +216,7 @@ const InformacionGeneralView = ({ director, section = 'perfil' }) => {
                   ) : (
                     <>
                       <Save size={20} />
-                      Guardar Tesoreria
+                      Guardar Tesorería
                     </>
                   )}
                 </button>

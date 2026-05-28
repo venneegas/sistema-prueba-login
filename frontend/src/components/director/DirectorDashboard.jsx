@@ -291,7 +291,7 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
             </h1>
             {cambioObligatorioPendiente && (
               <p className="text-sm text-amber-700 mt-1">
-                Debes cambiar tu contrasena temporal antes de usar el sistema.
+                Debes cambiar tu contraseña temporal antes de usar el sistema.
               </p>
             )}
           </div>
