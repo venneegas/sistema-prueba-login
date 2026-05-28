@@ -321,7 +321,7 @@ const ConsolidadoView = ({
 
     const tabla3Body = [
       ['Dinero en Caja', `S/. ${formatCurrency(dineroEnCaja)}`],
-      ['Dinero en Cuenta Corriente del Banco de la Nacion', `S/. ${formatCurrency(dineroEnBanco)}`],
+      ['Dinero en Cuenta Corriente del Banco de la Nación', `S/. ${formatCurrency(dineroEnBanco)}`],
       [{ content: `Saldo de Dinero, al ${actual.fin} ${anio}`, styles: { fillColor: [15, 23, 42], fontStyle: 'bold', textColor: [255, 255, 255] } }, { content: `S/. ${formatCurrency(saldoDineroTotal)}`, styles: { fillColor: [15, 23, 42], fontStyle: 'bold', textColor: [255, 255, 255], halign: 'right' } }]
     ];
 
@@ -526,7 +526,7 @@ const ConsolidadoView = ({
               <tr>
                 <td colSpan="2" className="border-b border-slate-200 p-0">
                   <div className="flex justify-between items-center text-[11px] px-5 py-2.5 bg-slate-50 text-slate-600">
-                    <span>Segun el Estado de Cuenta mensual emitido por el Banco de la Nacion:</span>
+                    <span>Segun el Estado de Cuenta mensual emitido por el Banco de la Nación:</span>
                     {!trimestreCerrado && (
                       <span className="flex items-center gap-1.5 font-bold text-amber-700 bg-amber-100/80 px-2.5 py-0.5 rounded-md border border-amber-200">
                         <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
@@ -585,7 +585,7 @@ const ConsolidadoView = ({
                 </td>
               </tr>
               <tr className="hover:bg-slate-50/80 transition-colors">
-                <td className="border-b border-slate-200 px-5 py-3.5 text-sm text-slate-700">Dinero en Cuenta Corriente del Banco de la Nacion *</td>
+                <td className="border-b border-slate-200 px-5 py-3.5 text-sm text-slate-700">Dinero en Cuenta Corriente del Banco de la Nación *</td>
                 <td className="border-b border-slate-200 bg-sky-50/30 px-5 py-3.5 text-right font-mono text-sm font-semibold text-slate-900">
                   {formatCurrency(dineroEnBanco)}
                 </td>

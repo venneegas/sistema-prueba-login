@@ -36,7 +36,7 @@ const InformacionGeneralView = ({ director, section = 'perfil' }) => {
           dni_tesorero: result.data.dni_tesorero || '',
           celular_tesorero: result.data.celular_tesorero || '',
           numero_cuenta_corriente: result.data.numero_cuenta_corriente || '',
-          banco: result.data.banco || 'Banco de la Nacion',
+          banco: result.data.banco || 'Banco de la Nación',
         });
       }
     } catch (error) {

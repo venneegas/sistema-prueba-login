@@ -284,7 +284,7 @@ CREATE TABLE IF NOT EXISTS tesoreria (
   dni_tesorero            VARCHAR(8) DEFAULT NULL,
   celular_tesorero        VARCHAR(9) DEFAULT NULL,
   numero_cuenta_corriente VARCHAR(50) DEFAULT NULL,
-  banco                   VARCHAR(50) DEFAULT 'Banco de la Nacion',
+  banco                   VARCHAR(50) DEFAULT 'Banco de la Nación',
   fecha_actualizacion     TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
   KEY idx_tesoreria_director_id (director_id),
