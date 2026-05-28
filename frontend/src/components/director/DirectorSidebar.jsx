@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { createPortal } from 'react-dom';
 import {
   LayoutDashboard,
   FolderOpen,
@@ -50,11 +49,11 @@ const DirectorSidebar = ({
     { id: 'general', label: 'CONSOLIDADO', description: 'Revisa el resumen trimestral de ingresos, egresos y saldo.', icon: <LayoutDashboard size={18} /> },
     { id: 'ingresos', label: 'INGRESOS', description: 'Registra y consulta los ingresos del trimestre.', icon: <FolderOpen size={18} /> },
     { id: 'egresos', label: 'EGRESOS', description: 'Registra y consulta los egresos sustentados.', icon: <FolderOpen size={18} /> },
-    { id: 'facturas', label: 'SUBIR PDF', description: 'Adjunta los sustentos PDF para su revision.', icon: <UploadCloud size={18} /> },
+    { id: 'facturas', label: 'SUBIR PDF', description: 'Adjunta los sustentos PDF para su revisión.', icon: <UploadCloud size={18} /> },
   ];
 
   const datosItems = [
-    { id: 'informacion', label: 'DIRECCIÓN', description: 'Actualiza los datos visibles de la dirección y el escudo institucional.', icon: <UserRound size={18} /> },
+    { id: 'informacion', label: 'DIRECCIÓN', description: 'Actualiza la foto del director y el escudo institucional.', icon: <UserRound size={18} /> },
     { id: 'tesoreria', label: 'TESORERIA', description: 'Registra datos del tesorero y cuenta corriente.', icon: <WalletCards size={18} /> },
   ];
 
@@ -73,7 +72,7 @@ const DirectorSidebar = ({
   const sectionLabelClass = 'px-4 pt-4 pb-1 text-[11px] font-extrabold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500';
 
   const renderTooltip = (item) => (
-    <span className="pointer-events-none absolute left-[calc(100%+0.75rem)] top-1/2 z-50 w-64 -translate-y-1/2 translate-x-1 rounded-xl border border-slate-200 bg-white px-4 py-3 text-left opacity-0 shadow-[0_18px_45px_-22px_rgba(15,23,42,0.6)] transition-all duration-150 group-hover/sidebar-item:translate-x-0 group-hover/sidebar-item:opacity-100 dark:border-slate-700 dark:bg-slate-900">
+    <span className="pointer-events-none absolute left-[calc(100%+0.75rem)] top-1/2 z-50 w-64 -translate-y-1/2 translate-x-1 rounded-xl border border-slate-200 bg-white px-4 py-3 text-left opacity-0 shadow-[0_18px_45px_-22px_rgba(15,23,42,0.6)] transition-all duration-150 group-hover/sidebar-item:translate-x-0 group-hover/sidebar-item:opacity-100 group-focus-within/sidebar-item:translate-x-0 group-focus-within/sidebar-item:opacity-100 dark:border-slate-700 dark:bg-slate-900">
       <span className="block text-[11px] font-extrabold uppercase tracking-[0.16em] text-blue-600 dark:text-blue-300">
         {item.label}
       </span>
@@ -88,7 +87,6 @@ const DirectorSidebar = ({
       <button
         type="button"
         onClick={item.onClick || (() => setActiveTab(item.id))}
-        onMouseDown={(event) => event.currentTarget.blur()}
         aria-label={item.description ? `${item.label}: ${item.description}` : item.label}
         className={`group relative w-full flex items-center overflow-hidden rounded-xl text-sm text-left transition-all duration-200 ${
           isCollapsed ? 'justify-center px-0 py-3' : 'justify-start gap-3 px-4 py-3'
@@ -132,13 +130,13 @@ const DirectorSidebar = ({
       </div>
 
       <nav className={`${isCollapsed ? 'p-3' : 'p-4'} flex-1 space-y-1.5 overflow-visible`}>
-        {!isCollapsed && <p className={sectionLabelClass}>Movimientos</p>}
+        {!isCollapsed && <p className={sectionLabelClass}>Información Económica</p>}
         {movimientoItems.map(renderSidebarAction)}
 
-        {!isCollapsed && <p className={sectionLabelClass}>Datos</p>}
+        {!isCollapsed && <p className={sectionLabelClass}>Datos de Responsables</p>}
         {datosItems.map(renderSidebarAction)}
 
-        {!isCollapsed && <p className={sectionLabelClass}>Configuracion</p>}
+        {!isCollapsed && <p className={sectionLabelClass}>Configuración</p>}
         {[
           { id: 'solicitud', label: 'SOLICITUD', description: 'Solicita el reemplazo del director o responsable registrado.', icon: <UserMinus size={18} />, onClick: onRequestReplacementClick },
           { id: 'credenciales', label: 'CREDENCIALES', description: 'Cambia la contraseña de acceso de tu cuenta.', icon: <Key size={18} />, onClick: onChangePasswordClick },
@@ -149,8 +147,8 @@ const DirectorSidebar = ({
 
       <div className={`${isCollapsed ? 'p-3' : 'p-4'} border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-[#091426] relative`}>
 
-        {isSoporteOpen && createPortal((
-          <div className="fixed inset-0 z-[500] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+        {isSoporteOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
             <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden animate-in fade-in zoom-in duration-200 border border-slate-200 dark:border-slate-700">
               <div className="flex items-center justify-between p-5 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
                 <h3 className="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
@@ -212,7 +210,7 @@ const DirectorSidebar = ({
               </div>
             </div>
           </div>
-        ), document.body)}
+        )}
 
         <div className={`${isCollapsed ? 'justify-center px-0' : 'gap-3 px-2'} flex items-center mb-4`}>
           <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-slate-800 flex items-center justify-center border-2 border-blue-200 dark:border-slate-600 shrink-0">
