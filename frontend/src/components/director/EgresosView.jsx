@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { Plus, Save, CalendarDays, X, Download, FileText, PaintBucket } from 'lucide-react';
+import { Plus, Save, CalendarDays, X, Download, FileText, PaintBucket, Trash2 } from 'lucide-react';
 import { buildApiUrl } from '../../config/api';
 import Toast from '../Toast';
 import { jsPDF } from 'jspdf';
@@ -762,10 +762,10 @@ const EgresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestreC
                       <button
                         onClick={() => eliminarFila(mesActivo, fila.id)}
                         disabled={trimestreCerrado}
-                        className="bg-slate-400 text-white p-1.5 rounded-lg hover:bg-rose-600 transition-all disabled:cursor-not-allowed disabled:opacity-50 shadow-sm"
+                        className="bg-rose-50 text-rose-600 p-1.5 rounded-lg border border-rose-200 hover:bg-rose-600 hover:text-white transition-all disabled:cursor-not-allowed disabled:opacity-50 shadow-sm"
                         title="Eliminar fila"
                       >
-                        <X size={16} />
+                        <Trash2 size={16} />
                       </button>
                     </div>
                   </td>
