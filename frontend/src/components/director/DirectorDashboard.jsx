@@ -281,7 +281,7 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
 
       <main className="flex-1 overflow-y-auto bg-[radial-gradient(circle_at_top_left,_rgba(37,99,235,0.08),_transparent_30%),linear-gradient(180deg,_#f8fbff_0%,_#eef3f8_100%)] p-8 dark:bg-none dark:bg-[#111827]">
         <div className="mx-auto max-w-7xl">
-        <div className="mb-6 flex justify-between items-center bg-white/90 dark:bg-slate-800/95 p-5 rounded-2xl shadow-[0_14px_40px_-28px_rgba(15,23,42,0.8)] border border-slate-200/80 dark:border-slate-700 backdrop-blur">
+        <div className="relative z-[200] mb-6 flex justify-between items-center bg-white/90 dark:bg-slate-800/95 p-5 rounded-2xl shadow-[0_14px_40px_-28px_rgba(15,23,42,0.8)] border border-slate-200/80 dark:border-slate-700 backdrop-blur">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-blue-600 dark:text-blue-300">
               Panel de Director
@@ -326,7 +326,7 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
             </select>
             
             {/* Dropdown de Notificaciones (Alertas + BD) */}
-            <div className="relative z-50" ref={dropdownRef}>
+            <div className="relative z-[220]" ref={dropdownRef}>
               <button
                 type="button"
                 onClick={toggleNotificaciones}
@@ -343,7 +343,7 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
               </button>
 
               {isNotificationsOpen && (
-                <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.3)] border border-slate-200 overflow-hidden">
+                <div className="absolute right-0 z-[230] mt-2 w-80 bg-white rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.3)] border border-slate-200 overflow-hidden">
                   <div className="bg-slate-50 border-b border-slate-200 px-4 py-3 flex justify-between items-center">
                     <h3 className="text-sm font-bold text-slate-800">Centro de Alertas</h3>
                     {unreadCount > 0 && (
