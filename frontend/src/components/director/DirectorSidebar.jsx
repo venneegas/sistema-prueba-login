@@ -148,7 +148,7 @@ const DirectorSidebar = ({
       <div className={`${isCollapsed ? 'p-3' : 'p-4'} border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-[#091426] relative`}>
 
         {isSoporteOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+          <div className="fixed inset-0 z-[500] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
             <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden animate-in fade-in zoom-in duration-200 border border-slate-200 dark:border-slate-700">
               <div className="flex items-center justify-between p-5 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
                 <h3 className="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">

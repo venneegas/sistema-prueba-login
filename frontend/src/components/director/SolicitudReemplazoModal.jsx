@@ -69,7 +69,7 @@ const SolicitudReemplazoModal = ({ isOpen, onClose, director }) => {
   const inputClass = "w-full rounded-xl border border-slate-300 px-4 py-3 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[500] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
       <div className="bg-white rounded-[24px] shadow-2xl max-w-lg w-full overflow-hidden animate-in fade-in zoom-in duration-200 border border-slate-200">
         
         <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 bg-slate-50/50">
