@@ -461,7 +461,7 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
       head: [['N°', 'Fecha', 'Tipo Comprobante', 'N° Comprobante', 'Concepto', 'Importe']],
       body: tableData,
       theme: 'grid',
-      headStyles: { fillColor: [5, 150, 105] }, // Color emerald-600
+      headStyles: { fillColor: [37, 99, 235] }, // Color blue-600
       foot: [['', '', '', '', 'TOTAL INGRESOS', `S/. ${calcularTotal(mesActivo).toFixed(2)}`]],
       footStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255], fontStyle: 'bold' } // slate-900
     });
@@ -509,7 +509,7 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
     const headerRow = ws.addRow(['N°', 'Fecha', 'Tipo Comprobante', 'N° Comprobante', 'Concepto', 'Importe']);
     headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
     headerRow.eachCell((cell) => {
-      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF059669' } }; // emerald-600
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF2563EB' } }; // blue-600
       cell.alignment = { horizontal: 'center', vertical: 'middle' };
       cell.border = { top: { style: 'thin' }, bottom: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' } };
     });
@@ -542,7 +542,7 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
     URL.revokeObjectURL(link.href);
   };
 
-  const inputClass = 'w-full p-2 outline-none bg-transparent text-slate-800 font-medium focus:bg-white focus:ring-2 focus:ring-emerald-500/20 rounded transition-all';
+  const inputClass = 'w-full p-2 outline-none bg-transparent text-slate-800 font-medium focus:bg-white focus:ring-2 focus:ring-blue-500/20 rounded transition-all';
 
   const limitesMesActivo = obtenerRangoMes(trimestreId, mesActivo);
 
@@ -556,7 +556,7 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
             onClick={() => setMesActivo(index)}
             className={`flex-1 px-6 py-3 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${
               mesActivo === index
-                ? 'bg-white text-emerald-700 shadow-sm border border-slate-200'
+                ? 'bg-white text-blue-700 shadow-sm border border-slate-200'
                 : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700'
             }`}
           >
@@ -627,14 +627,14 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
         <div className="overflow-x-auto rounded-[26px] border border-slate-300 shadow-sm">
           <table className="w-full border-collapse bg-white text-sm">
             <thead>
-              <tr className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white">
-                <th className="border border-emerald-700/50 px-4 py-3 font-bold uppercase tracking-wider w-12 text-center text-xs">N°</th>
-                <th className="border border-emerald-700/50 px-4 py-3 font-bold uppercase tracking-wider w-28 text-center text-xs">Fecha</th>
-                <th className="border border-emerald-700/50 px-4 py-3 font-bold uppercase tracking-wider w-40 text-center text-xs">Tipo Comprobante</th>
-                <th className="border border-emerald-700/50 px-4 py-3 font-bold uppercase tracking-wider w-36 text-center text-xs">N° Comprobante</th>
-                <th className="border border-emerald-700/50 px-4 py-3 font-bold uppercase tracking-wider text-left text-xs">Concepto</th>
-                <th className="border border-emerald-700/50 px-4 py-3 font-bold uppercase tracking-wider w-36 text-right text-xs">Importe (S/.)</th>
-                <th className="border border-emerald-700/50 px-4 py-3 font-bold uppercase tracking-wider w-24 text-center text-xs">Acción</th>
+              <tr className="bg-gradient-to-r from-blue-600 to-sky-600 text-white">
+                <th className="border border-blue-700/50 px-4 py-3 font-bold uppercase tracking-wider w-12 text-center text-xs">N°</th>
+                <th className="border border-blue-700/50 px-4 py-3 font-bold uppercase tracking-wider w-28 text-center text-xs">Fecha</th>
+                <th className="border border-blue-700/50 px-4 py-3 font-bold uppercase tracking-wider w-40 text-center text-xs">Tipo Comprobante</th>
+                <th className="border border-blue-700/50 px-4 py-3 font-bold uppercase tracking-wider w-36 text-center text-xs">N° Comprobante</th>
+                <th className="border border-blue-700/50 px-4 py-3 font-bold uppercase tracking-wider text-left text-xs">Concepto</th>
+                <th className="border border-blue-700/50 px-4 py-3 font-bold uppercase tracking-wider w-36 text-right text-xs">Importe (S/.)</th>
+                <th className="border border-blue-700/50 px-4 py-3 font-bold uppercase tracking-wider w-24 text-center text-xs">Acción</th>
               </tr>
             </thead>
             <tbody>
@@ -773,7 +773,7 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
                 <td colSpan="5" className="border border-slate-700 px-4 py-3 text-right uppercase tracking-wider text-xs">
                   Total {trimestreMeses[mesActivo]}
                 </td>
-                <td className="border border-slate-700 px-4 py-3 text-right font-mono text-base text-emerald-400">
+                <td className="border border-slate-700 px-4 py-3 text-right font-mono text-base text-blue-400">
                   {new Intl.NumberFormat('es-PE', { minimumFractionDigits: 2 }).format(calcularTotal(mesActivo))}
                 </td>
                 <td className="border border-slate-700 px-4 py-3 bg-slate-900"></td>
@@ -788,7 +788,7 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
               type="button"
               onClick={() => agregarFila(mesActivo)}
               disabled={trimestreCerrado}
-              className="flex items-center gap-2 bg-emerald-600 text-white px-6 py-3.5 rounded-2xl hover:bg-emerald-700 transition-all shadow-lg font-bold uppercase tracking-wide text-sm disabled:cursor-not-allowed disabled:bg-slate-400"
+              className="flex items-center gap-2 bg-blue-600 text-white px-6 py-3.5 rounded-2xl hover:bg-blue-700 transition-all shadow-lg font-bold uppercase tracking-wide text-sm disabled:cursor-not-allowed disabled:bg-slate-400"
             >
               <Plus size={20} /> Agregar Fila
             </button>
@@ -804,7 +804,7 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
             <button
               type="button"
               onClick={handleDownloadExcel}
-              className="flex items-center justify-center gap-2 bg-white text-emerald-700 border border-emerald-200 px-6 py-3.5 rounded-2xl hover:bg-emerald-50 transition-all shadow-sm font-bold uppercase tracking-wide text-sm"
+              className="flex items-center justify-center gap-2 bg-white text-blue-700 border border-blue-200 px-6 py-3.5 rounded-2xl hover:bg-blue-50 transition-all shadow-sm font-bold uppercase tracking-wide text-sm"
             >
               <Download size={20} /> Descargar Excel
             </button>
@@ -812,7 +812,7 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
               type="button"
               onClick={guardarMesActual}
               disabled={saving || loading || trimestreCerrado}
-              className="flex items-center justify-center gap-2 bg-emerald-600 text-white px-8 py-3.5 rounded-2xl hover:bg-emerald-700 transition-all font-bold shadow-lg disabled:bg-slate-400 uppercase tracking-wide text-sm"
+              className="flex items-center justify-center gap-2 bg-blue-600 text-white px-8 py-3.5 rounded-2xl hover:bg-blue-700 transition-all font-bold shadow-lg disabled:bg-slate-400 uppercase tracking-wide text-sm"
             >
               <Save size={20} /> {saving ? 'Guardando...' : 'Guardar Mes Actual'}
             </button>
