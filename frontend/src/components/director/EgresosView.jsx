@@ -630,13 +630,13 @@ const EgresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestreC
           <table className="w-full border-collapse bg-white text-sm">
             <thead>
               <tr className="bg-gradient-to-r from-rose-600 to-red-600 text-white">
-                <th className="border border-rose-700/50 px-4 py-3 font-bold uppercase tracking-wider w-12 text-center text-xs">N°</th>
-                <th className="border border-rose-700/50 px-4 py-3 font-bold uppercase tracking-wider w-28 text-center text-xs">Fecha</th>
-                <th className="border border-rose-700/50 px-4 py-3 font-bold uppercase tracking-wider w-40 text-center text-xs">Tipo Comprobante</th>
-                <th className="border border-rose-700/50 px-4 py-3 font-bold uppercase tracking-wider w-36 text-center text-xs">N° Comprobante</th>
-                <th className="border border-rose-700/50 px-4 py-3 font-bold uppercase tracking-wider text-left text-xs">Concepto</th>
-                <th className="border border-rose-700/50 px-4 py-3 font-bold uppercase tracking-wider w-36 text-right text-xs">Importe (S/.)</th>
-                <th className="border border-rose-700/50 px-4 py-3 font-bold uppercase tracking-wider w-24 text-center text-xs">Acción</th>
+                <th className="border border-rose-700/50 px-4 py-3 align-middle text-center text-[11px] font-black uppercase leading-5 tracking-[0.14em] text-white/95 w-12">N°</th>
+                <th className="border border-rose-700/50 px-4 py-3 align-middle text-center text-[11px] font-black uppercase leading-5 tracking-[0.14em] text-white/95 w-28">Fecha</th>
+                <th className="border border-rose-700/50 px-4 py-3 align-middle text-center text-[11px] font-black uppercase leading-5 tracking-[0.14em] text-white/95 w-40">Tipo Comprobante</th>
+                <th className="border border-rose-700/50 px-4 py-3 align-middle text-center text-[11px] font-black uppercase leading-5 tracking-[0.14em] text-white/95 w-36">N° Comprobante</th>
+                <th className="border border-rose-700/50 px-4 py-3 align-middle text-left text-[11px] font-black uppercase leading-5 tracking-[0.14em] text-white/95">Concepto</th>
+                <th className="border border-rose-700/50 px-4 py-3 align-middle text-right text-[11px] font-black uppercase leading-5 tracking-[0.14em] text-white/95 w-36">Importe (S/.)</th>
+                <th className="border border-rose-700/50 px-4 py-3 align-middle text-center text-[11px] font-black uppercase leading-5 tracking-[0.14em] text-white/95 w-24">Acción</th>
               </tr>
             </thead>
             <tbody>
