@@ -573,8 +573,10 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
       </div>
 
         <div className="flex justify-between items-center mb-6 rounded-3xl border border-slate-300 bg-slate-50/80 p-5 shadow-sm">
-          <h2 className="text-lg font-bold text-slate-800 uppercase tracking-wide">
-            RELACIÓN DE INGRESOS - {trimestreMeses[mesActivo].toUpperCase()} {anio}
+          <h2 className="text-[15px] font-black uppercase tracking-[0.14em] text-slate-900">
+            <span className="text-blue-700">Relación de ingresos</span>
+            <span className="mx-2 text-slate-300">/</span>
+            <span>{trimestreMeses[mesActivo]} {anio}</span>
           </h2>
           
           <div className="flex items-center gap-3">
@@ -773,7 +775,7 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
                 <td colSpan="5" className="border border-slate-700 px-4 py-3 text-right uppercase tracking-wider text-xs">
                   Total {trimestreMeses[mesActivo]}
                 </td>
-                <td className="border border-slate-700 px-4 py-3 text-right font-mono text-base text-blue-400">
+                <td className="border border-slate-700 px-4 py-3 text-right font-mono text-base text-white">
                   {new Intl.NumberFormat('es-PE', { minimumFractionDigits: 2 }).format(calcularTotal(mesActivo))}
                 </td>
                 <td className="border border-slate-700 px-4 py-3 bg-slate-900"></td>

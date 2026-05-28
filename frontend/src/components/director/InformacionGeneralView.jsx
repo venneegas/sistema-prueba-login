@@ -173,7 +173,7 @@ const InformacionGeneralView = ({ director, section = 'perfil' }) => {
                       value={formData.banco}
                       onChange={handleInputChange}
                       className={inputClass}
-                      placeholder="Banco de la Nacion"
+                      placeholder="Banco de la Nación"
                     />
                   </div>
 
