@@ -197,12 +197,17 @@ const SubirPDFView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
         
         {/* Encabezado */}
         <div className="flex justify-between items-center mb-6 rounded-3xl border border-slate-300 bg-slate-50/80 p-5 shadow-sm">
-          <div className="space-y-1">
-            <h2 className="text-lg font-bold text-slate-800 uppercase tracking-wide">
-              SUSTENTOS DE GASTO (PDF) - TRIMESTRAL
+          <div className="space-y-2">
+            <h2 className="text-[15px] font-black uppercase tracking-[0.14em] text-slate-900">
+              <span className="text-blue-700">Sustento documental</span>
+              <span className="mx-2 text-slate-300">/</span>
+              <span>Informe económico trimestral</span>
             </h2>
-            <p className="text-slate-500 text-sm font-medium">
-              Sube el documento PDF consolidado con todos los sustentos correspondientes a: {etiquetaTrimestre} {anio}.
+            <p className="text-sm font-semibold leading-6 text-slate-500">
+              Imprimir, firmar, escanear y subir el PDF correspondiente a
+              <span className="ml-1 font-black uppercase tracking-[0.12em] text-slate-700">
+                {etiquetaTrimestre} {anio}
+              </span>.
             </p>
           </div>
         </div>
