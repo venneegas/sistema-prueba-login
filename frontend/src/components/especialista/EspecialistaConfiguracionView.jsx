@@ -58,16 +58,9 @@ const EspecialistaConfiguracionView = ({ user, onOpenChangePassword, isDarkMode,
                       Especialista
                     </span>
                   </div>
-                  <div className="mt-3 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm text-slate-500 dark:text-slate-400">
-                    <span className="inline-flex items-center gap-2">
-                      <Mail size={16} />
-                      {email}
-                    </span>
-                    <span className="inline-flex items-center gap-2">
-                      <MapPin size={16} />
-                      UGEL Sede
-                    </span>
-                  </div>
+                  <p className="mt-3 text-sm font-semibold text-slate-500 dark:text-slate-400">
+                    Especialista de Contabilidad
+                  </p>
                 </div>
               </div>
 

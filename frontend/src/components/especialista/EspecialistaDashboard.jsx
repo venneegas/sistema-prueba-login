@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ColegioDetalle from './ColegioDetalle';
 import ChangePasswordModal from '../ChangePasswordModal';
 import LogoutModal from '../LogoutModal';
@@ -15,6 +15,7 @@ import useEspecialistaStats from '../../hooks/useEspecialistaStats';
 import { AlertTriangle, CheckCircle } from 'lucide-react';
 
 const ESTADOS_EXPLORADOR = ['Borrador', 'Enviado', 'Observado', 'Aprobado'];
+const COLEGIO_DETALLE_HISTORY_STATE = 'especialista-colegio-detalle';
 
 const obtenerTrimestreActual = () => {
   const mesActual = new Date().getMonth();
@@ -26,6 +27,7 @@ const EspecialistaDashboard = ({ user, onLogout }) => {
   const [estadoFiltro, setEstadoFiltro] = useState('Todos');
   const [activeView, setActiveView] = useState('explorador');
   const [selectedColegio, setSelectedColegio] = useState(null);
+  const selectedColegioRef = useRef(null);
   const [trimestreSeleccionado, setTrimestreSeleccionado] = useState(obtenerTrimestreActual);
 
   const currentSysYear = new Date().getFullYear();
@@ -51,6 +53,22 @@ const EspecialistaDashboard = ({ user, onLogout }) => {
   const showToast = (message, type = 'success') => {
     setToast({ show: true, message, type });
   };
+
+  useEffect(() => {
+    selectedColegioRef.current = selectedColegio;
+  }, [selectedColegio]);
+
+  useEffect(() => {
+    const handleBrowserBack = () => {
+      if (selectedColegioRef.current) {
+        setSelectedColegio(null);
+        setActiveView('explorador');
+      }
+    };
+
+    window.addEventListener('popstate', handleBrowserBack);
+    return () => window.removeEventListener('popstate', handleBrowserBack);
+  }, []);
 
   useEffect(() => {
     const isDark = localStorage.getItem('theme') === 'dark' ||
@@ -113,6 +131,31 @@ const EspecialistaDashboard = ({ user, onLogout }) => {
     setSelectedColegio(null);
   };
 
+  const handleSelectColegio = (colegio) => {
+    if (!selectedColegioRef.current) {
+      window.history.pushState(
+        {
+          ...(window.history.state || {}),
+          subView: COLEGIO_DETALLE_HISTORY_STATE
+        },
+        '',
+        window.location.href
+      );
+    }
+
+    setActiveView('explorador');
+    setSelectedColegio(colegio);
+  };
+
+  const handleBackToExplorador = () => {
+    if (window.history.state?.subView === COLEGIO_DETALLE_HISTORY_STATE) {
+      window.history.back();
+      return;
+    }
+
+    setSelectedColegio(null);
+  };
+
   return (
     <div className="flex h-screen bg-slate-50 dark:bg-slate-900">
       <EspecialistaSidebar
@@ -169,7 +212,7 @@ const EspecialistaDashboard = ({ user, onLogout }) => {
         ) : selectedColegio ? (
           <ColegioDetalle
             colegio={selectedColegio}
-            onBack={() => setSelectedColegio(null)}
+            onBack={handleBackToExplorador}
             trimestre={trimestreSeleccionado}
             anio={anioActual}
           />
@@ -188,7 +231,7 @@ const EspecialistaDashboard = ({ user, onLogout }) => {
             loading={loading}
             error={error}
             filteredColegios={filteredColegios}
-            onSelectColegio={setSelectedColegio}
+            onSelectColegio={handleSelectColegio}
           />
         )}
 
