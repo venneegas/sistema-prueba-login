@@ -1,50 +1,92 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import LoginForm from './components/LoginForm';
 import DirectorDashboard from './components/director/DirectorDashboard';
 import EspecialistaDashboard from './components/especialista/EspecialistaDashboard';
 import AdminDashboard from './components/admin/AdminDashboard';
 import WelcomeSplash from './components/WelcomeSplash';
+import { clearSession, getMsUntilSessionExpiration, getStoredSession } from './utils/sessionManager';
+
+const SESSION_EXPIRED_MESSAGE = 'Tu sesión ha expirado por seguridad. Por favor, inicia sesión nuevamente.';
 
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showWelcomeSplash, setShowWelcomeSplash] = useState(false);
 
-  useEffect(() => {
-    // Recuperar sesión persistente si el usuario da F5
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch (e) {
-        localStorage.removeItem('user');
-      }
-    }
-    setLoading(false);
-  }, []);
-
   const handleLoginSuccess = (userData) => {
     setUser(userData);
     setShowWelcomeSplash(true);
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+  const handleLogout = useCallback(() => {
+    clearSession();
     setUser(null);
     setShowWelcomeSplash(false);
-  };
+  }, []);
+
+  useEffect(() => {
+    const storedSession = getStoredSession();
+    if (storedSession) {
+      setUser(storedSession.user);
+    }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    if (!user) return undefined;
+
+    const expireSession = () => {
+      if (!getStoredSession()) {
+        alert(SESSION_EXPIRED_MESSAGE);
+        handleLogout();
+      }
+    };
+
+    const timeout = setTimeout(expireSession, getMsUntilSessionExpiration());
+    const handleVisibilityChange = () => {
+      if (!document.hidden) expireSession();
+    };
+    const handleWindowFocus = () => expireSession();
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleWindowFocus);
+
+    return () => {
+      clearTimeout(timeout);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleWindowFocus);
+    };
+  }, [handleLogout, user]);
+
+  useEffect(() => {
+    const originalFetch = window.fetch;
+    let hasNotifiedExpiration = false;
+
+    window.fetch = async (...args) => {
+      const response = await originalFetch(...args);
+
+      if (response.status === 401 && localStorage.getItem('token') && !hasNotifiedExpiration) {
+        hasNotifiedExpiration = true;
+        alert(SESSION_EXPIRED_MESSAGE);
+        handleLogout();
+      }
+
+      return response;
+    };
+
+    return () => {
+      window.fetch = originalFetch;
+    };
+  }, [handleLogout]);
 
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center bg-slate-50 font-bold text-blue-600">Cargando Sistema...</div>;
   }
 
-  // 1. Si no hay usuario logueado, mostrar pantalla de Login
   if (!user) {
     return <LoginForm onLoginSuccess={handleLoginSuccess} />;
   }
 
-  // 2. ENRUTADOR POR ROLES: Si es Especialista
   if (user.rol === 'especialista') {
     return (
       <>
@@ -54,7 +96,6 @@ function App() {
     );
   }
 
-  // 3. ENRUTADOR POR ROLES: Si es Administrador del Sistema
   if (user.rol === 'admin') {
     return (
       <>
@@ -64,21 +105,19 @@ function App() {
     );
   }
 
-  // 4. ENRUTADOR POR ROLES: Si es Director
   if (user.rol === 'director') {
     return (
       <>
-        <DirectorDashboard 
-          user={user} 
-          onLogout={handleLogout} 
-          onUserUpdate={setUser} 
+        <DirectorDashboard
+          user={user}
+          onLogout={handleLogout}
+          onUserUpdate={setUser}
         />
         {showWelcomeSplash && <WelcomeSplash user={user} onDone={() => setShowWelcomeSplash(false)} />}
       </>
     );
   }
 
-  // 5. FALLBACK DE SEGURIDAD (Rol desconocido)
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50">
       <h1 className="text-2xl font-bold text-red-600 mb-4">Acceso Denegado</h1>

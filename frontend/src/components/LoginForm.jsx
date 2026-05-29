@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { User, Lock, Eye, EyeOff, CheckCircle } from 'lucide-react';
 import { buildApiUrl } from '../config/api';
 import ForgotPassword from './ForgotPassword';
+import { saveSession } from '../utils/sessionManager';
 
 const LoginForm = ({ onLoginSuccess }) => {
   const [correo, setCorreo] = useState('');
@@ -34,8 +35,7 @@ const LoginForm = ({ onLoginSuccess }) => {
 
       if (response.ok && data.success) {
         // Guardar el token (JWT) y los datos del usuario para persistir la sesión al pulsar F5
-        if (data.token) localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
+        saveSession({ token: data.token, user: data.user });
 
         // Mostrar estado de éxito en el botón antes de redirigir
         setIsSuccess(true);

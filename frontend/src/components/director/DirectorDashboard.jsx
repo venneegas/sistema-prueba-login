@@ -155,7 +155,7 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
     window.fetch = async (...args) => {
       const response = await originalFetch(...args);
       // Si el backend nos rechaza la petición por token inválido o expirado
-      if (response.status === 401) {
+      if (response.status === 401 && localStorage.getItem('token')) {
         alert('Tu sesión ha expirado por motivos de seguridad. Por favor, inicia sesión nuevamente.');
         onLogoutRef.current(); // Expulsar al usuario inmediatamente
       }
