@@ -16,12 +16,17 @@ import { AlertTriangle, CheckCircle } from 'lucide-react';
 
 const ESTADOS_EXPLORADOR = ['Borrador', 'Enviado', 'Observado', 'Aprobado'];
 
+const obtenerTrimestreActual = () => {
+  const mesActual = new Date().getMonth();
+  return String(Math.floor(mesActual / 3) + 1);
+};
+
 const EspecialistaDashboard = ({ user, onLogout }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [estadoFiltro, setEstadoFiltro] = useState('Todos');
   const [activeView, setActiveView] = useState('explorador');
   const [selectedColegio, setSelectedColegio] = useState(null);
-  const [trimestreSeleccionado, setTrimestreSeleccionado] = useState('1');
+  const [trimestreSeleccionado, setTrimestreSeleccionado] = useState(obtenerTrimestreActual);
 
   const currentSysYear = new Date().getFullYear();
   const [anioActual, setAnioActual] = useState(currentSysYear >= 2026 ? currentSysYear : 2026);
