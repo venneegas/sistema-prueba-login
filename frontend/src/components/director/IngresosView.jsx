@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { Plus, Save, CalendarDays, X, Download, FileText, PaintBucket, Trash2 } from 'lucide-react';
+import { Plus, Save, CalendarDays, Download, FileText, Trash2 } from 'lucide-react';
 import { buildApiUrl } from '../../config/api';
 import Toast from '../Toast';
 import { jsPDF } from 'jspdf';
@@ -16,7 +16,6 @@ const crearFilaVacia = () => ({
   numero: '',
   concepto: '',
   importe: 0,
-  color: '',
 });
 
 const formatearFechaApi = (fecha) => {
@@ -172,7 +171,6 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
               numero: registro.numero_comprobante || '',
               concepto: registro.concepto || '',
               importe: registro.monto ?? 0,
-              color: registro.color || '',
             });
           }
         });
@@ -304,7 +302,6 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
         numero_comprobante: fila.numero,
         concepto: fila.concepto,
         monto: fila.importe,
-        color: fila.color,
       }));
 
     const filasSinTipo = datosMeses[mesActivo]
@@ -519,9 +516,6 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
       row.getCell(6).numFmt = '"S/." #,##0.00';
       row.eachCell(c => {
         c.border = { top: { style: 'thin' }, bottom: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' } };
-        if (fila.color) {
-          c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + fila.color.replace('#', '').toUpperCase() } };
-        }
       });
     });
 
@@ -641,8 +635,8 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
             </thead>
             <tbody>
               {datosMeses[mesActivo].map((fila, index) => (
-                <tr key={fila.id} style={{ backgroundColor: fila.color || undefined }} className="hover:bg-slate-50/80 transition-colors group/row">
-                  <td className="border border-slate-300 px-2 py-2 text-center font-medium text-slate-500" style={{ backgroundColor: fila.color || '#f8fafc' }}>{index + 1}</td>
+                <tr key={fila.id} className="hover:bg-slate-50/80 transition-colors group/row">
+                  <td className="border border-slate-300 bg-slate-50 px-2 py-2 text-center font-medium text-slate-500">{index + 1}</td>
                   <td className="border border-slate-300 p-1">
                     <button
                       type="button"
@@ -737,28 +731,6 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
                   </td>
                   <td className="border border-slate-300 p-1 text-center">
                     <div className="flex items-center justify-center gap-1.5">
-                      <div className="relative group/color flex items-center justify-center">
-                        <label className={`cursor-pointer ${fila.color ? 'bg-white' : 'bg-slate-100'} text-slate-600 p-1.5 rounded-lg hover:bg-slate-200 transition-all border border-slate-300 shadow-sm`} title="Resaltar fila">
-                          <PaintBucket size={16} color={fila.color || 'currentColor'} />
-                          <input
-                            type="color"
-                            value={fila.color || '#ffffff'}
-                            onChange={(e) => handleInputChange(mesActivo, fila.id, 'color', e.target.value)}
-                            disabled={trimestreCerrado}
-                            className="opacity-0 absolute w-0 h-0"
-                          />
-                        </label>
-                        {fila.color && !trimestreCerrado && (
-                          <button
-                            type="button"
-                            onClick={() => handleInputChange(mesActivo, fila.id, 'color', '')}
-                            className="absolute -top-1.5 -right-1.5 bg-rose-100 text-rose-600 rounded-full p-0.5 hover:bg-rose-200 shadow-sm"
-                            title="Quitar color"
-                          >
-                            <X size={10} strokeWidth={3} />
-                          </button>
-                        )}
-                      </div>
                       <button
                         onClick={() => eliminarFila(mesActivo, fila.id)}
                         disabled={trimestreCerrado}
