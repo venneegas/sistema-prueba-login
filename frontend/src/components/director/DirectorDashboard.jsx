@@ -481,7 +481,6 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
               <EstadoReporteView
                 trimestreId={trimestreId}
                 anio={anioActual}
-                schoolName={user.director?.school}
                 trimestreCerrado={esCerradoFinal}
                 mensajeCierre={mensajeCierreEfectivo}
                 errorCierre={errorCierre}

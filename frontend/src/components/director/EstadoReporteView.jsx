@@ -18,22 +18,26 @@ const formatearFechaCierre = (fecha) => {
 };
 
 const periodos = {
-  '1': { label: '1er Trimestre', meses: ['Enero', 'Febrero', 'Marzo'] },
-  '2': { label: '2do Trimestre', meses: ['Abril', 'Mayo', 'Junio'] },
-  '3': { label: '3er Trimestre', meses: ['Julio', 'Agosto', 'Septiembre'] },
-  '4': { label: '4to Trimestre', meses: ['Octubre', 'Noviembre', 'Diciembre'] },
+  '1': { label: '1er Trimestre', meses: ['Enero', 'Febrero', 'Marzo'], fin: { dia: 31, mes: 2 } },
+  '2': { label: '2do Trimestre', meses: ['Abril', 'Mayo', 'Junio'], fin: { dia: 30, mes: 5 } },
+  '3': { label: '3er Trimestre', meses: ['Julio', 'Agosto', 'Septiembre'], fin: { dia: 30, mes: 8 } },
+  '4': { label: '4to Trimestre', meses: ['Octubre', 'Noviembre', 'Diciembre'], fin: { dia: 31, mes: 11 } },
 };
 
 const EstadoReporteView = ({
   trimestreId,
   anio,
-  schoolName,
   trimestreCerrado,
   mensajeCierre,
   errorCierre,
   cerradoEn,
 }) => {
   const periodoActual = periodos[String(trimestreId)] || periodos['1'];
+  const fechaFinPeriodo = new Intl.DateTimeFormat('es-PE', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+  }).format(new Date(Number(anio), periodoActual.fin.mes, periodoActual.fin.dia));
 
   const estadoReporte = errorCierre
     ? {
@@ -117,23 +121,18 @@ const EstadoReporteView = ({
           </div>
         </div>
 
-        <div className="grid gap-4 p-7 md:grid-cols-3">
-          <div className="rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm dark:border-slate-700 dark:bg-slate-900/40">
-            <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">Institución</p>
-            <p className="mt-2 text-base font-black uppercase text-slate-950 dark:text-white">{schoolName || 'Institución educativa'}</p>
-          </div>
-          <div className="rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm dark:border-slate-700 dark:bg-slate-900/40">
-            <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">Periodo</p>
-            <p className="mt-2 text-base font-black text-slate-950 dark:text-white">{periodoActual.label} {anio}</p>
-            <p className="mt-1 text-xs font-semibold text-slate-500 dark:text-slate-400">{periodoActual.meses.join(', ')}</p>
-          </div>
-          <div className="rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm dark:border-slate-700 dark:bg-slate-900/40">
-            <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">Fecha de cierre</p>
-            <p className="mt-2 text-base font-black text-slate-950 dark:text-white">{cerradoEn ? formatearFechaCierre(cerradoEn) : 'Pendiente'}</p>
+        <div className="px-7 pt-6">
+          <div className="flex flex-col gap-2 rounded-2xl border border-slate-200 bg-slate-50/80 px-5 py-3 text-sm font-semibold text-slate-600 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-300 md:flex-row md:items-center md:justify-between">
+            <span>
+              {periodoActual.label} {anio} · {periodoActual.meses.join(', ')}
+            </span>
+            <span className="font-extrabold text-slate-900 dark:text-white">
+              Fin del trimestre: {fechaFinPeriodo}
+            </span>
           </div>
         </div>
 
-        <div className="px-7 pb-7">
+        <div className="px-7 py-7">
           <div className="rounded-3xl border border-slate-200 bg-slate-50/80 p-5 dark:border-slate-700 dark:bg-slate-900/40">
             <div className="mb-5 flex items-center gap-3">
               <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-sky-50 text-sky-700 dark:bg-sky-500/10 dark:text-sky-200">
