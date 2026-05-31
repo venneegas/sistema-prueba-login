@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Save, FileText, Download } from 'lucide-react';
+import { Save, FileText, Download, CheckCircle2, Clock3, CircleDot, AlertTriangle } from 'lucide-react';
 import { buildApiUrl } from '../../config/api';
 import Toast from '../Toast';
 import { jsPDF } from 'jspdf';
@@ -428,6 +428,58 @@ const ConsolidadoView = ({
   const finalLabelClass = 'px-5 py-3.5 text-right text-sm font-extrabold tracking-tight';
   const finalValueClass = 'px-5 py-3.5 text-right font-mono text-sm font-extrabold text-cyan-200';
 
+  const estadoReporte = errorCierre
+    ? {
+        label: 'Estado no disponible',
+        description: 'No se pudo consultar el avance del reporte en este momento.',
+        badgeClass: 'border-red-200 bg-red-50 text-red-700',
+        Icon: AlertTriangle,
+      }
+    : trimestreCerrado
+      ? {
+          label: 'Enviado a revisión',
+          description: cerradoEn
+            ? `Cerrado el ${formatearFechaCierre(cerradoEn)}. La UGEL puede revisar u observar el reporte.`
+            : 'El reporte fue cerrado y queda pendiente de revisión por la UGEL.',
+          badgeClass: 'border-sky-200 bg-sky-50 text-sky-700',
+          Icon: CheckCircle2,
+        }
+      : {
+          label: 'Borrador',
+          description: 'El reporte sigue editable hasta que se cierre el trimestre.',
+          badgeClass: 'border-amber-200 bg-amber-50 text-amber-700',
+          Icon: Clock3,
+        };
+
+  const trazabilidadPasos = [
+    {
+      label: 'Registro',
+      detail: 'Movimientos capturados',
+      status: errorCierre ? 'pending' : 'done',
+    },
+    {
+      label: 'Cierre',
+      detail: trimestreCerrado ? 'Periodo cerrado' : 'Pendiente de cierre',
+      status: errorCierre ? 'pending' : trimestreCerrado ? 'done' : 'active',
+    },
+    {
+      label: 'Revisión UGEL',
+      detail: trimestreCerrado ? 'En seguimiento' : 'Se habilita al cerrar',
+      status: errorCierre ? 'pending' : trimestreCerrado ? 'active' : 'pending',
+    },
+    {
+      label: 'Resultado',
+      detail: 'Aprobado u observado',
+      status: 'pending',
+    },
+  ];
+
+  const pasoClass = (status) => {
+    if (status === 'done') return 'border-sky-600 bg-sky-600 text-white';
+    if (status === 'active') return 'border-amber-400 bg-amber-100 text-amber-700';
+    return 'border-slate-300 bg-white text-slate-400';
+  };
+
   const trEditableClass = trimestreCerrado
     ? 'hover:bg-slate-50/80 transition-colors'
     : 'bg-amber-50/30 hover:bg-amber-100/40 transition-colors';
@@ -453,6 +505,47 @@ const ConsolidadoView = ({
             <div className="col-span-3 rounded-2xl font-bold bg-slate-200 p-3 border border-slate-300">Nombre de la II.EE.</div>
             <div className="col-span-9 rounded-2xl p-3 border border-slate-300 bg-white text-center font-bold uppercase text-sky-800 shadow-sm">{schoolName || 'I.E. Sideral Carrion'}</div>
           </div>
+        </div>
+
+        <div className="mb-6 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="min-w-0">
+              <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-sky-700">Trazabilidad del reporte</p>
+              <h3 className="mt-1 text-lg font-black text-slate-950">Estado del consolidado trimestral</h3>
+              <p className="mt-1 max-w-2xl text-sm font-medium leading-relaxed text-slate-500">
+                Permite verificar el avance del reporte financiero del periodo seleccionado.
+              </p>
+            </div>
+
+            <div className={`flex w-fit items-center gap-2 rounded-2xl border px-4 py-2.5 text-sm font-extrabold ${estadoReporte.badgeClass}`}>
+              <estadoReporte.Icon className="h-4 w-4" />
+              <span>{estadoReporte.label}</span>
+            </div>
+          </div>
+
+          <div className="mt-5 grid gap-3 md:grid-cols-4">
+            {trazabilidadPasos.map((paso, index) => (
+              <div
+                key={paso.label}
+                className="relative rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-3"
+              >
+                <div className="flex items-start gap-3">
+                  <span className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 ${pasoClass(paso.status)}`}>
+                    {paso.status === 'done' ? <CheckCircle2 className="h-4 w-4" /> : <CircleDot className="h-4 w-4" />}
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-500">Paso {index + 1}</p>
+                    <p className="mt-0.5 text-sm font-extrabold text-slate-950">{paso.label}</p>
+                    <p className="mt-0.5 text-xs font-semibold text-slate-500">{paso.detail}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <p className="mt-4 rounded-2xl bg-slate-50 px-4 py-3 text-xs font-semibold leading-relaxed text-slate-500">
+            {estadoReporte.description}
+          </p>
         </div>
 
         {(mensajeCierre || errorCierre || trimestreCerrado) && (
