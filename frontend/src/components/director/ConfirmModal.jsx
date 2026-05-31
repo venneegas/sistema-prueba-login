@@ -1,10 +1,11 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { AlertTriangle } from 'lucide-react';
 
 const ConfirmModal = ({ isOpen, onClose, onConfirm, title, message, confirmText = 'Confirmar', cancelText = 'Cancelar', isDestructive = false }) => {
   if (!isOpen) return null;
 
-  return (
+  return createPortal((
     <div className="fixed inset-0 z-[500] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
       <div className="bg-white rounded-[24px] shadow-2xl max-w-sm w-full overflow-hidden animate-in fade-in zoom-in duration-200">
         <div className="p-6 text-center">
@@ -35,7 +36,7 @@ const ConfirmModal = ({ isOpen, onClose, onConfirm, title, message, confirmText 
         </div>
       </div>
     </div>
-  );
+  ), document.body);
 };
 
 export default ConfirmModal;
