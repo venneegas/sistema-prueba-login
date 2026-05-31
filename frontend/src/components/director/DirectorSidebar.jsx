@@ -19,6 +19,7 @@ import {
   Mail,
   Clock,
   UserRound,
+  FileCheck2,
 } from 'lucide-react';
 
 const DirectorSidebar = ({
@@ -52,6 +53,7 @@ const DirectorSidebar = ({
     { id: 'ingresos', label: 'INGRESOS', description: 'Registra y consulta los ingresos del trimestre.', icon: <FolderOpen size={18} /> },
     { id: 'egresos', label: 'EGRESOS', description: 'Registra y consulta los egresos sustentados.', icon: <FolderOpen size={18} /> },
     { id: 'facturas', label: 'SUBIR PDF', description: 'Adjunta los sustentos PDF para su revisión.', icon: <UploadCloud size={18} /> },
+    { id: 'estado-reporte', label: 'ESTADO REPORTE', description: 'Consulta la trazabilidad y estado actual del reporte trimestral.', icon: <FileCheck2 size={18} /> },
   ];
 
   const datosItems = [

@@ -10,6 +10,7 @@ import InformacionGeneralView from './InformacionGeneralView';
 import IngresosView from './IngresosView';
 import EgresosView from './EgresosView';
 import SubirPDFView from './SubirPDFView';
+import EstadoReporteView from './EstadoReporteView';
 import { buildApiUrl } from '../../config/api';
 
 const CIERRES_API_URL = buildApiUrl('/api/movimientos/cierres');
@@ -473,6 +474,18 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
         anio={anioActual}
                 directorId={user.director?.id}
                 trimestreCerrado={esCerradoFinal}
+              />
+            )}
+
+            {activeTab === 'estado-reporte' && (
+              <EstadoReporteView
+                trimestreId={trimestreId}
+                anio={anioActual}
+                schoolName={user.director?.school}
+                trimestreCerrado={esCerradoFinal}
+                mensajeCierre={mensajeCierreEfectivo}
+                errorCierre={errorCierre}
+                cerradoEn={cerradoEn}
               />
             )}
 
