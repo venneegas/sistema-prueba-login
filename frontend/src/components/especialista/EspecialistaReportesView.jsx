@@ -1,7 +1,69 @@
-import React from 'react';
-import { AlertCircle, Building2, CheckCircle2, Inbox, Clock, Download, FileText, Loader2, PieChart } from 'lucide-react';
+import React, { useMemo } from 'react';
+import { AlertCircle, Building2, CheckCircle2, Inbox, Clock, Loader2, PieChart, TrendingDown, TrendingUp } from 'lucide-react';
 import EspecialistaPeriodoFilters from './EspecialistaPeriodoFilters';
-import EspecialistaBarLineChart from './EspecialistaBarLineChart';
+
+const formatCurrency = (value) => Number(value || 0).toLocaleString('es-PE', {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2
+});
+
+const RankingCard = ({ title, subtitle, data, dataKey, icon: Icon, tone }) => {
+  const maxValue = Math.max(...data.map((item) => Number(item[dataKey] || 0)), 0);
+  const toneClasses = {
+    emerald: {
+      icon: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400',
+      bar: 'bg-emerald-500',
+      amount: 'text-emerald-600 dark:text-emerald-400'
+    },
+    rose: {
+      icon: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400',
+      bar: 'bg-rose-500',
+      amount: 'text-rose-600 dark:text-rose-400'
+    }
+  };
+  const classes = toneClasses[tone];
+
+  return (
+    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+      <div className="p-6 border-b border-slate-100 dark:border-slate-700 flex items-start gap-4">
+        <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${classes.icon}`}>
+          <Icon size={22} />
+        </div>
+        <div>
+          <h3 className="font-black text-slate-800 dark:text-slate-100">{title}</h3>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{subtitle}</p>
+        </div>
+      </div>
+
+      <div className="divide-y divide-slate-100 dark:divide-slate-700/70">
+        {data.map((item, index) => {
+          const amount = Number(item[dataKey] || 0);
+          const width = maxValue > 0 ? Math.max((amount / maxValue) * 100, 4) : 4;
+
+          return (
+            <div key={`${item.codigoModular || item.directorId}-${dataKey}`} className="p-4">
+              <div className="flex items-start justify-between gap-4">
+                <div className="min-w-0 flex items-start gap-3">
+                  <span className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center text-sm font-black flex-shrink-0">
+                    {index + 1}
+                  </span>
+                  <div className="min-w-0">
+                    <p className="font-bold text-sm text-slate-800 dark:text-slate-100 truncate">{item.nombre || 'Institucion sin nombre'}</p>
+                    <p className="text-xs text-slate-400 dark:text-slate-500 font-mono mt-0.5">{item.codigoModular || '-'}</p>
+                  </div>
+                </div>
+                <p className={`text-sm font-black whitespace-nowrap ${classes.amount}`}>S/ {formatCurrency(amount)}</p>
+              </div>
+              <div className="mt-3 h-2 rounded-full bg-slate-100 dark:bg-slate-700 overflow-hidden">
+                <div className={`h-full rounded-full ${classes.bar}`} style={{ width: `${width}%` }} />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
 
 const EspecialistaReportesView = ({
   anioActual,
@@ -17,6 +79,16 @@ const EspecialistaReportesView = ({
   reporteLoading,
   reporteError
 }) => {
+  const rankingIngresos = useMemo(
+    () => [...reporteGlobal].sort((a, b) => Number(b.totalIngresos || 0) - Number(a.totalIngresos || 0)).slice(0, 10),
+    [reporteGlobal]
+  );
+
+  const rankingEgresos = useMemo(
+    () => [...reporteGlobal].sort((a, b) => Number(b.totalEgresos || 0) - Number(a.totalEgresos || 0)).slice(0, 10),
+    [reporteGlobal]
+  );
+
   return (
     <>
       <header className="bg-white dark:bg-slate-800 shadow-sm px-8 py-5 flex items-center justify-between z-10 border-b border-slate-200 dark:border-slate-700">
@@ -164,7 +236,7 @@ const EspecialistaReportesView = ({
           {reporteLoading ? (
             <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-10 flex items-center justify-center gap-3 text-slate-500 dark:text-slate-400">
               <Loader2 size={24} className="animate-spin text-blue-500" />
-              <span className="font-medium">Cargando graficos financieros...</span>
+              <span className="font-medium">Cargando rankings financieros...</span>
             </div>
           ) : reporteError ? (
             <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-rose-200 dark:border-rose-800 p-8 flex items-center gap-3 text-rose-600 dark:text-rose-400">
@@ -173,31 +245,27 @@ const EspecialistaReportesView = ({
             </div>
           ) : reporteGlobal.length === 0 ? (
             <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-10 text-center text-slate-500 dark:text-slate-400">
-              <p className="text-lg font-semibold text-slate-700 dark:text-slate-200">No hay datos financieros para graficar</p>
+              <p className="text-lg font-semibold text-slate-700 dark:text-slate-200">No hay datos financieros para comparar</p>
               <p className="text-sm mt-2">Cuando los colegios registren ingresos y egresos en este periodo, apareceran aqui.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-6">
-              <EspecialistaBarLineChart
-                title="Ingresos Totales por Colegio"
-                subtitle="Barras y linea comparativa del total de ingresos registrados por cada institucion del periodo."
-                totalLabel="Ingreso general"
-                colorClass="bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800"
-                barColor="#10b981"
-                lineColor="#065f46"
-                data={reporteGlobal}
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+              <RankingCard
+                title="Ranking de Recaudación de Ingresos"
+                subtitle="Top 10 de instituciones con mayor ingreso registrado en el periodo."
+                data={rankingIngresos}
                 dataKey="totalIngresos"
+                icon={TrendingUp}
+                tone="emerald"
               />
 
-              <EspecialistaBarLineChart
-                title="Egresos Totales por Colegio"
-                subtitle="Vista consolidada de los egresos registrados por cada institucion en el mismo periodo."
-                totalLabel="Egreso general"
-                colorClass="bg-rose-50 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-800"
-                barColor="#fb7185"
-                lineColor="#be123c"
-                data={reporteGlobal}
+              <RankingCard
+                title="Ranking de Egresos"
+                subtitle="Top 10 de instituciones con mayor egreso registrado en el periodo."
+                data={rankingEgresos}
                 dataKey="totalEgresos"
+                icon={TrendingDown}
+                tone="rose"
               />
             </div>
           )}

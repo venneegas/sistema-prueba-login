@@ -42,6 +42,19 @@ const REPORTES = {
       { header: 'Cuenta Corriente', key: 'numeroCuentaCorriente', width: 24 },
       { header: 'Estado de Cuenta', key: 'estadoCuentaCorriente', width: 18 }
     ]
+  },
+  rankingRecaudacion: {
+    sheetName: 'Ranking',
+    title: 'RANKING DE RECAUDACIÓN',
+    filePrefix: 'RANKING_RECAUDACION',
+    columns: [
+      { header: 'Puesto', key: 'n', width: 8 },
+      { header: 'Cod. Modular', key: 'codigoModular', width: 16 },
+      { header: 'N° IE', key: 'numeroIE', width: 12 },
+      { header: 'Institución Educativa', key: 'nombre', width: 50 },
+      { header: 'Monto', key: 'monto', width: 18, money: true },
+      { header: 'Estado', key: 'estado', width: 16 }
+    ]
   }
 };
 
@@ -128,12 +141,89 @@ const agregarTotalesConsolidado = (ws, reporte) => {
   aplicarBordes(footerRow);
 };
 
+const agregarHojaRanking = ({ wb, sheetName, title, periodoText, reporte, dataKey }) => {
+  const config = REPORTES.rankingRecaudacion;
+  const ws = wb.addWorksheet(sheetName, {
+    views: [{ state: 'frozen', xSplit: 0, ySplit: 4 }]
+  });
+
+  ws.columns = config.columns.map((column) => ({
+    header: '',
+    key: column.key,
+    width: column.width
+  }));
+
+  const lastColumnLetter = ws.getColumn(config.columns.length).letter;
+  ws.mergeCells(`A1:${lastColumnLetter}1`);
+  const titleCell = ws.getCell('A1');
+  titleCell.value = `${title} - ${periodoText}`;
+  titleCell.font = { size: 14, bold: true, color: { argb: 'FFFFFFFF' } };
+  titleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4F46E5' } };
+  titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+
+  ws.mergeCells(`A2:${lastColumnLetter}2`);
+  ws.getCell('A2').value = 'Sistema de Gestión de Recursos Propios - UGEL';
+  ws.getCell('A2').font = { bold: true };
+  ws.getCell('A2').alignment = { horizontal: 'center' };
+
+  ws.addRow([]);
+  aplicarEstiloCabecera(ws.addRow(config.columns.map((column) => column.header)));
+
+  const ranking = [...reporte].sort((a, b) => Number(b[dataKey] || 0) - Number(a[dataKey] || 0));
+
+  ranking.forEach((row, index) => {
+    const dataRow = ws.addRow([
+      index + 1,
+      row.codigoModular || '-',
+      row.numeroIE || '-',
+      row.nombre || 'Institución Desconocida',
+      Number(row[dataKey] || 0),
+      row.estado || 'Borrador'
+    ]);
+
+    dataRow.getCell(5).numFmt = '"S/." #,##0.00';
+    aplicarBordes(dataRow);
+  });
+};
+
 const exportEspecialistaReporte = async ({
   trimestreSeleccionado,
   anioActual,
   reporte,
   tipoReporte = 'consolidado'
 }) => {
+  if (tipoReporte === 'rankingRecaudacion') {
+    const wb = new ExcelJS.Workbook();
+    const periodoText = getPeriodoText(trimestreSeleccionado, anioActual);
+
+    agregarHojaRanking({
+      wb,
+      sheetName: 'Ranking Ingresos',
+      title: 'RANKING DE RECAUDACIÓN DE INGRESOS',
+      periodoText,
+      reporte,
+      dataKey: 'totalIngresos'
+    });
+
+    agregarHojaRanking({
+      wb,
+      sheetName: 'Ranking Egresos',
+      title: 'RANKING DE EGRESOS',
+      periodoText,
+      reporte,
+      dataKey: 'totalEgresos'
+    });
+
+    const buffer = await wb.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `${REPORTES.rankingRecaudacion.filePrefix}_${getFilePeriodo(trimestreSeleccionado, anioActual)}.xlsx`;
+    link.click();
+    URL.revokeObjectURL(link.href);
+    return;
+  }
+
   const config = REPORTES[tipoReporte] || REPORTES.consolidado;
   const wb = new ExcelJS.Workbook();
   const ws = wb.addWorksheet(config.sheetName, {

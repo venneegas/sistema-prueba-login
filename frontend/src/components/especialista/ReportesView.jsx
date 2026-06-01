@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import {
   AlertTriangle,
+  BarChart3,
   CheckCircle2,
   Download,
   FileSpreadsheet,
@@ -73,6 +74,18 @@ const ReportesView = ({
         { label: 'Con cuenta', value: cuentasCorrientes.conCuenta },
         { label: 'Sin cuenta', value: cuentasCorrientes.sinCuenta }
       ]
+    },
+    {
+      id: 'rankingRecaudacion',
+      title: 'Ranking de Recaudación',
+      description: 'Exporta los rankings descendentes de ingresos y egresos del periodo, ordenados por institución educativa.',
+      icon: BarChart3,
+      accent: 'indigo',
+      data: reporteGlobal,
+      stats: [
+        { label: 'Ranking', value: 'Ingresos' },
+        { label: 'Ranking', value: 'Egresos' }
+      ]
     }
   ];
 
@@ -97,6 +110,13 @@ const ReportesView = ({
       stat: 'bg-slate-950/45 border-emerald-300/15 text-emerald-50',
       ghost: 'text-emerald-700/25',
       button: 'bg-emerald-500 hover:bg-emerald-400 focus:ring-emerald-300/30'
+    },
+    indigo: {
+      panel: 'from-indigo-900 to-slate-950',
+      icon: 'bg-indigo-500/20 text-indigo-100 border-indigo-300/20',
+      stat: 'bg-slate-950/45 border-indigo-300/15 text-indigo-50',
+      ghost: 'text-indigo-700/25',
+      button: 'bg-indigo-500 hover:bg-indigo-400 focus:ring-indigo-300/30'
     }
   };
 
