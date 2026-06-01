@@ -57,7 +57,7 @@ const DirectorSidebar = ({
   ];
 
   const datosItems = [
-    { id: 'informacion', label: 'DIRECCIÓN', description: 'Actualiza la foto del director y el escudo institucional.', icon: <UserRound size={18} /> },
+    { id: 'informacion', label: 'DIRECCIÓN', description: 'Consulta los datos del director y de la institución educativa.', icon: <UserRound size={18} /> },
     { id: 'tesoreria', label: 'TESORERIA', description: 'Registra datos del tesorero y cuenta corriente.', icon: <WalletCards size={18} /> },
   ];
 

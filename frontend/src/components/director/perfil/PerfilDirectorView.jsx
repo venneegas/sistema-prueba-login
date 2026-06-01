@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Building2, UserRound } from 'lucide-react';
 import API_BASE_URL, { buildApiUrl } from '../../../config/api';
-import ProfileImageUploader from './ProfileImageUploader';
 
 const obtenerNombreCompleto = (director) => {
   const partes = [
@@ -25,8 +24,6 @@ const PerfilDirectorView = ({ director }) => {
     escudo_colegio: null,
   });
   const [loading, setLoading] = useState(true);
-  const [uploading, setUploading] = useState('');
-  const [message, setMessage] = useState(null);
 
   useEffect(() => {
     const fetchPerfil = async () => {
@@ -58,62 +55,16 @@ const PerfilDirectorView = ({ director }) => {
     fetchPerfil();
   }, [director?.id]);
 
-  const uploadImage = async (type, file) => {
-    if (!director?.id) return;
-
-    setUploading(type);
-    setMessage(null);
-
-    try {
-      const formData = new FormData();
-      formData.append('imagen', file);
-
-      const response = await fetch(buildApiUrl(`/api/perfil/${director.id}/${type}`), {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-        body: formData,
-      });
-      const result = await response.json();
-
-      if (!response.ok || !result.success) {
-        throw new Error(result.message || 'No se pudo subir la imagen.');
-      }
-
-      setPerfil((prev) => ({
-        ...prev,
-        ...(type === 'foto'
-          ? { foto_director: result.data?.foto_director }
-          : { escudo_colegio: result.data?.escudo_colegio }),
-      }));
-      setMessage({ type: 'success', text: 'Imagen actualizada correctamente.' });
-    } catch (error) {
-      setMessage({ type: 'error', text: error.message || 'Error al subir la imagen.' });
-    } finally {
-      setUploading('');
-      setTimeout(() => setMessage(null), 4000);
-    }
-  };
-
   const datosDirector = [
     { label: 'DNI', value: director?.dni || 'No disponible' },
     { label: 'Celular', value: director?.celular || 'No disponible' },
     { label: 'Correo', value: director?.email || director?.correo || 'No disponible' },
+    { label: 'RUC', value: director?.ruc || director?.ruc_ie || director?.institucion_ruc || 'No registrado' },
   ];
 
   return (
     <div className="py-8 px-4 max-w-5xl mx-auto space-y-8">
       <div className="bg-white p-6 md:p-8 rounded-[28px] shadow-[0_24px_60px_-30px_rgba(15,23,42,0.45)] border border-slate-200">
-        {message && (
-          <div className={`mb-6 rounded-xl border px-4 py-3 text-sm font-semibold ${
-            message.type === 'success'
-              ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
-              : 'border-red-200 bg-red-50 text-red-700'
-          }`}
-          >
-            {message.text}
-          </div>
-        )}
-
         <div className="mb-6 overflow-hidden rounded-3xl border border-slate-200 bg-gradient-to-br from-blue-50 via-white to-slate-50">
           <div className="grid gap-6 p-6 lg:grid-cols-[1.1fr_0.9fr]">
             <div className="flex flex-col gap-5 md:flex-row md:items-center">
@@ -147,28 +98,7 @@ const PerfilDirectorView = ({ director }) => {
           </div>
         </div>
 
-        <div className="mb-6 grid gap-5 lg:grid-cols-2">
-          <ProfileImageUploader
-            title="Actualizar foto"
-            subtitle="Formatos JPG, PNG o WEBP. Maximo 2 MB."
-            imageUrl={buildAssetUrl(perfil.foto_director)}
-            fallback={<UserRound size={42} />}
-            shape="rounded-full"
-            uploading={uploading === 'foto'}
-            onFileSelected={(file) => uploadImage('foto', file)}
-          />
-
-          <ProfileImageUploader
-            title="Actualizar escudo"
-            subtitle="Formatos JPG, PNG o WEBP. Maximo 2 MB."
-            imageUrl={buildAssetUrl(perfil.escudo_colegio)}
-            fallback={<Building2 size={42} />}
-            uploading={uploading === 'escudo'}
-            onFileSelected={(file) => uploadImage('escudo', file)}
-          />
-        </div>
-
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
           {datosDirector.map((item) => (
             <div key={item.label} className="rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm transition-all hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md">
               <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-slate-400">{item.label}</p>

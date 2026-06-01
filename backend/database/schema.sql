@@ -13,6 +13,7 @@
 CREATE TABLE IF NOT EXISTS instituciones (
   id                 INT AUTO_INCREMENT PRIMARY KEY,
   codigo_modular     VARCHAR(20) NOT NULL COMMENT 'Codigo MINEDU unico',
+  ruc                VARCHAR(11) DEFAULT NULL COMMENT 'RUC de la institucion educativa si corresponde',
   numero             VARCHAR(20) DEFAULT NULL COMMENT 'Numero oficial de la institucion educativa',
   nombre             VARCHAR(200) NOT NULL COMMENT 'Nombre completo de la institucion',
   nivel_educativo    ENUM('inicial', 'primaria', 'secundaria', 'tecnico', 'superior') NOT NULL,
