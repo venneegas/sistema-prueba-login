@@ -463,6 +463,29 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
       footStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255], fontStyle: 'bold' } // slate-900
     });
 
+    const pageMargin = 14;
+    const pageHeight = doc.internal.pageSize.getHeight();
+    let signatureY = doc.lastAutoTable.finalY + 18;
+    if (signatureY > pageHeight - 28) {
+      doc.addPage();
+      signatureY = 60;
+    }
+
+    const signatureWidth = 68;
+    const leftSignatureX = pageMargin + 10;
+    const rightSignatureX = doc.internal.pageSize.getWidth() - pageMargin - 10 - signatureWidth;
+
+    doc.setDrawColor(15, 23, 42);
+    doc.setLineWidth(0.35);
+    doc.line(leftSignatureX, signatureY, leftSignatureX + signatureWidth, signatureY);
+    doc.line(rightSignatureX, signatureY, rightSignatureX + signatureWidth, signatureY);
+
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(15, 23, 42);
+    doc.text('Presidente', leftSignatureX + (signatureWidth / 2), signatureY + 6, { align: 'center' });
+    doc.text('Tesorero', rightSignatureX + (signatureWidth / 2), signatureY + 6, { align: 'center' });
+
     const nombreSeguro = (schoolName || 'IE').replace(/["<>|:*?\\/]/g, '').trim().replace(/\s+/g, '_');
     doc.save(`Ingresos_${trimestreMeses[mesActivo]}_${nombreSeguro}.pdf`);
   };
