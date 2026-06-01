@@ -310,17 +310,54 @@ const ConsolidadoView = ({
 
     doc.setFontSize(16);
     doc.setFont('helvetica', 'bold');
-    doc.text('INFORME ECONÓMICO TRIMESTRAL', 14, 20);
+    doc.text('INFORME ECONÓMICO TRIMESTRAL', doc.internal.pageSize.getWidth() / 2, 15, { align: 'center' });
 
-    doc.setFillColor(248, 250, 252);
-    doc.setDrawColor(203, 213, 225);
-    doc.roundedRect(pageMargin, 24, tableWidth, 17, 2, 2, 'FD');
+    doc.setDrawColor(15, 23, 42);
+    doc.setLineWidth(0.4);
+    doc.line(pageMargin, 20, pageMargin + tableWidth, 20);
 
     doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Recursos Propios de la Institución Educativa', doc.internal.pageSize.getWidth() / 2, 25, { align: 'center' });
+
+    autoTable(doc, {
+      startY: 31,
+      theme: 'grid',
+      margin: { left: pageMargin, right: pageMargin },
+      tableWidth,
+      body: [
+        [
+          { content: 'Trimestre:', styles: { fillColor: [226, 232, 240], fontStyle: 'bold', halign: 'left' } },
+          { content: actual.meses.join(', ').toUpperCase(), styles: { fontStyle: 'bold', halign: 'center' } },
+          { content: String(anio), styles: { fontStyle: 'bold', halign: 'center' } }
+        ],
+        [
+          { content: 'Número de la II.EE.', styles: { fillColor: [226, 232, 240], fontStyle: 'bold', halign: 'left' } },
+          { content: numeroIE || '-', colSpan: 2, styles: { fontStyle: 'bold', halign: 'center' } }
+        ],
+        [
+          { content: 'Nombre de la II.EE.', styles: { fillColor: [226, 232, 240], fontStyle: 'bold', halign: 'left' } },
+          { content: schoolName || 'No disponible', colSpan: 2, styles: { fontStyle: 'bold', halign: 'center', textColor: [3, 105, 161] } }
+        ]
+      ],
+      styles: {
+        font: 'helvetica',
+        fontSize: 9,
+        cellPadding: 3.2,
+        lineColor: [203, 213, 225],
+        lineWidth: 0.25,
+        textColor: [15, 23, 42],
+        valign: 'middle'
+      },
+      columnStyles: {
+        0: { cellWidth: 48 },
+        1: { cellWidth: tableWidth - 78 },
+        2: { cellWidth: 30 }
+      }
+    });
+
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(15, 23, 42);
-    doc.text(`Institución Educativa: ${schoolName || 'No disponible'}`, pageMargin + 4, 31);
-    doc.text(`Periodo: ${actual.label} ${anio}`, pageMargin + 4, 37);
 
     const tabla1Body = [
       [{ content: 'INGRESOS', colSpan: 2, styles: { fillColor: [241, 245, 249], fontStyle: 'bold', textColor: [15, 23, 42] } }],
@@ -335,7 +372,7 @@ const ConsolidadoView = ({
 
     autoTable(doc, {
       ...commonTableOptions,
-      startY: 48,
+      startY: doc.lastAutoTable.finalY + 8,
       head: [[{ content: '1. DETALLE DE LOS MOVIMIENTOS DE CAJA', colSpan: 2, styles: { halign: 'left', fillColor: [2, 132, 199] } }]],
       body: tabla1Body
     });
@@ -364,6 +401,28 @@ const ConsolidadoView = ({
       head: [[{ content: '3. CONSOLIDADO', colSpan: 2, styles: { halign: 'left', fillColor: [2, 132, 199] } }]],
       body: tabla3Body
     });
+
+    const pageHeight = doc.internal.pageSize.getHeight();
+    let signatureY = doc.lastAutoTable.finalY + 32;
+    if (signatureY > pageHeight - 28) {
+      doc.addPage();
+      signatureY = 60;
+    }
+
+    const signatureWidth = 68;
+    const leftSignatureX = pageMargin + 10;
+    const rightSignatureX = doc.internal.pageSize.getWidth() - pageMargin - 10 - signatureWidth;
+
+    doc.setDrawColor(15, 23, 42);
+    doc.setLineWidth(0.35);
+    doc.line(leftSignatureX, signatureY, leftSignatureX + signatureWidth, signatureY);
+    doc.line(rightSignatureX, signatureY, rightSignatureX + signatureWidth, signatureY);
+
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(15, 23, 42);
+    doc.text('Director(a)', leftSignatureX + (signatureWidth / 2), signatureY + 6, { align: 'center' });
+    doc.text('Responsable de Recursos Propios', rightSignatureX + (signatureWidth / 2), signatureY + 6, { align: 'center' });
 
     const nombreSeguro = (schoolName || 'IE').replace(/["<>|:*?\\/]/g, '').trim().replace(/\s+/g, '_');
     doc.save(`Consolidado_${actual.label.replace(/ /g, '_')}_${nombreSeguro}.pdf`);
