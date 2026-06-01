@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Building2, UserRound } from 'lucide-react';
+import { UserRound } from 'lucide-react';
 import API_BASE_URL, { buildApiUrl } from '../../../config/api';
 
 const obtenerNombreCompleto = (director) => {
@@ -21,7 +21,6 @@ const buildAssetUrl = (path) => {
 const PerfilDirectorView = ({ director }) => {
   const [perfil, setPerfil] = useState({
     foto_director: null,
-    escudo_colegio: null,
   });
   const [loading, setLoading] = useState(true);
 
@@ -42,7 +41,6 @@ const PerfilDirectorView = ({ director }) => {
         if (response.ok && result.success) {
           setPerfil({
             foto_director: result.data?.foto_director || null,
-            escudo_colegio: result.data?.escudo_colegio || null,
           });
         }
       } catch (error) {
@@ -66,7 +64,7 @@ const PerfilDirectorView = ({ director }) => {
     <div className="py-8 px-4 max-w-5xl mx-auto space-y-8">
       <div className="bg-white p-6 md:p-8 rounded-[28px] shadow-[0_24px_60px_-30px_rgba(15,23,42,0.45)] border border-slate-200">
         <div className="mb-6 overflow-hidden rounded-3xl border border-slate-200 bg-gradient-to-br from-blue-50 via-white to-slate-50">
-          <div className="grid gap-6 p-6 lg:grid-cols-[1.1fr_0.9fr]">
+          <div className="p-6">
             <div className="flex flex-col gap-5 md:flex-row md:items-center">
               <div className="flex h-28 w-28 shrink-0 items-center justify-center overflow-hidden rounded-full border-4 border-white bg-blue-100 text-blue-700 shadow-lg">
                 {perfil.foto_director ? (
@@ -79,20 +77,6 @@ const PerfilDirectorView = ({ director }) => {
                 <p className="text-xs font-bold uppercase tracking-[0.2em] text-blue-600">Perfil del director</p>
                 <h2 className="mt-2 text-3xl font-black leading-tight text-slate-950">{obtenerNombreCompleto(director)}</h2>
                 {loading && <p className="mt-2 text-sm font-semibold text-slate-400">Cargando perfil...</p>}
-              </div>
-            </div>
-
-            <div className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white/80 p-4 shadow-sm">
-              <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-white text-blue-700">
-                {perfil.escudo_colegio ? (
-                  <img src={buildAssetUrl(perfil.escudo_colegio)} alt="Escudo del colegio" className="h-full w-full object-cover" />
-                ) : (
-                  <Building2 size={40} />
-                )}
-              </div>
-              <div>
-                <p className="text-sm font-extrabold uppercase tracking-wide text-slate-900">Escudo institucional</p>
-                <p className="mt-1 text-sm text-slate-500">Imagen representativa del colegio.</p>
               </div>
             </div>
           </div>
