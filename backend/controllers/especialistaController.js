@@ -286,12 +286,15 @@ const getReporteGlobal = async (req, res) => {
         i.codigo_modular AS codigoModular,
         i.numero AS numeroIE,
         i.nombre AS nombre,
+        t.numero_cuenta_corriente AS numeroCuentaCorriente,
+        COALESCE(t.banco, 'Banco de la Nación') AS banco,
         COALESCE(e.estado, 'Borrador') AS estado,
         (SELECT COALESCE(SUM(monto), 0) FROM movimientos m1 WHERE m1.director_id = d.id AND m1.tipo_movimiento = 'INGRESO' AND YEAR(m1.fecha) = ? AND MONTH(m1.fecha) BETWEEN ? AND ?) AS totalIngresos,
         (SELECT COALESCE(SUM(monto), 0) FROM movimientos m2 WHERE m2.director_id = d.id AND m2.tipo_movimiento = 'EGRESO' AND YEAR(m2.fecha) = ? AND MONTH(m2.fecha) BETWEEN ? AND ?) AS totalEgresos,
         (SELECT COALESCE(saldo_mes3, 0) FROM saldos s WHERE s.director_id = d.id AND anio = ? AND trimestre = ?) AS saldoFinal
       FROM directores d
       INNER JOIN instituciones i ON d.institucion_id = i.id
+      LEFT JOIN tesoreria t ON d.id = t.director_id
       LEFT JOIN estados e ON d.id = e.director_id AND e.trimestre = ? AND e.anio = ?
       ORDER BY i.nombre ASC
     `;
