@@ -384,7 +384,7 @@ const ConsolidadoView = ({
 
     autoTable(doc, {
       ...commonTableOptions,
-      startY: doc.lastAutoTable.finalY + 10,
+      startY: doc.lastAutoTable.finalY + 6,
       head: [[{ content: '2. DETALLE DE LOS MOVIMIENTOS DE LA CUENTA CORRIENTE', colSpan: 2, styles: { halign: 'left', fillColor: [2, 132, 199] } }]],
       body: tabla2Body
     });
@@ -397,13 +397,13 @@ const ConsolidadoView = ({
 
     autoTable(doc, {
       ...commonTableOptions,
-      startY: doc.lastAutoTable.finalY + 10,
+      startY: doc.lastAutoTable.finalY + 6,
       head: [[{ content: '3. CONSOLIDADO', colSpan: 2, styles: { halign: 'left', fillColor: [2, 132, 199] } }]],
       body: tabla3Body
     });
 
     const pageHeight = doc.internal.pageSize.getHeight();
-    let signatureY = doc.lastAutoTable.finalY + 32;
+    let signatureY = doc.lastAutoTable.finalY + 18;
     if (signatureY > pageHeight - 28) {
       doc.addPage();
       signatureY = 60;
@@ -421,8 +421,8 @@ const ConsolidadoView = ({
     doc.setFontSize(9);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(15, 23, 42);
-    doc.text('Director(a)', leftSignatureX + (signatureWidth / 2), signatureY + 6, { align: 'center' });
-    doc.text('Responsable de Recursos Propios', rightSignatureX + (signatureWidth / 2), signatureY + 6, { align: 'center' });
+    doc.text('Presidente', leftSignatureX + (signatureWidth / 2), signatureY + 6, { align: 'center' });
+    doc.text('Tesorero', rightSignatureX + (signatureWidth / 2), signatureY + 6, { align: 'center' });
 
     const nombreSeguro = (schoolName || 'IE').replace(/["<>|:*?\\/]/g, '').trim().replace(/\s+/g, '_');
     doc.save(`Consolidado_${actual.label.replace(/ /g, '_')}_${nombreSeguro}.pdf`);
