@@ -279,32 +279,65 @@ const ConsolidadoView = ({
 
   const handleDownloadPDF = () => {
     const doc = new jsPDF();
+    const pageMargin = 14;
+    const tableWidth = doc.internal.pageSize.getWidth() - (pageMargin * 2);
+    const amountColumnWidth = 40;
+    const labelColumnWidth = tableWidth - amountColumnWidth;
+    const commonTableOptions = {
+      theme: 'grid',
+      margin: { left: pageMargin, right: pageMargin },
+      tableWidth,
+      styles: {
+        font: 'helvetica',
+        fontSize: 9,
+        cellPadding: 2,
+        lineColor: [203, 213, 225],
+        lineWidth: 0.2,
+        textColor: [30, 41, 59],
+        valign: 'middle'
+      },
+      headStyles: {
+        fillColor: [2, 132, 199],
+        textColor: [255, 255, 255],
+        fontStyle: 'bold',
+        halign: 'left'
+      },
+      columnStyles: {
+        0: { cellWidth: labelColumnWidth },
+        1: { cellWidth: amountColumnWidth, halign: 'right' }
+      }
+    };
 
     doc.setFontSize(16);
     doc.setFont('helvetica', 'bold');
     doc.text('INFORME ECONÓMICO TRIMESTRAL', 14, 20);
 
-    doc.setFontSize(11);
+    doc.setFillColor(248, 250, 252);
+    doc.setDrawColor(203, 213, 225);
+    doc.roundedRect(pageMargin, 24, tableWidth, 17, 2, 2, 'FD');
+
+    doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
-    doc.text(`Institucion Educativa: ${schoolName || 'No disponible'}`, 14, 28);
-    doc.text(`Periodo: ${actual.label} ${anio}`, 14, 34);
+    doc.setTextColor(15, 23, 42);
+    doc.text(`Institución Educativa: ${schoolName || 'No disponible'}`, pageMargin + 4, 31);
+    doc.text(`Periodo: ${actual.label} ${anio}`, pageMargin + 4, 37);
 
     const tabla1Body = [
       [{ content: 'INGRESOS', colSpan: 2, styles: { fillColor: [241, 245, 249], fontStyle: 'bold', textColor: [15, 23, 42] } }],
       ['+ Saldo inicial del trimestre', `S/. ${formatCurrency(saldoInicialCaja)}`],
       ...actual.meses.map((mes, index) => [`+ Correspondiente a ${mes}`, `S/. ${formatCurrency(movimientos.ingresos[index])}`]),
-      [{ content: `Total Ingresos del ${actual.label}`, styles: { fontStyle: 'bold' } }, { content: `S/. ${formatCurrency(totalIngresos)}`, styles: { fontStyle: 'bold', halign: 'right' } }],
+      [{ content: `Total Ingresos del ${actual.label}`, styles: { fontStyle: 'bold', halign: 'right' } }, { content: `S/. ${formatCurrency(totalIngresos)}`, styles: { fontStyle: 'bold', halign: 'right' } }],
       [{ content: 'EGRESOS', colSpan: 2, styles: { fillColor: [241, 245, 249], fontStyle: 'bold', textColor: [15, 23, 42] } }],
       ...actual.meses.map((mes, index) => [`- Correspondiente a ${mes}`, `S/. ${formatCurrency(movimientos.egresos[index])}`]),
-      [{ content: `Total Egresos del ${actual.label}`, styles: { fontStyle: 'bold' } }, { content: `S/. ${formatCurrency(totalEgresos)}`, styles: { fontStyle: 'bold', halign: 'right' } }],
-      [{ content: 'Saldo final del Trimestre', styles: { fillColor: [15, 23, 42], fontStyle: 'bold', textColor: [255, 255, 255] } }, { content: `S/. ${formatCurrency(dineroEnCaja)}`, styles: { fillColor: [15, 23, 42], fontStyle: 'bold', textColor: [255, 255, 255], halign: 'right' } }]
+      [{ content: `Total Egresos del ${actual.label}`, styles: { fontStyle: 'bold', halign: 'right' } }, { content: `S/. ${formatCurrency(totalEgresos)}`, styles: { fontStyle: 'bold', halign: 'right' } }],
+      [{ content: 'Saldo final del Trimestre', styles: { fillColor: [15, 23, 42], fontStyle: 'bold', textColor: [255, 255, 255], halign: 'right' } }, { content: `S/. ${formatCurrency(dineroEnCaja)}`, styles: { fillColor: [15, 23, 42], fontStyle: 'bold', textColor: [255, 255, 255], halign: 'right' } }]
     ];
 
     autoTable(doc, {
-      startY: 42,
+      ...commonTableOptions,
+      startY: 48,
       head: [[{ content: '1. DETALLE DE LOS MOVIMIENTOS DE CAJA', colSpan: 2, styles: { halign: 'left', fillColor: [2, 132, 199] } }]],
-      body: tabla1Body,
-      theme: 'grid'
+      body: tabla1Body
     });
 
     const tabla2Body = actual.meses.map((mes, index) => [
@@ -313,23 +346,23 @@ const ConsolidadoView = ({
     ]);
 
     autoTable(doc, {
+      ...commonTableOptions,
       startY: doc.lastAutoTable.finalY + 10,
       head: [[{ content: '2. DETALLE DE LOS MOVIMIENTOS DE LA CUENTA CORRIENTE', colSpan: 2, styles: { halign: 'left', fillColor: [2, 132, 199] } }]],
-      body: tabla2Body,
-      theme: 'grid'
+      body: tabla2Body
     });
 
     const tabla3Body = [
       ['Dinero en Caja', `S/. ${formatCurrency(dineroEnCaja)}`],
       ['Dinero en Cuenta Corriente del Banco de la Nación', `S/. ${formatCurrency(dineroEnBanco)}`],
-      [{ content: `Saldo de Dinero, al ${actual.fin} ${anio}`, styles: { fillColor: [15, 23, 42], fontStyle: 'bold', textColor: [255, 255, 255] } }, { content: `S/. ${formatCurrency(saldoDineroTotal)}`, styles: { fillColor: [15, 23, 42], fontStyle: 'bold', textColor: [255, 255, 255], halign: 'right' } }]
+      [{ content: `Saldo de Dinero, al ${actual.fin} ${anio}`, styles: { fillColor: [15, 23, 42], fontStyle: 'bold', textColor: [255, 255, 255], halign: 'right' } }, { content: `S/. ${formatCurrency(saldoDineroTotal)}`, styles: { fillColor: [15, 23, 42], fontStyle: 'bold', textColor: [255, 255, 255], halign: 'right' } }]
     ];
 
     autoTable(doc, {
+      ...commonTableOptions,
       startY: doc.lastAutoTable.finalY + 10,
       head: [[{ content: '3. CONSOLIDADO', colSpan: 2, styles: { halign: 'left', fillColor: [2, 132, 199] } }]],
-      body: tabla3Body,
-      theme: 'grid'
+      body: tabla3Body
     });
 
     const nombreSeguro = (schoolName || 'IE').replace(/["<>|:*?\\/]/g, '').trim().replace(/\s+/g, '_');
