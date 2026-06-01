@@ -116,8 +116,7 @@ const login = async (req, res) => {
             d.email,
             d.institucion_id,
             i.numero AS numero_ie,
-            i.nombre AS nombre_ie,
-            i.ruc AS ruc_ie
+            i.nombre AS nombre_ie
           FROM directores d
           JOIN instituciones i ON d.institucion_id = i.id
           WHERE d.id = ?
@@ -172,7 +171,6 @@ const login = async (req, res) => {
               email: directorData.email,
               school: directorData.nombre_ie,
               numero_ie: directorData.numero_ie,
-              ruc: directorData.ruc_ie,
               institucion_id: directorData.institucion_id
             }
           : null
