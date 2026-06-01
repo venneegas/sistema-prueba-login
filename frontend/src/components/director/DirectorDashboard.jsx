@@ -59,6 +59,19 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
 
   const cambioObligatorioPendiente = Boolean(user?.debeCambiarPassword);
 
+  useEffect(() => {
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+
+    return () => {
+      document.body.style.overflow = previousBodyOverflow;
+      document.documentElement.style.overflow = previousHtmlOverflow;
+    };
+  }, []);
+
   const periodos = {
     '1': ['Enero', 'Febrero', 'Marzo'],
     '2': ['Abril', 'Mayo', 'Junio'],
