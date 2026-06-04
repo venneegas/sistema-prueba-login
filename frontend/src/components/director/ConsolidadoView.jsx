@@ -385,11 +385,11 @@ const ConsolidadoView = ({
       [{ content: 'INGRESOS', colSpan: 2, styles: { fillColor: [241, 245, 249], fontStyle: 'bold', textColor: [15, 23, 42] } }],
       ['+ Saldo inicial del trimestre', `S/. ${formatCurrency(saldoInicialCaja)}`],
       ...actual.meses.map((mes, index) => [`+ Correspondiente a ${mes}`, `S/. ${formatCurrency(movimientos.ingresos[index])}`]),
-      [{ content: `Total Ingresos del ${actual.label}`, styles: { fontStyle: 'bold', halign: 'right' } }, { content: `S/. ${formatCurrency(totalIngresos)}`, styles: { fontStyle: 'bold', halign: 'right' } }],
+      [{ content: `Total Ingresos del ${actual.label}`, styles: { fontStyle: 'bold', halign: 'center' } }, { content: `S/. ${formatCurrency(totalIngresos)}`, styles: { fontStyle: 'bold', halign: 'right' } }],
       [{ content: 'EGRESOS', colSpan: 2, styles: { fillColor: [241, 245, 249], fontStyle: 'bold', textColor: [15, 23, 42] } }],
       ...actual.meses.map((mes, index) => [`- Correspondiente a ${mes}`, `S/. ${formatCurrency(movimientos.egresos[index])}`]),
-      [{ content: `Total Egresos del ${actual.label}`, styles: { fontStyle: 'bold', halign: 'right' } }, { content: `S/. ${formatCurrency(totalEgresos)}`, styles: { fontStyle: 'bold', halign: 'right' } }],
-      [{ content: saldoCajaLabel, styles: { fillColor: [15, 23, 42], fontStyle: 'bold', textColor: [255, 255, 255], halign: 'right' } }, { content: `S/. ${formatCurrency(dineroEnCaja)}`, styles: { fillColor: [15, 23, 42], fontStyle: 'bold', textColor: [255, 255, 255], halign: 'right' } }]
+      [{ content: `Total Egresos del ${actual.label}`, styles: { fontStyle: 'bold', halign: 'center' } }, { content: `S/. ${formatCurrency(totalEgresos)}`, styles: { fontStyle: 'bold', halign: 'right' } }],
+      [{ content: saldoCajaLabel, styles: { fillColor: [15, 23, 42], lineColor: [15, 23, 42], fontStyle: 'bold', textColor: [255, 255, 255], halign: 'center' } }, { content: `S/. ${formatCurrency(dineroEnCaja)}`, styles: { fillColor: [15, 23, 42], lineColor: [15, 23, 42], fontStyle: 'bold', textColor: [255, 255, 255], halign: 'right' } }]
     ];
 
     autoTable(doc, {
@@ -414,7 +414,7 @@ const ConsolidadoView = ({
     const tabla3Body = [
       ['Dinero en Caja', `S/. ${formatCurrency(dineroEnCaja)}`],
       ['Dinero en Cuenta Corriente del Banco de la Nación', `S/. ${formatCurrency(dineroEnBanco)}`],
-      [{ content: saldoDineroLabel, styles: { fillColor: [15, 23, 42], fontStyle: 'bold', textColor: [255, 255, 255], halign: 'right' } }, { content: `S/. ${formatCurrency(saldoDineroTotal)}`, styles: { fillColor: [15, 23, 42], fontStyle: 'bold', textColor: [255, 255, 255], halign: 'right' } }]
+      [{ content: saldoDineroLabel, styles: { fillColor: [15, 23, 42], lineColor: [15, 23, 42], fontStyle: 'bold', textColor: [255, 255, 255], halign: 'center' } }, { content: `S/. ${formatCurrency(saldoDineroTotal)}`, styles: { fillColor: [15, 23, 42], lineColor: [15, 23, 42], fontStyle: 'bold', textColor: [255, 255, 255], halign: 'right' } }]
     ];
 
     autoTable(doc, {
@@ -545,7 +545,8 @@ const ConsolidadoView = ({
   const tdValueClass = 'border-b border-slate-200 px-5 py-3.5 text-sm text-right font-mono font-semibold text-slate-900';
   const sectionHeaderClass = 'bg-sky-700 text-white px-5 py-3 font-bold text-sm uppercase tracking-[0.16em] text-left';
   const finalRowClass = 'bg-[#12314a] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]';
-  const finalLabelClass = 'px-5 py-3.5 text-right text-xs font-extrabold uppercase tracking-wide text-white';
+  const totalLabelClass = 'border-b px-5 py-3.5 text-center text-xs font-extrabold uppercase tracking-wide';
+  const finalLabelClass = 'px-5 py-3.5 text-center text-xs font-extrabold uppercase tracking-wide text-white';
   const finalValueClass = 'px-5 py-3.5 text-right font-mono text-sm font-extrabold text-white';
 
   const trEditableClass = trimestreCerrado
@@ -621,7 +622,7 @@ const ConsolidadoView = ({
                 </tr>
               ))}
               <tr className="bg-sky-50/40 font-bold">
-                <td className="border-b border-sky-100 px-5 py-3.5 text-right text-xs font-extrabold uppercase tracking-wide text-sky-900">Total Ingresos del {actual.label}</td>
+                <td className={`${totalLabelClass} border-sky-100 text-sky-900`}>Total Ingresos del {actual.label}</td>
                 <td className={tdValueClass}>{formatCurrency(totalIngresos)}</td>
               </tr>
 
@@ -633,7 +634,7 @@ const ConsolidadoView = ({
                 </tr>
               ))}
               <tr className="bg-rose-50/45 font-bold">
-                <td className="border-b border-rose-100 px-5 py-3.5 text-right text-xs font-extrabold uppercase tracking-wide text-rose-900">Total Egresos del {actual.label}</td>
+                <td className={`${totalLabelClass} border-rose-100 text-rose-900`}>Total Egresos del {actual.label}</td>
                 <td className={tdValueClass}>{formatCurrency(totalEgresos)}</td>
               </tr>
 
