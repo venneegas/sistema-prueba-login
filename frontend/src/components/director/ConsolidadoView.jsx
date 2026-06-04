@@ -324,7 +324,7 @@ const ConsolidadoView = ({
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(46);
         doc.setTextColor(190, 18, 60);
-        doc.text('INVALIDO', pageWidth / 2, stampY + 29, { align: 'center' });
+        doc.text('NO OFICIAL', pageWidth / 2, stampY + 29, { align: 'center' });
       }
     };
 

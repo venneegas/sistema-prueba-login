@@ -130,8 +130,8 @@ const DirectorSidebar = ({
   );
 
   return (
-    <aside className={`${isCollapsed ? 'w-20' : 'w-64'} bg-white dark:bg-[#07111f] text-slate-800 dark:text-white h-full flex flex-col shadow-[10px_0_35px_-28px_rgba(15,23,42,0.9)] z-20 border-r border-slate-200 dark:border-slate-800 transition-all duration-300`}>
-      <div className={`${isCollapsed ? 'px-3 py-5' : 'p-6'} relative border-b border-slate-200 dark:border-slate-800 text-center flex justify-center bg-white dark:bg-[#07111f]`}>
+    <aside className={`${isCollapsed ? 'w-20' : 'w-64'} bg-white dark:bg-[#07111f] text-slate-800 dark:text-white h-screen min-h-0 shrink-0 flex flex-col shadow-[10px_0_35px_-28px_rgba(15,23,42,0.9)] z-20 border-r border-slate-200 dark:border-slate-800 transition-all duration-300`}>
+      <div className={`${isCollapsed ? 'px-3 py-5' : 'p-6'} relative shrink-0 border-b border-slate-200 dark:border-slate-800 text-center flex justify-center bg-white dark:bg-[#07111f]`}>
         <img
           src="https://ugelsanta.gob.pe/wp-content/uploads/2026/02/Logo_US3.png"
           alt="Logo UGEL"
@@ -148,7 +148,7 @@ const DirectorSidebar = ({
         </button>
       </div>
 
-      <nav className={`${isCollapsed ? 'p-3' : 'p-4'} flex-1 space-y-1.5 overflow-visible`}>
+      <nav className={`${isCollapsed ? 'p-3' : 'p-4'} min-h-0 flex-1 space-y-1.5 overflow-y-auto overflow-x-hidden`}>
         {!isCollapsed && <p className={sectionLabelClass}>Información Económica</p>}
         {movimientoItems.map(renderSidebarAction)}
 
@@ -164,7 +164,7 @@ const DirectorSidebar = ({
         ].map(renderSidebarAction)}
       </nav>
 
-      <div className={`${isCollapsed ? 'p-3' : 'p-4'} border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-[#091426] relative`}>
+      <div className={`${isCollapsed ? 'p-3' : 'p-4'} shrink-0 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-[#091426] relative`}>
 
         {isSoporteOpen && createPortal((
           <div className="fixed inset-0 z-[500] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
