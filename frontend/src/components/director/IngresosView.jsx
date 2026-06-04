@@ -98,7 +98,7 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
   useEffect(() => {
     const fetchComprobantes = async () => {
       try {
-        const response = await fetch(buildApiUrl('/api/comprobantes'), {
+        const response = await fetch(buildApiUrl('/api/comprobantes?tipo=ingreso'), {
           headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
         });
         const result = await leerRespuestaJson(response);

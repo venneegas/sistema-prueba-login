@@ -121,4 +121,5 @@ INSERT INTO comprobantes (id, nombre, activo) VALUES
 (4, 'Recibo por Honorarios', 1),
 (5, 'Declaración Jurada', 1),
 (6, 'Voucher Banco', 1),
-(7, 'Cheque', 1);
+(7, 'Cheque', 1),
+(8, 'Recibo Interno', 1);
