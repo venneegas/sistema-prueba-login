@@ -265,7 +265,9 @@ const EgresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestreC
   const formatearFechaDDMM = (fecha) => {
     if (!fecha) return '';
     const [, mes, dia] = fecha.split('-');
-    return `${dia}-${mes}`;
+    const mesesAbreviados = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
+    const mesTexto = mesesAbreviados[Number(mes) - 1] || mes;
+    return `${dia}-${mesTexto}`;
   };
 
   const abrirSelectorFecha = (filaId) => {
