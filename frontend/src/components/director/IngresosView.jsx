@@ -432,20 +432,24 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
   // Funciones placeholder para la exportación
   const handleDownloadPDF = () => {
     const doc = new jsPDF();
-    const addNoOficialWatermark = () => {
+    const addInvalidWatermark = () => {
       const totalPages = doc.getNumberOfPages();
       const pageWidth = doc.internal.pageSize.getWidth();
       const pageHeight = doc.internal.pageSize.getHeight();
+      const stampWidth = 158;
+      const stampHeight = 42;
+      const stampX = (pageWidth - stampWidth) / 2;
+      const stampY = (pageHeight - stampHeight) / 2;
 
       for (let pageNumber = 1; pageNumber <= totalPages; pageNumber += 1) {
         doc.setPage(pageNumber);
+        doc.setDrawColor(190, 18, 60);
+        doc.setLineWidth(1.4);
+        doc.roundedRect(stampX, stampY, stampWidth, stampHeight, 5, 5, 'S');
         doc.setFont('helvetica', 'bold');
-        doc.setFontSize(50);
-        doc.setTextColor(248, 113, 113);
-        doc.text('NO OFICIAL', pageWidth / 2, pageHeight / 2, {
-          align: 'center',
-          angle: -35
-        });
+        doc.setFontSize(46);
+        doc.setTextColor(190, 18, 60);
+        doc.text('INVALIDO', pageWidth / 2, stampY + 29, { align: 'center' });
       }
     };
     
@@ -503,7 +507,7 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
     doc.text('Tesorero', rightSignatureX + (signatureWidth / 2), signatureY + 6, { align: 'center' });
 
     if (!trimestreCerrado) {
-      addNoOficialWatermark();
+      addInvalidWatermark();
     }
 
     const nombreSeguro = (schoolName || 'IE').replace(/["<>|:*?\\/]/g, '').trim().replace(/\s+/g, '_');
