@@ -34,7 +34,7 @@ const DirectorSidebar = ({
 }) => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isSoporteOpen, setIsSoporteOpen] = useState(false);
-  const [hoveredTooltipId, setHoveredTooltipId] = useState(null);
+  const [tooltipData, setTooltipData] = useState(null);
 
   useEffect(() => {
     const isDark = localStorage.getItem('theme') === 'dark'
@@ -75,30 +75,49 @@ const DirectorSidebar = ({
 
   const sectionLabelClass = 'px-4 pt-4 pb-1 text-[11px] font-extrabold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500';
 
-  const renderTooltip = (item) => (
-    <span className={`pointer-events-none absolute left-[calc(100%+0.75rem)] top-1/2 z-50 w-64 -translate-y-1/2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-left shadow-[0_18px_45px_-22px_rgba(15,23,42,0.6)] transition-all duration-150 dark:border-slate-700 dark:bg-slate-900 ${
-      hoveredTooltipId === item.id ? 'translate-x-0 opacity-100' : 'translate-x-1 opacity-0'
-    }`}>
-      <span className="block text-[11px] font-extrabold uppercase tracking-[0.16em] text-blue-600 dark:text-blue-300">
-        {item.label}
-      </span>
-      <span className="mt-1 block text-xs font-medium leading-5 text-slate-600 dark:text-slate-300">
-        {item.description}
-      </span>
-    </span>
-  );
+  const showTooltip = (event, item) => {
+    if (!item.description) return;
+
+    const rect = event.currentTarget.getBoundingClientRect();
+    setTooltipData({
+      id: item.id,
+      label: item.label,
+      description: item.description,
+      top: rect.top + rect.height / 2,
+      left: rect.right + 12,
+    });
+  };
+
+  const renderTooltipPortal = () => {
+    if (!tooltipData) return null;
+
+    return createPortal(
+      <div
+        className="pointer-events-none fixed z-[650] w-64 -translate-y-1/2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-left opacity-100 shadow-[0_18px_45px_-22px_rgba(15,23,42,0.6)] transition-opacity duration-150 dark:border-slate-700 dark:bg-slate-900"
+        style={{ top: tooltipData.top, left: tooltipData.left }}
+      >
+        <span className="block text-[11px] font-extrabold uppercase tracking-[0.16em] text-blue-600 dark:text-blue-300">
+          {tooltipData.label}
+        </span>
+        <span className="mt-1 block text-xs font-medium leading-5 text-slate-600 dark:text-slate-300">
+          {tooltipData.description}
+        </span>
+      </div>,
+      document.body
+    );
+  };
 
   const renderSidebarAction = (item) => (
     <div
       key={item.id}
       className="group/sidebar-item relative"
-      onMouseEnter={() => setHoveredTooltipId(item.id)}
-      onMouseLeave={() => setHoveredTooltipId(null)}
+      onMouseEnter={(event) => showTooltip(event, item)}
+      onMouseLeave={() => setTooltipData(null)}
     >
       <button
         type="button"
         onClick={(event) => {
-          setHoveredTooltipId(null);
+          setTooltipData(null);
           event.currentTarget.blur();
           if (item.onClick) {
             item.onClick();
@@ -125,7 +144,6 @@ const DirectorSidebar = ({
         </span>
         {!isCollapsed && <span>{item.label}</span>}
       </button>
-      {item.description && renderTooltip(item)}
     </div>
   );
 
@@ -148,7 +166,10 @@ const DirectorSidebar = ({
         </button>
       </div>
 
-      <nav className={`director-sidebar-scrollbar ${isCollapsed ? 'p-3' : 'p-4'} min-h-0 flex-1 space-y-1.5 overflow-y-auto overflow-x-hidden`}>
+      <nav
+        className={`director-sidebar-scrollbar ${isCollapsed ? 'p-3' : 'p-4'} min-h-0 flex-1 space-y-1.5 overflow-y-auto overflow-x-hidden`}
+        onScroll={() => setTooltipData(null)}
+      >
         {!isCollapsed && <p className={sectionLabelClass}>Información Económica</p>}
         {movimientoItems.map(renderSidebarAction)}
 
@@ -270,6 +291,7 @@ const DirectorSidebar = ({
           {!isCollapsed && <span>Cerrar Sesión</span>}
         </button>
       </div>
+      {renderTooltipPortal()}
     </aside>
   );
 };
