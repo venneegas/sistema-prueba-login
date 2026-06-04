@@ -432,6 +432,22 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
   // Funciones placeholder para la exportación
   const handleDownloadPDF = () => {
     const doc = new jsPDF();
+    const addNoOficialWatermark = () => {
+      const totalPages = doc.getNumberOfPages();
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+
+      for (let pageNumber = 1; pageNumber <= totalPages; pageNumber += 1) {
+        doc.setPage(pageNumber);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(50);
+        doc.setTextColor(248, 113, 113);
+        doc.text('NO OFICIAL', pageWidth / 2, pageHeight / 2, {
+          align: 'center',
+          angle: -35
+        });
+      }
+    };
     
     doc.setFontSize(16);
     doc.setFont('helvetica', 'bold');
@@ -483,8 +499,12 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
     doc.setFontSize(9);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(15, 23, 42);
-    doc.text('Presidente', leftSignatureX + (signatureWidth / 2), signatureY + 6, { align: 'center' });
+    doc.text('Director', leftSignatureX + (signatureWidth / 2), signatureY + 6, { align: 'center' });
     doc.text('Tesorero', rightSignatureX + (signatureWidth / 2), signatureY + 6, { align: 'center' });
+
+    if (!trimestreCerrado) {
+      addNoOficialWatermark();
+    }
 
     const nombreSeguro = (schoolName || 'IE').replace(/["<>|:*?\\/]/g, '').trim().replace(/\s+/g, '_');
     doc.save(`Ingresos_${trimestreMeses[mesActivo]}_${nombreSeguro}.pdf`);
