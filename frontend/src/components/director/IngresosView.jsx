@@ -477,7 +477,16 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
 
     autoTable(doc, {
       startY: 35,
-      head: [['N°', 'Fecha', 'Tipo Comprobante', 'N° Comprobante', 'Concepto', 'Importe']],
+      head: [
+        [
+          { content: 'N°', rowSpan: 2 },
+          { content: 'Fecha', rowSpan: 2 },
+          { content: 'Comprobante', colSpan: 2, styles: { halign: 'center' } },
+          { content: 'Concepto', rowSpan: 2 },
+          { content: 'Importe', rowSpan: 2 },
+        ],
+        ['Tipo', 'N°'],
+      ],
       body: tableData,
       theme: 'grid',
       headStyles: { fillColor: [37, 99, 235] }, // Color blue-600
@@ -519,7 +528,7 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
   const handleDownloadExcel = async () => {
     const wb = new ExcelJS.Workbook();
     const ws = wb.addWorksheet('Ingresos', {
-      views: [{ state: 'frozen', xSplit: 0, ySplit: 5 }] // Congela cabecera
+      views: [{ state: 'frozen', xSplit: 0, ySplit: 6 }] // Congela cabecera
     });
 
     // Intento de cargar logo de la UGEL
@@ -552,12 +561,20 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
 
     ws.addRow([]); ws.addRow([]); // Espacio debajo del título
 
-    const headerRow = ws.addRow(['N°', 'Fecha', 'Tipo Comprobante', 'N° Comprobante', 'Concepto', 'Importe']);
-    headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
-    headerRow.eachCell((cell) => {
-      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF2563EB' } }; // blue-600
-      cell.alignment = { horizontal: 'center', vertical: 'middle' };
-      cell.border = { top: { style: 'thin' }, bottom: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' } };
+    const headerTopRow = ws.addRow(['N°', 'Fecha', 'Comprobante', '', 'Concepto', 'Importe']);
+    const headerSubRow = ws.addRow(['', '', 'Tipo', 'N°', '', '']);
+    ws.mergeCells(`A${headerTopRow.number}:A${headerSubRow.number}`);
+    ws.mergeCells(`B${headerTopRow.number}:B${headerSubRow.number}`);
+    ws.mergeCells(`C${headerTopRow.number}:D${headerTopRow.number}`);
+    ws.mergeCells(`E${headerTopRow.number}:E${headerSubRow.number}`);
+    ws.mergeCells(`F${headerTopRow.number}:F${headerSubRow.number}`);
+    [headerTopRow, headerSubRow].forEach((row) => {
+      row.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      row.eachCell((cell) => {
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF2563EB' } }; // blue-600
+        cell.alignment = { horizontal: 'center', vertical: 'middle' };
+        cell.border = { top: { style: 'thin' }, bottom: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' } };
+      });
     });
 
     datosMeses[mesActivo].filter(fila => filaTieneContenido(fila)).forEach((fila, index) => {
@@ -673,13 +690,16 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
           <table className="w-full border-collapse bg-white text-sm">
             <thead>
               <tr className="bg-blue-600 text-white">
-                <th className="border border-blue-700/50 px-4 py-3 align-middle text-center text-[11px] font-black uppercase leading-5 tracking-[0.14em] text-white/95 w-12">N°</th>
-                <th className="border border-blue-700/50 px-4 py-3 align-middle text-center text-[11px] font-black uppercase leading-5 tracking-[0.14em] text-white/95 w-28">Fecha</th>
-                <th className="border border-blue-700/50 px-4 py-3 align-middle text-center text-[11px] font-black uppercase leading-5 tracking-[0.14em] text-white/95 w-40">Tipo Comprobante</th>
-                <th className="border border-blue-700/50 px-4 py-3 align-middle text-center text-[11px] font-black uppercase leading-5 tracking-[0.14em] text-white/95 w-36">N° Comprobante</th>
-                <th className="border border-blue-700/50 px-4 py-3 align-middle text-center text-[11px] font-black uppercase leading-5 tracking-[0.14em] text-white/95">Concepto</th>
-                <th className="border border-blue-700/50 px-4 py-3 align-middle text-right text-[11px] font-black uppercase leading-5 tracking-[0.14em] text-white/95 w-36">Importe (S/.)</th>
-                <th className="border border-blue-700/50 px-4 py-3 align-middle text-center text-[11px] font-black uppercase leading-5 tracking-[0.14em] text-white/95 w-24">Acción</th>
+                <th rowSpan="2" className="border border-blue-700/50 px-4 py-3 align-middle text-center text-[11px] font-black uppercase leading-5 tracking-[0.14em] text-white/95 w-12">N°</th>
+                <th rowSpan="2" className="border border-blue-700/50 px-4 py-3 align-middle text-center text-[11px] font-black uppercase leading-5 tracking-[0.14em] text-white/95 w-28">Fecha</th>
+                <th colSpan="2" className="border border-blue-700/50 px-4 py-3 align-middle text-center text-[11px] font-black uppercase leading-5 tracking-[0.14em] text-white/95">Comprobante</th>
+                <th rowSpan="2" className="border border-blue-700/50 px-4 py-3 align-middle text-center text-[11px] font-black uppercase leading-5 tracking-[0.14em] text-white/95">Concepto</th>
+                <th rowSpan="2" className="border border-blue-700/50 px-4 py-3 align-middle text-right text-[11px] font-black uppercase leading-5 tracking-[0.14em] text-white/95 w-36">Importe (S/.)</th>
+                <th rowSpan="2" className="border border-blue-700/50 px-4 py-3 align-middle text-center text-[11px] font-black uppercase leading-5 tracking-[0.14em] text-white/95 w-24">Acción</th>
+              </tr>
+              <tr className="bg-blue-600 text-white">
+                <th className="border border-blue-700/50 px-4 py-2 align-middle text-center text-[11px] font-black uppercase leading-5 tracking-[0.14em] text-white/95 w-40">Tipo</th>
+                <th className="border border-blue-700/50 px-4 py-2 align-middle text-center text-[11px] font-black uppercase leading-5 tracking-[0.14em] text-white/95 w-36">N°</th>
               </tr>
             </thead>
             <tbody>
