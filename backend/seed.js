@@ -18,7 +18,7 @@ async function runSeeder() {
     
     // 3. Insertar Catálogo de Comprobantes
     console.log('📄 Insertando Tipos de Comprobantes...');
-    const comprobantes = ['Factura', 'Boleta Venta', 'Boleta Electrónica', 'Recibo por Honorarios', 'Declaración Jurada', 'Voucher Banco', 'Cheque', 'Recibo Interno'];
+    const comprobantes = ['Factura', 'Boleta Venta Electrónica', 'Recibo por Honorarios', 'Declaración Jurada', 'Voucher Banco', 'Cheque', 'Recibo Interno'];
     for (const comp of comprobantes) {
       await pool.execute(
         `INSERT IGNORE INTO comprobantes (nombre, activo) VALUES (?, 1)`,

@@ -1,8 +1,44 @@
 const { pool } = require('../config/db');
 
+const normalizarComprobantes = async () => {
+  const [boletas] = await pool.query(
+    `SELECT id, nombre
+     FROM comprobantes
+     WHERE nombre IN ('Boleta Venta', 'Boleta Electrónica', 'Boleta Venta Electrónica')
+     ORDER BY id ASC`
+  );
+
+  const boletaUnificada = boletas.find((item) => item.nombre === 'Boleta Venta Electrónica');
+  const boletaVenta = boletas.find((item) => item.nombre === 'Boleta Venta');
+  const boletaElectronica = boletas.find((item) => item.nombre === 'Boleta Electrónica');
+
+  if (!boletaUnificada && boletaVenta) {
+    await pool.query(
+      'UPDATE comprobantes SET nombre = ?, activo = 1 WHERE id = ?',
+      ['Boleta Venta Electrónica', boletaVenta.id]
+    );
+  } else if (!boletaUnificada && boletaElectronica) {
+    await pool.query(
+      'UPDATE comprobantes SET nombre = ?, activo = 1 WHERE id = ?',
+      ['Boleta Venta Electrónica', boletaElectronica.id]
+    );
+  } else if (!boletaUnificada) {
+    await pool.query(
+      'INSERT IGNORE INTO comprobantes (nombre, activo) VALUES (?, 1)',
+      ['Boleta Venta Electrónica']
+    );
+  }
+
+  await pool.query(
+    "UPDATE comprobantes SET activo = 0 WHERE nombre IN ('Boleta Venta', 'Boleta Electrónica')"
+  );
+};
+
 exports.getComprobantes = async (req, res) => {
   try {
     const tipo = String(req.query.tipo || '').toLowerCase();
+
+    await normalizarComprobantes();
 
     if (tipo === 'ingreso') {
       await pool.query(

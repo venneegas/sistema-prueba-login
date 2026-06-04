@@ -116,8 +116,8 @@ INSERT INTO usuarios (id, email, nombre, password_hash, rol, director_id, estado
 -- 4. Insertar Comprobantes Base
 INSERT INTO comprobantes (id, nombre, activo) VALUES
 (1, 'Factura', 1),
-(2, 'Boleta Venta', 1),
-(3, 'Boleta Electrónica', 1),
+(2, 'Boleta Venta Electrónica', 1),
+(3, 'Boleta Electrónica', 0),
 (4, 'Recibo por Honorarios', 1),
 (5, 'Declaración Jurada', 1),
 (6, 'Voucher Banco', 1),
