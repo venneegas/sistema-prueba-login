@@ -148,7 +148,7 @@ const DirectorSidebar = ({
         </button>
       </div>
 
-      <nav className={`${isCollapsed ? 'p-3' : 'p-4'} min-h-0 flex-1 space-y-1.5 overflow-y-auto overflow-x-hidden`}>
+      <nav className={`director-sidebar-scrollbar ${isCollapsed ? 'p-3' : 'p-4'} min-h-0 flex-1 space-y-1.5 overflow-y-auto overflow-x-hidden`}>
         {!isCollapsed && <p className={sectionLabelClass}>Información Económica</p>}
         {movimientoItems.map(renderSidebarAction)}
 

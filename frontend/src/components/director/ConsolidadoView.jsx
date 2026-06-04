@@ -38,6 +38,8 @@ const ConsolidadoView = ({
   };
 
   const actual = periodos[trimestreId];
+  const saldoCajaLabel = 'SALDO DE CAJA AL TÉRMINO DEL TRIMESTRE';
+  const saldoDineroLabel = `SALDO AL ${actual.fin}, ${anio}`.toUpperCase();
 
   // Variables de estado para los inputs de la Seccion 2
   const [saldosBanco, setSaldosBanco] = useState({
@@ -387,7 +389,7 @@ const ConsolidadoView = ({
       [{ content: 'EGRESOS', colSpan: 2, styles: { fillColor: [241, 245, 249], fontStyle: 'bold', textColor: [15, 23, 42] } }],
       ...actual.meses.map((mes, index) => [`- Correspondiente a ${mes}`, `S/. ${formatCurrency(movimientos.egresos[index])}`]),
       [{ content: `Total Egresos del ${actual.label}`, styles: { fontStyle: 'bold', halign: 'right' } }, { content: `S/. ${formatCurrency(totalEgresos)}`, styles: { fontStyle: 'bold', halign: 'right' } }],
-      [{ content: 'Saldo final del Trimestre', styles: { fillColor: [15, 23, 42], fontStyle: 'bold', textColor: [255, 255, 255], halign: 'right' } }, { content: `S/. ${formatCurrency(dineroEnCaja)}`, styles: { fillColor: [15, 23, 42], fontStyle: 'bold', textColor: [255, 255, 255], halign: 'right' } }]
+      [{ content: saldoCajaLabel, styles: { fillColor: [15, 23, 42], fontStyle: 'bold', textColor: [255, 255, 255], halign: 'right' } }, { content: `S/. ${formatCurrency(dineroEnCaja)}`, styles: { fillColor: [15, 23, 42], fontStyle: 'bold', textColor: [255, 255, 255], halign: 'right' } }]
     ];
 
     autoTable(doc, {
@@ -412,7 +414,7 @@ const ConsolidadoView = ({
     const tabla3Body = [
       ['Dinero en Caja', `S/. ${formatCurrency(dineroEnCaja)}`],
       ['Dinero en Cuenta Corriente del Banco de la Nación', `S/. ${formatCurrency(dineroEnBanco)}`],
-      [{ content: `Saldo de Dinero, al ${actual.fin} ${anio}`, styles: { fillColor: [15, 23, 42], fontStyle: 'bold', textColor: [255, 255, 255], halign: 'right' } }, { content: `S/. ${formatCurrency(saldoDineroTotal)}`, styles: { fillColor: [15, 23, 42], fontStyle: 'bold', textColor: [255, 255, 255], halign: 'right' } }]
+      [{ content: saldoDineroLabel, styles: { fillColor: [15, 23, 42], fontStyle: 'bold', textColor: [255, 255, 255], halign: 'right' } }, { content: `S/. ${formatCurrency(saldoDineroTotal)}`, styles: { fillColor: [15, 23, 42], fontStyle: 'bold', textColor: [255, 255, 255], halign: 'right' } }]
     ];
 
     autoTable(doc, {
@@ -423,7 +425,7 @@ const ConsolidadoView = ({
     });
 
     const pageHeight = doc.internal.pageSize.getHeight();
-    let signatureY = doc.lastAutoTable.finalY + 18;
+    let signatureY = doc.lastAutoTable.finalY + 24;
     if (signatureY > pageHeight - 28) {
       doc.addPage();
       signatureY = 60;
@@ -504,7 +506,9 @@ const ConsolidadoView = ({
     addSubHeader('EGRESOS');
     actual.meses.forEach((mes, index) => ws.addRow([`- Correspondiente a ${mes}`, Number(movimientos.egresos[index])]));
     ws.addRow([`Total Egresos del ${actual.label}`, Number(totalEgresos)]).font = { bold: true, color: { argb: 'FF9F1239' } };
-    ws.addRow(['Saldo final del Trimestre', Number(dineroEnCaja)]).font = { bold: true };
+    const rowSaldoCaja = ws.addRow([saldoCajaLabel, Number(dineroEnCaja)]);
+    rowSaldoCaja.font = { bold: true, size: 12, color: { argb: 'FFFFFFFF' } };
+    rowSaldoCaja.eachCell(c => c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0F172A' } });
     
     ws.addRow([]);
     addSectionHeader('2. DETALLE DE LOS MOVIMIENTOS DE LA CUENTA CORRIENTE');
@@ -514,7 +518,7 @@ const ConsolidadoView = ({
     addSectionHeader('3. CONSOLIDADO');
     ws.addRow(['Dinero en Caja', Number(dineroEnCaja)]);
     ws.addRow(['Dinero en Cuenta Corriente del Banco de la Nación', Number(dineroEnBanco)]);
-    const rowTotal = ws.addRow([`Saldo de Dinero, al ${actual.fin} ${anio}`, Number(saldoDineroTotal)]);
+    const rowTotal = ws.addRow([saldoDineroLabel, Number(saldoDineroTotal)]);
     rowTotal.font = { bold: true, size: 12, color: { argb: 'FFFFFFFF' } };
     rowTotal.eachCell(c => c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0F172A' } });
 
@@ -541,8 +545,8 @@ const ConsolidadoView = ({
   const tdValueClass = 'border-b border-slate-200 px-5 py-3.5 text-sm text-right font-mono font-semibold text-slate-900';
   const sectionHeaderClass = 'bg-sky-700 text-white px-5 py-3 font-bold text-sm uppercase tracking-[0.16em] text-left';
   const finalRowClass = 'bg-[#12314a] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]';
-  const finalLabelClass = 'px-5 py-3.5 text-right text-sm font-extrabold tracking-tight';
-  const finalValueClass = 'px-5 py-3.5 text-right font-mono text-sm font-extrabold text-cyan-200';
+  const finalLabelClass = 'px-5 py-3.5 text-right text-xs font-extrabold uppercase tracking-wide text-white';
+  const finalValueClass = 'px-5 py-3.5 text-right font-mono text-sm font-extrabold text-white';
 
   const trEditableClass = trimestreCerrado
     ? 'hover:bg-slate-50/80 transition-colors'
@@ -634,7 +638,7 @@ const ConsolidadoView = ({
               </tr>
 
               <tr className={finalRowClass}>
-                <td className={finalLabelClass}>Saldo final del trimestre</td>
+                <td className={finalLabelClass}>{saldoCajaLabel}</td>
                 <td className={finalValueClass}>{formatCurrency(dineroEnCaja)}</td>
               </tr>
 
@@ -707,7 +711,7 @@ const ConsolidadoView = ({
                 </td>
               </tr>
               <tr className={finalRowClass}>
-              <td className={finalLabelClass}>Saldo de dinero, al {actual.fin} {anio}</td>
+                <td className={finalLabelClass}>{saldoDineroLabel}</td>
                 <td className={finalValueClass}>
                   {formatCurrency(saldoDineroTotal)}
                 </td>

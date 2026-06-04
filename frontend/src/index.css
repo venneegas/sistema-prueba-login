@@ -114,3 +114,44 @@ input::-ms-clear {
 .dark *::-webkit-scrollbar-thumb:hover {
   background-color: #7dd3fc;
 }
+
+.director-sidebar-scrollbar {
+  scrollbar-color: #cbd5e1 transparent;
+  scrollbar-width: thin;
+}
+
+.director-sidebar-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.director-sidebar-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.director-sidebar-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(148, 163, 184, 0.32);
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background-clip: padding-box;
+}
+
+.director-sidebar-scrollbar:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(100, 116, 139, 0.55);
+}
+
+.dark .director-sidebar-scrollbar {
+  scrollbar-color: #334155 transparent;
+}
+
+.dark .director-sidebar-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.dark .director-sidebar-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(71, 85, 105, 0.42);
+  border-color: transparent;
+}
+
+.dark .director-sidebar-scrollbar:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(100, 116, 139, 0.66);
+}
