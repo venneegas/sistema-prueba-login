@@ -86,10 +86,10 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
   const anioTope = Math.max(2026, currentSysYear) + 1; // Un año al futuro por si acaso
   const aniosDisponibles = Array.from({ length: anioTope - 2026 + 1 }, (_, i) => 2026 + i);
   const trimestresDisponibles = [
-    { id: '1', label: '1er Trimestre' },
-    { id: '2', label: '2do Trimestre' },
-    { id: '3', label: '3er Trimestre' },
-    { id: '4', label: '4to Trimestre' },
+    { id: '1', label: '1º Trimestre' },
+    { id: '2', label: '2º Trimestre' },
+    { id: '3', label: '3º Trimestre' },
+    { id: '4', label: '4º Trimestre' },
   ];
   const maxTrimestrePermitido = anioActual < currentSysYear
     ? 4

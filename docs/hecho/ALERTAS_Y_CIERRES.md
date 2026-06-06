@@ -5,10 +5,10 @@ Este documento detalla el comportamiento de la plataforma frente a las fechas l�
 ## 📅 1. Definición de Fechas Límite
 El sistema otorga a los directores **un mes de gracia** tras la finalización de cada trimestre para procesar y subir su información. El plazo vence estrictamente a las **11:59:59 PM** del último día de ese mes de gracia:
 
-*   **1er Trimestre (Ene-Mar):** Vence el 30 de Abril.
-*   **2do Trimestre (Abr-Jun):** Vence el 31 de Julio.
-*   **3er Trimestre (Jul-Sep):** Vence el 31 de Octubre.
-*   **4to Trimestre (Oct-Dic):** Vence el 31 de Enero del año siguiente.
+*   **1º Trimestre (Ene-Mar):** Vence el 30 de Abril.
+*   **2º Trimestre (Abr-Jun):** Vence el 31 de Julio.
+*   **3º Trimestre (Jul-Sep):** Vence el 31 de Octubre.
+*   **4º Trimestre (Oct-Dic):** Vence el 31 de Enero del año siguiente.
 
 ---
 

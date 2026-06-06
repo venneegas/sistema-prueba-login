@@ -16,10 +16,10 @@ import {
 } from 'lucide-react';
 
 const trimestreLabels = {
-  1: '1er Trimestre (Ene - Mar)',
-  2: '2do Trimestre (Abr - Jun)',
-  3: '3er Trimestre (Jul - Sep)',
-  4: '4to Trimestre (Oct - Dic)'
+  1: '1º Trimestre (Ene - Mar)',
+  2: '2º Trimestre (Abr - Jun)',
+  3: '3º Trimestre (Jul - Sep)',
+  4: '4º Trimestre (Oct - Dic)'
 };
 
 const resumenAlertas = [
@@ -174,10 +174,10 @@ const EspecialistaAlertasView = ({
                     onChange={(e) => onTrimestreChange(e.target.value)}
                     className="w-full bg-transparent text-sm font-bold text-slate-700 dark:text-slate-200 outline-none"
                   >
-                    <option value="1">1er Trimestre (Ene - Mar)</option>
-                    <option value="2">2do Trimestre (Abr - Jun)</option>
-                    <option value="3">3er Trimestre (Jul - Sep)</option>
-                    <option value="4">4to Trimestre (Oct - Dic)</option>
+                    <option value="1">1º Trimestre (Ene - Mar)</option>
+                    <option value="2">2º Trimestre (Abr - Jun)</option>
+                    <option value="3">3º Trimestre (Jul - Sep)</option>
+                    <option value="4">4º Trimestre (Oct - Dic)</option>
                   </select>
                 </div>
               </label>

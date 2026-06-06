@@ -32,10 +32,10 @@ const EspecialistaPeriodoFilters = ({
           value={trimestreSeleccionado}
           onChange={(e) => onTrimestreChange(e.target.value)}
         >
-          <option value="1" className="bg-white dark:bg-slate-900 text-black dark:text-white">1er Trimestre (Ene - Mar)</option>
-          <option value="2" className="bg-white dark:bg-slate-900 text-black dark:text-white">2do Trimestre (Abr - Jun)</option>
-          <option value="3" className="bg-white dark:bg-slate-900 text-black dark:text-white">3er Trimestre (Jul - Sep)</option>
-          <option value="4" className="bg-white dark:bg-slate-900 text-black dark:text-white">4to Trimestre (Oct - Dic)</option>
+          <option value="1" className="bg-white dark:bg-slate-900 text-black dark:text-white">1º Trimestre (Ene - Mar)</option>
+          <option value="2" className="bg-white dark:bg-slate-900 text-black dark:text-white">2º Trimestre (Abr - Jun)</option>
+          <option value="3" className="bg-white dark:bg-slate-900 text-black dark:text-white">3º Trimestre (Jul - Sep)</option>
+          <option value="4" className="bg-white dark:bg-slate-900 text-black dark:text-white">4º Trimestre (Oct - Dic)</option>
         </select>
       </div>
     </div>

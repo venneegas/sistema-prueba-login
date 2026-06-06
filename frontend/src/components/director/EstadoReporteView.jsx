@@ -18,10 +18,10 @@ const formatearFechaCierre = (fecha) => {
 };
 
 const periodos = {
-  '1': { label: '1er Trimestre', meses: ['Enero', 'Febrero', 'Marzo'], fin: { dia: 31, mes: 2 } },
-  '2': { label: '2do Trimestre', meses: ['Abril', 'Mayo', 'Junio'], fin: { dia: 30, mes: 5 } },
-  '3': { label: '3er Trimestre', meses: ['Julio', 'Agosto', 'Septiembre'], fin: { dia: 30, mes: 8 } },
-  '4': { label: '4to Trimestre', meses: ['Octubre', 'Noviembre', 'Diciembre'], fin: { dia: 31, mes: 11 } },
+  '1': { label: '1º Trimestre', meses: ['Enero', 'Febrero', 'Marzo'], fin: { dia: 31, mes: 2 } },
+  '2': { label: '2º Trimestre', meses: ['Abril', 'Mayo', 'Junio'], fin: { dia: 30, mes: 5 } },
+  '3': { label: '3º Trimestre', meses: ['Julio', 'Agosto', 'Septiembre'], fin: { dia: 30, mes: 8 } },
+  '4': { label: '4º Trimestre', meses: ['Octubre', 'Noviembre', 'Diciembre'], fin: { dia: 31, mes: 11 } },
 };
 
 const EstadoReporteView = ({

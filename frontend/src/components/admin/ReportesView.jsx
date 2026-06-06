@@ -102,10 +102,10 @@ const ReportesView = ({ showToast }) => {
                   className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-sm font-medium text-slate-700"
                 >
                   <option value="todos">Todos los Trimestres</option>
-                  <option value="1">1er Trimestre (Ene-Mar)</option>
-                  <option value="2">2do Trimestre (Abr-Jun)</option>
-                  <option value="3">3er Trimestre (Jul-Sep)</option>
-                  <option value="4">4to Trimestre (Oct-Dic)</option>
+                  <option value="1">1º Trimestre (Ene-Mar)</option>
+                  <option value="2">2º Trimestre (Abr-Jun)</option>
+                  <option value="3">3º Trimestre (Jul-Sep)</option>
+                  <option value="4">4º Trimestre (Oct-Dic)</option>
                 </select>
               </div>
 

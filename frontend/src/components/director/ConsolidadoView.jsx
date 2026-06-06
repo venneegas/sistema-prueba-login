@@ -31,10 +31,10 @@ const ConsolidadoView = ({
   onCerrarTrimestre,
 }) => {
   const periodos = {
-    '1': { label: '1er Trimestre', meses: ['Enero', 'Febrero', 'Marzo'], fin: '31 de Marzo' },
-    '2': { label: '2do Trimestre', meses: ['Abril', 'Mayo', 'Junio'], fin: '30 de Junio' },
-    '3': { label: '3er Trimestre', meses: ['Julio', 'Agosto', 'Septiembre'], fin: '30 de Septiembre' },
-    '4': { label: '4to Trimestre', meses: ['Octubre', 'Noviembre', 'Diciembre'], fin: '31 de Diciembre' },
+    '1': { label: '1º Trimestre', meses: ['Enero', 'Febrero', 'Marzo'], fin: '31 de Marzo' },
+    '2': { label: '2º Trimestre', meses: ['Abril', 'Mayo', 'Junio'], fin: '30 de Junio' },
+    '3': { label: '3º Trimestre', meses: ['Julio', 'Agosto', 'Septiembre'], fin: '30 de Septiembre' },
+    '4': { label: '4º Trimestre', meses: ['Octubre', 'Noviembre', 'Diciembre'], fin: '31 de Diciembre' },
   };
 
   const actual = periodos[trimestreId];
