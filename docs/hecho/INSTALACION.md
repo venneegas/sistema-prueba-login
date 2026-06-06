@@ -1,100 +1,96 @@
-# 🚀 Guía de Instalación del Sistema UGEL
+# Guia De Instalacion Del Sistema UGEL
 
-Esta guía detalla los pasos necesarios para clonar, configurar y ejecutar el **Sistema de Gestión Financiera Educativa** en cualquier ordenador nuevo desde cero.
+Esta guia describe como levantar el sistema en un entorno local usando la base de datos real o una copia de respaldo autorizada.
 
----
+## 1. Requisitos Previos
 
-## 📋 1. Requisitos Previos
+- Node.js 18 o superior.
+- npm.
+- Git.
+- MySQL local o remoto.
+- HeidiSQL, phpMyAdmin u otra herramienta para administrar MySQL.
 
-Antes de empezar, asegúrate de tener instalado en el nuevo ordenador:
-*   **[Node.js](https://nodejs.org/es/)** (Versión 18 o superior).
-*   **[Git](https://git-scm.com/)** (Para clonar el repositorio).
-*   **[Laragon](https://laragon.org/download/)** o XAMPP (Para el servidor MySQL local y phpMyAdmin).
+## 2. Base De Datos
 
----
+1. Crea una base de datos MySQL.
+2. Importa `backend/database/schema.sql`.
+3. Si cuentas con un respaldo real autorizado, importalo despues del schema o reemplaza la base local con ese respaldo.
+4. Verifica que existan las tablas principales: `usuarios`, `roles`, `instituciones`, `directores`, `movimientos`, `sustentos`, `cierres`, `estados`, `saldos`, `tesoreria`, `notificaciones`, `solicitudes`, `sesiones` y `auditorias`.
 
-## 🗄️ 2. Configuración de la Base de Datos
+El archivo `schema.sql` define la estructura. Los datos reales deben provenir de la base oficial o de un respaldo controlado.
 
-1.  Abre **Laragon** y presiona **"Iniciar Todo"** (Asegúrate de que MySQL esté corriendo).
-2.  Abre **phpMyAdmin** (usualmente en `http://localhost/phpmyadmin`).
-3.  Ve a la pestaña **"Bases de datos"** y crea una nueva llamada:
-    `ugel_db` *(Codificamiento recomendado: utf8mb4_spanish_ci)*.
-4.  Haz clic sobre `ugel_db` en el panel izquierdo, ve a la pestaña **"Importar"**.
-5.  Selecciona el archivo de backup `.sql` (generado desde el sistema anterior) o utiliza el archivo `schema.sql` que se encuentra en la carpeta `/backend/database/` del proyecto.
-6.  Haz clic en **Continuar**. Las tablas y los usuarios de prueba se crearán automáticamente.
+## 3. Backend
 
----
+Desde la carpeta del backend:
 
-## ⚙️ 3. Configuración del Backend (Servidor)
+```bash
+cd backend
+npm install
+```
 
-1. Abre una terminal y navega a la carpeta del backend:
-   ```bash
-   cd ruta/del/proyecto/backend
-   ```
+Crea un archivo `.env`:
 
-2. Instala todas las dependencias y librerías necesarias:
-   ```bash
-   npm install
-   ```
+```env
+PORT=5000
+NODE_ENV=development
+JWT_SECRET=firma_secreta_ugel_2026
 
-3. Crea un archivo llamado `.env` en la raíz de la carpeta `backend` y configura tus variables de entorno (asegúrate de poner la contraseña correcta de tu MySQL en Laragon):
-   ```env
-   PORT=5000
-   NODE_ENV=development
-   JWT_SECRET=firma_secreta_ugel_2026
-   
-   # Credenciales de la Base de Datos Local
-   DB_HOST=localhost
-   DB_PORT=3306
-   DB_USER=root
-   DB_PASSWORD=
-   DB_NAME=ugel_db
-   ```
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=
+DB_NAME=ugel_db
 
-4. Inicia el servidor backend:
-   ```bash
-   npm start
-   ```
-   *Deberías ver en consola: "Servidor corriendo en el puerto 5000" y "Conectado a la base de datos MySQL".*
+EMAIL_HOST=
+EMAIL_PORT=465
+EMAIL_SECURE=true
+EMAIL_USER=
+EMAIL_PASS=
+EMAIL_FROM=
+```
 
----
+Inicia el servidor:
 
-## 💻 4. Configuración del Frontend (Interfaz)
+```bash
+npm start
+```
 
-1. Abre una **nueva** pestaña en tu terminal y navega a la carpeta del frontend:
-   ```bash
-   cd ruta/del/proyecto/frontend
-   ```
+El backend debe mostrar que el servidor esta activo y que la conexion a MySQL fue exitosa.
 
-2. Instala todas las dependencias de React:
-   ```bash
-   npm install
-   ```
+## 4. Frontend
 
-3. Inicia la aplicación web:
-   ```bash
-   npm start
-   ```
-   *El navegador se abrirá automáticamente en `http://localhost:3000` con la pantalla de inicio de sesión.*
+Desde la carpeta del frontend:
 
----
+```bash
+cd frontend
+npm install
+npm start
+```
 
-## 🔑 5. Credenciales de Acceso
+La aplicacion se abrira normalmente en `http://localhost:3000`.
 
-Si importaste la base de datos de prueba, puedes utilizar las siguientes cuentas para probar los distintos módulos del sistema:
+Si el frontend necesita apuntar a un backend especifico, revisa la configuracion de API en `frontend/src/config/api.js` y las variables de entorno correspondientes.
 
-**👨‍💻 Administrador de TI (Soporte)**
-*   **Correo:** `edgard.venegas@ugel.edu.pe`
-*   **Contraseña:** `(La que configuraste en tu sistema)`
+## 5. Accesos
 
-**🕵️‍♂️ Especialista UGEL (Auditor)**
-*   **Correo:** `especialista@ugel.edu.pe` *(Revisar BD para correo exacto)*
-*   **Contraseña:** `(Revisar BD)`
+Los accesos deben existir en la tabla `usuarios`. Para directores, el usuario debe estar vinculado a un registro de `directores`, y ese director debe estar vinculado a una `institucion`.
 
-**👨‍🏫 Director de I.E. (Declarante)**
-*   **Correo:** `sariber19@hotmail.com` *(O cualquier otro colegio)*
-*   **Contraseña:** `password123` *(O la que esté vigente)*
+No se recomienda documentar contrasenas reales en este archivo. Para un entorno local, crea usuarios desde el panel administrador o mediante un script autorizado, siempre con contrasenas hasheadas.
 
----
+## 6. Archivos Subidos
 
-🎉 **¡Listo! El sistema debería estar funcionando al 100% en tu entorno local.**
+Los PDFs se guardan en:
+
+```text
+backend/uploads/pdfs
+```
+
+En local, basta con que la carpeta exista. En produccion, Render requiere Persistent Disk o almacenamiento externo para no perder archivos al reiniciar o redesplegar.
+
+## 7. Verificacion Rapida
+
+1. Inicia sesion con un usuario real.
+2. Confirma que el rol correcto abre su panel correspondiente.
+3. En Director, verifica ingresos, egresos, consolidado, sustentos PDF, tesoreria y estado de reporte.
+4. En Especialista, verifica explorador, detalle de colegio, auditoria y reporte global.
+5. En Admin, verifica usuarios, sesiones, auditoria y backup.

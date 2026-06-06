@@ -1,508 +1,137 @@
-# 🏗️ ARQUITECTURA DEL SISTEMA: BD + Backend + Frontend
+# Arquitectura del Sistema UGEL
 
-**Estado:** Documentación técnica completa  
-**Fecha:** 3 de abril de 2026  
+**Estado:** vigente  
+**Ultima actualizacion:** junio de 2026
 
----
+Este documento resume la arquitectura actual del Sistema de Gestion Financiera Educativa. La plataforma trabaja con datos reales almacenados en MySQL; ya no usa archivos JSON ni datos mock como fuente de autenticacion o consulta.
 
-## 🔷 DIAGRAMA GENERAL
+## Vista General
 
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                         NAVEGADOR (React Frontend)                          │
-│                          http://localhost:3000                              │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                              │
-│  ┌──────────────────────────────────────────────────────────────┐           │
-│  │  LoginForm.jsx                                               │           │
-│  │  ┌─────────────────────────────────────────────────────┐    │           │
-│  │  │ Input: correo + password                            │    │           │
-│  │  │ POST /api/auth/login                                │    │           │
-│  │  │ {correo: "...", password: "..."}                   │    │           │
-│  │  └──────────────┬──────────────────────────────────────┘    │           │
-│  └─────────────────┼────────────────────────────────────────────┘           │
-│                    │ HTTP POST                                              │
-│                    ▼                                                        │
-├──────────────────────────────────────────────────────────────────────────────┤
-│                                INTERNET                                      │
-└──────────────────────────────────────────────────────────────────────────────┘
-                     │
-                     ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│         EXPRESS.JS BACKEND (Node.js)                                        │
-│         http://localhost:5000                                               │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                              │
-│  ┌─────────────────────────────────────────────────────────────┐           │
-│  │  authController.js - POST /api/auth/login                  │           │
-│  │                                                              │           │
-│  │  1️⃣ Recibe: {correo, password}                             │           │
-│  │     ↓                                                        │           │
-│  │  2️⃣ Valida contra directores.json                          │           │
-│  │     if (directores[correo].password === password) ✓        │           │
-│  │     ↓                                                        │           │
-│  │  3️⃣ Conecta a MySQL                                        │           │
-│  │     SELECT * FROM directores WHERE correo = ?              │           │
-│  │     ↓                                                        │           │
-│  │  4️⃣ Si no existe → INSERT (crear automático)              │           │
-│  │     Si existe → UPDATE (sincronizar datos)                 │           │
-│  │     ↓                                                        │           │
-│  │  5️⃣ Registra en login_logs                                │           │
-│  │     INSERT INTO login_logs (director_id, fecha, exitoso)   │           │
-│  │     ↓                                                        │           │
-│  │  6️⃣ Devuelve JSON con datos director (SIN contraseña)   │           │
-│  │     {success: true, director: {id, nombre, ...}}           │           │
-│  │                                                              │           │
-│  └─────────────────────────────────────────────────────────────┘           │
-│                                                                              │
-│  Archivos clave:                                                            │
-│  • authController.js  → Lógica de login                                    │
-│  • config/db.js       → Conexión + validación                             │
-│  • server.js          → Servidor Express                                    │
-│  • routes/auth.js     → Rutas API                                          │
-│  • data/directores.json → Credenciales (JSON)                             │
-│                                                                              │
-└──────────────────────────────────────────────────────────────────────────────┘
-         │             │              │                │
-         │ JSON        │ SQL Queries  │                │
-         │ Read        │              │                │
-         ▼             ▼              │                │
-   ┌──────────┐  ┌──────────────────┐│                │
-   │ ARCHIVO  │  │                  ││                │
-   │ JSON     │  │  MySQL - Laragon ││                │
-   └──────────┘  │  (Puerto 3306)   ││                │
-                 └──────────────────┘│                │
-      directores │                   │                │
-      .json      │  ┌────────────────┼────────────────┐
-                 │  │                │                │
-                 │  ▼                ▼                ▼
-                 │ ┌──────────────────────────────────┐
-                 │ │  BASE DE DATOS: ugel_db         │
-                 │ │                                  │
-                 │ │  Tablas:                         │
-                 │ │  ┌──────────────────────────┐   │
-                 │ │  │ directores               │   │
-                 │ │  ├─────────────────────────┼┐  │
-                 │ │  │ id (INT PK)             ││  │
-                 │ │  │ dni (VARCHAR 8)         ││  │
-                 │ │  │ nombre (VARCHAR)        ││  │
-                 │ │  │ apellido (VARCHAR)      ││  │
-                 │ │  │ correo (VARCHAR UNIQUE) ││  │
-                 │ │  │ colegio (VARCHAR)       ││  │
-                 │ │  │ password_hash (VARCHAR) ││  │
-                 │ │  │ creado_en (TIMESTAMP)   ││  │
-                 │ │  │ actualizado_en (TIMESTAMP)  │
-                 │ │  └─────────────────────────┼┘  │
-                 │ │                                  │
-                 │ │  ┌──────────────────────────┐   │
-                 │ │  │ login_logs              │   │
-                 │ │  ├─────────────────────────┼┐  │
-                 │ │  │ id (INT PK)             ││  │
-                 │ │  │ director_id (INT FK)    ││  │
-                 │ │  │ correo (VARCHAR)        ││  │
-                 │ │  │ fecha (TIMESTAMP)       ││  │
-                 │ │  │ exitoso (BOOLEAN)       ││  │
-                 │ │  │ razon_fallo (VARCHAR)   ││  │
-                 │ │  │ ip_address (VARCHAR)    ││  │
-                 │ │  └─────────────────────────┼┘  │
-                 │ │                                  │
-                 │ └──────────────────────────────────┘
-                 │
-                 └─ Motor: InnoDB, Charset: utf8mb4
+```text
+Usuario
+  |
+  v
+Frontend React
+  |
+  | HTTP/JSON + token JWT
+  v
+Backend Node.js + Express
+  |
+  v
+Base de datos MySQL
 ```
 
----
+## Capas Del Sistema
 
-## 📁 ESTRUCTURA DE CARPETAS
+### Frontend
 
-```
-c:\Users\edgar\OneDrive\Desktop\prueba\
-│
-├── 📄 ANALISIS_BD_Y_VALIDACION.md
-├── 📄 PROBLEMA_Y_SOLUCION.md
-├── 📄 GUIA_RAPIDA.md
-├── 📄 ARQUITECTURA.md (este archivo)
-├── 📄 package.json (raíz)
-│
-├── 📁 backend/
-│   ├── 📄 .env ⭐ CREAR (credenciales MySQL)
-│   ├── 📄 .env.example (referencia)
-│   ├── 📄 server.js (puerto 5000)
-│   ├── 📄 package.json
-│   │
-│   ├── 📁 config/
-│   │   └── 📄 db.js (conexión MySQL + validación JSON)
-│   │
-│   ├── 📁 controllers/
-│   │   └── 📄 authController.js (POST /api/auth/login)
-│   │
-│   ├── 📁 routes/
-│   │   └── 📄 auth.js (definición de rutas)
-│   │
-│   ├── 📁 data/
-│   │   └── 📄 directores.json ⭐ Credenciales (fuente primaria)
-│   │
-│   ├── 📁 database/
-│   │   ├── 📄 schema.sql ⭐ Crear BD en MySQL
-│   │   └── 📄 importar-directores.js
-│   │
-│   └── 📁 env/
-│       └── .env oculto
-│
-├── 📁 frontend/
-│   ├── 📄 package.json
-│   ├── 📄 src/
-│   │
-│   ├── 📁 public/
-│   │   └── index.html (puerto 3000)
-│   │
-│   └── 📁 src/
-│       ├── 📄 App.js (contenedor principal)
-│       ├── 📄 index.js
-│       │
-│       ├── 📁 components/
-│       │   ├── 📄 LoginForm.jsx ⚠️ NECESITA CAMBIOS (conectar al backend)
-│       │   ├── 📄 DirectorDashboard.jsx
-│       │   ├── 📄 DirectorSidebar.jsx
-│       │   └── ...más componentes
-│       │
-│       └── 📁 data/
-│           └── 📄 users.js (MOCK - NO USAR cuando backend esté activo)
-```
+El frontend esta construido con React y Tailwind CSS. Consume la API del backend mediante `fetch` y envia el token JWT en las rutas protegidas.
 
----
+Modulos principales:
 
-## 🔄 FLUJO DE DATOS COMPLETO
+- Login, recuperacion y cambio de contrasena.
+- Panel Director: consolidado, ingresos, egresos, sustentos PDF, direccion, tesoreria, estado de reporte y notificaciones.
+- Panel Especialista: explorador de instituciones, detalle financiero, auditoria, alertas, solicitudes y reportes globales.
+- Panel Administrador: usuarios, auditoria, logs de acceso, respaldo de base de datos y reportes administrativos.
 
-### Escenario: Login Exitoso
+### Backend
 
-```
-┌──────────────────────────────────────────────────────────────────┐
-│ 1. USUARIO INGRESA CREDENCIALES                                  │
-├──────────────────────────────────────────────────────────────────┤
-│                                                                   │
-│ Correo: juan.perez@colegio.edu.pe                               │
-│ Contraseña: password123                                         │
-│                                                                   │
-└──────────────────────┬───────────────────────────────────────────┘
-                       │
-                       ▼
-┌──────────────────────────────────────────────────────────────────┐
-│ 2. FRONTEND → BACKEND (POST /api/auth/login)                    │
-├──────────────────────────────────────────────────────────────────┤
-│                                                                   │
-│ {                                                                │
-│   "correo": "juan.perez@colegio.edu.pe",                       │
-│   "password": "password123"                                     │
-│ }                                                                │
-│                                                                   │
-└──────────────────────┬───────────────────────────────────────────┘
-                       │
-                       ▼
-┌──────────────────────────────────────────────────────────────────┐
-│ 3. BACKEND: VALIDA CONTRA directores.json                       │
-├──────────────────────────────────────────────────────────────────┤
-│                                                                   │
-│ ✓ Encuentra: juan.perez@colegio.edu.pe en JSON                  │
-│ ✓ Contraseña coincide: password123                              │
-│ → Continuar al paso 4                                            │
-│                                                                   │
-└──────────────────────┬───────────────────────────────────────────┘
-                       │
-                       ▼
-┌──────────────────────────────────────────────────────────────────┐
-│ 4. BACKEND: BUSCA EN MySQL (tablaDirectores)                    │
-├──────────────────────────────────────────────────────────────────┤
-│                                                                   │
-│ SELECT * FROM directores                                         │
-│ WHERE correo = 'juan.perez@colegio.edu.pe'                      │
-│                                                                   │
-│ ¿Resultado?                                                      │
-│ ├─ SI EXISTE (ya login antes)                                   │
-│ │  └─ UPDATE: Actualizar datos si cambiaron en JSON            │
-│ │                                                                │
-│ └─ NO EXISTE (primera vez que accede)                           │
-│    └─ INSERT: Crear registro automáticamente                    │
-│                                                                   │
-└──────────────────────┬───────────────────────────────────────────┘
-                       │
-                       ▼
-┌──────────────────────────────────────────────────────────────────┐
-│ 5. BACKEND: REGISTRA EN login_logs (AUDITORÍA)                  │
-├──────────────────────────────────────────────────────────────────┤
-│                                                                   │
-│ INSERT INTO login_logs (                                         │
-│   director_id: 1,                                                │
-│   correo: 'juan.perez@colegio.edu.pe',                          │
-│   fecha: NOW(),                                                  │
-│   exitoso: true,                                                 │
-│   ip_address: '127.0.0.1'                                        │
-│ )                                                                │
-│                                                                   │
-│ → Queda registro permanente de acceso                            │
-│                                                                   │
-└──────────────────────┬───────────────────────────────────────────┘
-                       │
-                       ▼
-┌──────────────────────────────────────────────────────────────────┐
-│ 6. BACKEND → FRONTEND (RESPUESTA)                               │
-├──────────────────────────────────────────────────────────────────┤
-│                                                                   │
-│ {                                                                │
-│   "success": true,                                               │
-│   "message": "Inicio de sesión exitoso.",                       │
-│   "director": {                                                  │
-│     "id": 1,                                                     │
-│     "nombre": "Juan",                                            │
-│     "apellido": "Pérez",                                         │
-│     "correo": "juan.perez@colegio.edu.pe",                      │
-│     "dni": "12345678",                                           │
-│     "colegio": "Colegio Nacional Jorge Chávez"                  │
-│   }                                                              │
-│ }                                                                │
-│                                                                   │
-│ ⭐ NOTA: Password NUNCA se devuelve por seguridad              │
-│                                                                   │
-└──────────────────────┬───────────────────────────────────────────┘
-                       │
-                       ▼
-┌──────────────────────────────────────────────────────────────────┐
-│ 7. FRONTEND: PROCESA RESPUESTA                                  │
-├──────────────────────────────────────────────────────────────────┤
-│                                                                   │
-│ ✓ Guarda datos director en contexto/localStorage               │
-│ ✓ Redirige a DirectorDashboard                                  │
-│ ✓ Muestra datos del usuario logueado                            │
-│                                                                   │
-└──────────────────────────────────────────────────────────────────┘
-```
+El backend usa Node.js con Express. Centraliza la autenticacion, validacion, persistencia, auditoria y gestion de archivos.
 
----
+Rutas principales:
 
-### Escenario: Login Fallido
+- `/api/auth`: login, cambio de contrasena, recuperacion de contrasena y auditoria frontend.
+- `/api/movimientos`: ingresos, egresos, saldos bancarios y cierres trimestrales.
+- `/api/sustentos`: subida, listado y eliminacion de PDFs.
+- `/api/datos-institucionales`: datos de tesoreria y cuenta corriente.
+- `/api/especialista`: instituciones, detalle financiero, PDFs, auditoria y reporte global.
+- `/api/notificaciones`: notificaciones del director.
+- `/api/admin`: usuarios, auditoria, sesiones y backup SQL.
+- `/api/solicitudes-reemplazo`: solicitudes de cambio o reemplazo de director.
+- `/api/comprobantes`: catalogo de comprobantes por tipo de movimiento.
+- `/api/perfil`: datos visuales de perfil cuando existan.
 
-```
-┌──────────────────────────────────────────────────────────────────┐
-│ ENTRADA INCORRECTA: Contraseña mal                              │
-├──────────────────────────────────────────────────────────────────┤
-│                                                                   │
-│ Correo: juan.perez@colegio.edu.pe                               │
-│ Contraseña: PASSWORD_INCORRECTA ❌                               │
-│                                                                   │
-└──────────────────────┬───────────────────────────────────────────┘
-                       │
-                       ▼
-                   BACKEND
-                       │
-                       ▼
-┌──────────────────────────────────────────────────────────────────┐
-│ VALIDACIÓN FALLIDA: JSON no coincide                            │
-├──────────────────────────────────────────────────────────────────┤
-│                                                                   │
-│ directores['juan.perez@colegio.edu.pe'].password = "password123"│
-│ input.password = "PASSWORD_INCORRECTA"                           │
-│ ✗ NO COINCIDEN                                                   │
-│                                                                   │
-│ → Retorna error ANTES de acceder a BD                            │
-│ → NUNCA se registra en login_logs (optimización)               │
-│                                                                   │
-└──────────────────────┬───────────────────────────────────────────┘
-                       │
-                       ▼
-┌──────────────────────────────────────────────────────────────────┐
-│ RESPUESTA AL FRONTEND                                            │
-├──────────────────────────────────────────────────────────────────┤
-│                                                                   │
-│ HTTP 401 Unauthorized                                            │
-│                                                                   │
-│ {                                                                │
-│   "success": false,                                               │
-│   "message": "Correo o contraseña incorrectos."                 │
-│ }                                                                │
-│                                                                   │
-│ → Frontend muestra error al usuario                             │
-│ → NO redirige al dashboard                                      │
-│                                                                   │
-└──────────────────────────────────────────────────────────────────┘
-```
+### Base De Datos
 
----
+La persistencia real se realiza en MySQL. Las tablas principales son:
 
-## 🔐 FLUJO DE VALIDACIÓN
+- `instituciones`: datos de instituciones educativas, codigo modular y RUC opcional.
+- `directores`: datos personales y vinculo con la institucion.
+- `roles`: catalogo de roles del sistema.
+- `usuarios`: cuentas de acceso, hash de contrasena, rol y estado.
+- `sesiones`: intentos de inicio de sesion exitosos y fallidos.
+- `auditorias`: acciones relevantes realizadas por usuarios.
+- `comprobantes`: tipos de comprobante permitidos.
+- `movimientos`: ingresos y egresos registrados por director.
+- `cierres`: candado trimestral del director.
+- `estados`: estado de revision del reporte financiero.
+- `sustentos`: metadatos de PDFs subidos por directores.
+- `tesoreria`: tesorero, banco y cuenta corriente.
+- `perfil`: rutas de imagenes de perfil si se habilitan.
+- `saldos`: saldos bancarios trimestrales.
+- `notificaciones`: mensajes visibles para directores.
+- `solicitudes`: solicitudes de cambio o reemplazo.
 
-```
-ENTRADA (correo + contraseña)
-        │
-        ▼
-    ¿Existe en directores.json?
-        │
-        ├─── NO ──► Retornar: 401 Unauthorized
-        │           "Correo o contraseña incorrectos"
-        │
-        └─── SÍ ──► ¿Contraseña coincide?
-                    │
-                    ├─── NO ──► Retornar: 401 Unauthorized
-                    │           "Correo o contraseña incorrectos"
-                    │
-                    └─── SÍ ──► Continuar...
-                                │
-                                ▼
-                        Buscar en BD MySQL
-                                │
-                                ├─── NO EXISTE ──► INSERT (crear)
-                                │
-                                └─── EXISTE ──► UPDATE (sincronizar)
-                                        │
-                                        ▼
-                                Registrar en login_logs
-                                        │
-                                        ▼
-                                Retornar: 200 OK
-                                {director data}
-```
+## Autenticacion
 
----
+El login valida contra la tabla `usuarios` de MySQL usando `bcryptjs`. Si las credenciales son correctas, el backend genera un token JWT con el id, correo y rol del usuario.
 
-## 📊 TABLAS MYSQL
+Flujo resumido:
 
-### Tabla: directores
-```sql
-+──────────────────────────────────────────────────────────────┐
-│                        directores                            │
-├────────────────────────┬──────────────┬──────────────────────┤
-│ Columna                │ Tipo         │ Propósito            │
-├────────────────────────┼──────────────┼──────────────────────┤
-│ id (PK)                │ INT          │ Identificador único  │
-│ dni                    │ VARCHAR(8)   │ DNI del director     │
-│ nombre                 │ VARCHAR(100) │ Nombre               │
-│ apellido               │ VARCHAR(100) │ Apellido             │
-│ correo (UNIQUE)        │ VARCHAR(100) │ Correo (clave)       │
-│ colegio                │ VARCHAR(150) │ Nombre del colegio   │
-│ password_hash          │ VARCHAR(255) │ Contraseña (bcrypt)  │
-│ ultimo_login           │ TIMESTAMP    │ Último acceso        │
-│ creado_en              │ TIMESTAMP    │ Fecha creación       │
-│ actualizado_en         │ TIMESTAMP    │ Última actualización │
-└────────────────────────┴──────────────┴──────────────────────┘
-```
+1. El usuario envia correo y contrasena.
+2. El backend busca el correo en `usuarios`.
+3. Se compara la contrasena con `password_hash`.
+4. Se registra el intento en `sesiones`.
+5. Si el login es correcto, se actualiza `ultimo_login`.
+6. Se devuelve el token JWT y los datos del usuario.
+7. Si el usuario es director, se adjuntan sus datos de `directores` e `instituciones`.
 
-### Tabla: login_logs
-```sql
-+──────────────────────────────────────────────────────────────┐
-│                      login_logs                              │
-├────────────────────────┬──────────────┬──────────────────────┤
-│ Columna                │ Tipo         │ Propósito            │
-├────────────────────────┼──────────────┼──────────────────────┤
-│ id (PK)                │ INT          │ Identificador único  │
-│ director_id (FK)       │ INT          │ Referencia director  │
-│ correo                 │ VARCHAR(100) │ Correo del acceso    │
-│ fecha                  │ TIMESTAMP    │ Cuándo se logueó     │
-│ exitoso                │ BOOLEAN      │ Login exitoso o no   │
-│ razon_fallo            │ VARCHAR(255) │ Por qué falló (si es)│
-│ ip_address             │ VARCHAR(45)  │ IP del cliente       │
-└────────────────────────┴──────────────┴──────────────────────┘
-```
+## Flujo Director
 
----
+El director selecciona anio y trimestre. El sistema carga datos reales desde la base de datos:
 
-## 🛠️ TECNOLOGÍAS USADAS
+- Ingresos y egresos desde `movimientos`.
+- Saldos desde `saldos`.
+- PDFs desde `sustentos`.
+- Estado del reporte desde `estados`.
+- Cierre desde `cierres`.
+- Datos de tesoreria desde `tesoreria`.
+- Notificaciones desde `notificaciones`.
 
-| Componente | Tecnología | Versión | Puerto | Rol |
-|-----------|-----------|---------|--------|-----|
-| **Frontend** | React | 18.x | 3000 | UI/Interfaz |
-| **Backend** | Node.js + Express | 20.x | 5000 | API/Lógica |
-| **BD** | MySQL | 5.7+ | 3306 | Persistencia |
-| **Validación** | JSON (directores.json) | - | - | Fuente primaria |
-| **Seguridad** | bcryptjs | 2.4.x | - | Hash contraseñas |
+Cuando el director cierra un trimestre, el backend crea el registro en `cierres` y actualiza `estados` a `Enviado`. Desde ese momento la edicion queda bloqueada para ese periodo, salvo que el especialista observe el reporte.
 
----
+## Flujo Especialista
 
-## 📋 CHECKLIST DE IMPLEMENTACIÓN
+El especialista consulta instituciones y reportes por anio/trimestre. El sistema cruza datos reales de instituciones, directores, movimientos, saldos, sustentos y estados.
 
-- [x] Base de datos MySQL creada
-- [x] Tablas (directores, login_logs) creadas
-- [x] Backend configurado (Express)
-- [x] Rutas de autenticación definidas
-- [x] Validación contra JSON implementada
-- [x] Sincronización a BD automática
-- [x] Respuestas seguras (sin contraseña)
-- [ ] ⚠️ Frontend conectado al backend (PENDIENTE)
-- [ ] LoginForm debe hacer POST a /api/auth/login
-- [ ] Tests de integración
-- [ ] Documentación de API (Swagger/OpenAPI)
-- [ ] Rate limiting en login
-- [ ] Manejo de sesiones con JWT (futuro)
+Estados disponibles:
 
----
+- `Borrador`
+- `Enviado`
+- `Observado`
+- `Aprobado`
 
-## 🔗 ENDPOINTS API
+Si aprueba, el reporte queda sellado. Si observa, se registra comentario, se notifica al director y se libera el periodo para correccion.
 
-### POST /api/auth/login
-**Descripción:** Autentica un director
+## Archivos PDF
 
-**Request:**
-```json
-{
-  "correo": "juan.perez@colegio.edu.pe",
-  "password": "password123"
-}
-```
+Los PDFs se suben con `multer` y se guardan fisicamente en `backend/uploads/pdfs`. La tabla `sustentos` conserva el nombre original, ruta, tamano, anio, trimestre y director.
 
-**Response (200 OK):**
-```json
-{
-  "success": true,
-  "message": "Inicio de sesión exitoso.",
-  "director": {
-    "id": 1,
-    "nombre": "Juan",
-    "apellido": "Pérez",
-    "correo": "juan.perez@colegio.edu.pe",
-    "dni": "12345678",
-    "colegio": "Colegio Nacional Jorge Chávez"
-  }
-}
-```
+En produccion, Render puede borrar archivos si no se usa disco persistente. Para operacion estable se recomienda configurar Persistent Disk o migrar archivos a un servicio externo.
 
-**Response (401 Unauthorized):**
-```json
-{
-  "success": false,
-  "message": "Correo o contraseña incorrectos."
-}
-```
+## Auditoria
 
-### POST /api/auth/change-password
-**Descripción:** Cambia contraseña de director
+El sistema registra:
 
-**Request:**
-```json
-{
-  "correo": "juan.perez@colegio.edu.pe",
-  "newPassword": "nuevacontraseña123"
-}
-```
+- Intentos de inicio de sesion en `sesiones`.
+- Acciones administrativas y operativas en `auditorias`.
+- Notificaciones al director en `notificaciones`.
+- Cambios de estado del reporte en `estados`.
 
----
+## Despliegue
 
-## 🎯 RESUMEN ARQUITECTURA
+- Frontend: Vercel.
+- Backend: Render.
+- Base de datos: MySQL en servicio externo.
 
-```
-                    CLIENTE (React)
-                    ↓ HTTP/JSON ↓
-                    SERVIDOR (Node/Express)
-                    ↓ Validación ↓
-            JSON (directores.json)
-                    ↓ Sincronización ↓
-            MySQL (ugel_db)
-```
-
-**Características:**
-- ✅ Validación de 2 fuentes (JSON + BD)
-- ✅ Sincronización automática
-- ✅ Auditoría completa
-- ✅ Seguridad (sin exposición de contraseña)
-- ✅ Escalable (ilimitados directores)
-
----
-
-**Documento generado para entender la arquitectura completa del sistema.**
+El frontend usa variables de entorno para apuntar al backend desplegado. El backend usa `.env` para credenciales de MySQL, JWT y correo.

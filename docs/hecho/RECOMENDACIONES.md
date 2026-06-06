@@ -1,24 +1,60 @@
-# 🚀 Recomendaciones y Siguientes Pasos
+# Recomendaciones Y Siguientes Pasos
 
-Este documento detalla las ideas y mejoras planificadas para evolucionar el **Sistema de Gestión Financiera Educativa** hacia una plataforma más completa, robusta y profesional.
+Este documento lista mejoras pendientes o puntos de vigilancia. No incluye funcionalidades que ya fueron completadas.
 
----
+## 1. Almacenamiento Persistente De Archivos
 
-## 1. Exportación del Consolidado a PDF o Excel 📄 *(Implementado ✅)*
-Actualmente, el director puede visualizar su consolidado (sumas, restas y saldos del banco) únicamente en pantalla. 
-**Objetivo:** Agregar un botón de "Descargar Reporte" que genere un documento PDF con formato oficial (incluyendo el logo de la UGEL, nombre del colegio, firmas, etc.) listo para ser impreso y firmado.
+Los PDFs subidos por los directores ya se guardan de forma real con `multer` y se registran en la tabla `sustentos`. El riesgo actual esta en produccion: si Render usa disco efimero, los archivos pueden perderse tras reinicios o redeploys.
 
-## 2. Subida REAL de Archivos en `SubirPDFView.jsx` ☁️ *(Implementado ✅)*
-La pestaña de "SUBIR PDF" cuenta con una interfaz atractiva pero actualmente solo simula el progreso de subida.
-**Objetivo:** Conectar este componente al backend usando una librería como `Multer` (en Node.js) para que los archivos PDF realmente se transfieran, se validen (peso, formato) y se guarden de forma segura en el servidor, manteniendo un histórico de sustentos.
+Recomendacion:
 
-## 3. Alertas Flotantes (Toasts) 🔔 *(Implementado ✅)*
-Sustituir los recuadros de mensajes estáticos de éxito o error que empujan el contenido de la pantalla.
-**Objetivo:** Implementar notificaciones flotantes (tipo *Toasts*) que aparezcan sutilmente en una esquina de la pantalla y desaparezcan automáticamente a los 3 segundos, mejorando significativamente la UX.
+- Configurar Persistent Disk en Render, o
+- Migrar PDFs a almacenamiento externo como S3, Cloudinary u otro servicio equivalente.
 
-## 4. Seguridad en el Backend (Autenticación JWT) 🔒 *(Implementado ✅)*
-Asegurarnos de que las rutas del backend estén protegidas contra accesos no autorizados.
-**Objetivo:** Implementar JSON Web Tokens (JWT) para que cuando el frontend solicite datos (ej. cargar ingresos/egresos), el servidor verifique la identidad del usuario a través del token de sesión. Esto previene que usuarios malintencionados fuercen peticiones escribiendo la URL de la API directamente.
+## 2. Reportes Administrativos
 
-## 5. Descarga de Respaldos (Backups) 💾 *(Implementado ✅)*
-Brindar la posibilidad al administrador / especialista de descargar un volcado total de la base de datos en caso de emergencia.
+El panel de Especialista ya cuenta con reporte global basado en datos reales. El panel Admin debe evitar vistas con informacion simulada y consumir endpoints reales para reportes institucionales.
+
+Recomendacion:
+
+- Reutilizar `/api/especialista/reporte-global` cuando el reporte sea financiero.
+- Crear rutas admin propias si se necesitan filtros o formatos diferentes.
+
+## 3. Auditoria En Produccion
+
+El sistema registra sesiones y acciones relevantes. En produccion se debe validar que la IP registrada corresponda al usuario final y no solo al proxy o load balancer.
+
+Recomendacion:
+
+- Revisar `trust proxy` en Express si Render entrega IP por cabeceras.
+- Verificar registros reales en `sesiones` y `auditorias`.
+
+## 4. Mantenimiento De Catalogos
+
+Los tipos de comprobante ya se administran desde la tabla `comprobantes`. Para mantener consistencia:
+
+- Ingresos debe usar `Recibo Interno` y `Voucher Banco`.
+- Egresos debe usar el catalogo activo, excluyendo comprobantes deshabilitados.
+- `Boleta Venta Electronica` debe quedar como denominacion unificada.
+
+## 5. Limpieza De Schema
+
+Algunas columnas pueden quedar como legado si la interfaz ya no usa la funcionalidad asociada.
+
+Puntos a revisar antes de eliminar columnas:
+
+- `movimientos.color`: antes permitia colorear filas.
+- `perfil.foto_director` y `perfil.escudo_colegio`: antes permitian subir imagenes.
+
+No eliminar columnas en produccion sin migracion controlada y respaldo previo.
+
+## 6. Pruebas De Flujo Completo
+
+Probar el ciclo real:
+
+1. Director registra ingresos, egresos, saldos y PDFs.
+2. Director cierra trimestre.
+3. Especialista observa con comentario.
+4. Director corrige y vuelve a cerrar.
+5. Especialista aprueba.
+6. Admin revisa auditoria, sesiones y respaldo.

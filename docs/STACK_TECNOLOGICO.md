@@ -1,41 +1,58 @@
-# 💻 Stack Tecnológico del Proyecto
+# Stack Tecnologico Del Proyecto
 
-Este documento detalla los lenguajes, frameworks, librerías y herramientas utilizadas en el desarrollo del proyecto. El sistema utiliza una arquitectura basada en un stack **PERN modificado** (reemplazando PostgreSQL por MySQL).
+**Estado:** vigente  
+**Ultima actualizacion:** junio de 2026
 
----
+El sistema usa una arquitectura web con frontend en React, backend en Node.js/Express y persistencia real en MySQL.
 
-## 🎨 Frontend (Interfaz de Usuario)
+## Frontend
 
-*   **Librería Principal:** **React (v18.x)**. Toda la interfaz está construida con componentes funcionales usando hooks (como `useState`, `useEffect`).
-*   **Lenguaje:** **JavaScript (JSX / ES6+)**.
-*   **Estilos:** **Tailwind CSS**. Utilizado para el diseño responsivo y rápido a través de clases utilitarias (ej. `max-w-4xl`, `bg-white`, `rounded-2xl`).
-*   **Iconos:** **`lucide-react`**. Librería de iconos vectoriales para la interfaz de usuario (iconos como `Upload`, `FileText`, `Trash2`).
-*   **Construcción:** **Babel** y herramientas del ecosistema React.
+- **React:** interfaz principal basada en componentes funcionales y hooks.
+- **JavaScript / JSX:** lenguaje de desarrollo del cliente.
+- **Tailwind CSS:** estilos utilitarios, responsive design y modo oscuro.
+- **Lucide React:** iconografia de la interfaz.
+- **jsPDF + jspdf-autotable:** generacion de reportes PDF.
+- **ExcelJS:** generacion de archivos Excel.
+- **React Scripts:** build y servidor de desarrollo.
 
----
+## Backend
 
-## ⚙️ Backend (Servidor y API)
+- **Node.js:** entorno de ejecucion.
+- **Express:** API REST y middleware.
+- **mysql2:** conexion a MySQL mediante pool y promesas.
+- **bcryptjs:** hash y validacion de contrasenas.
+- **jsonwebtoken:** generacion y validacion de tokens JWT.
+- **multer:** subida de archivos PDF e imagenes.
+- **nodemailer:** recuperacion de contrasena y notificaciones por correo.
+- **helmet:** cabeceras HTTP de seguridad.
+- **cors:** control de origenes permitidos.
+- **express-rate-limit:** limitacion de intentos en rutas sensibles.
+- **dotenv:** variables de entorno.
 
-*   **Entorno de Ejecución:** **Node.js** (versión recomendada 20.x).
-*   **Lenguaje:** **JavaScript**.
-*   **Framework Web:** **Express.js**. Manejo de rutas, middleware y creación de la API REST.
-*   **Seguridad:** **`bcryptjs`** (v2.4.x) para el hashing y verificación segura de contraseñas.
-*   **Configuración:** **`dotenv`** para el manejo de variables de entorno (`.env`).
-*   **CORS:** Middleware **`cors`** para permitir peticiones seguras desde el cliente React al servidor Express.
+## Base De Datos
 
----
+- **Motor:** MySQL.
+- **Fuente real de datos:** tablas MySQL. No se usa `directores.json` ni datos mock para autenticar usuarios.
+- **Tablas clave:** `usuarios`, `roles`, `directores`, `instituciones`, `movimientos`, `saldos`, `sustentos`, `cierres`, `estados`, `tesoreria`, `notificaciones`, `solicitudes`, `sesiones` y `auditorias`.
 
-## 🗄️ Base de Datos y Persistencia
+## Persistencia De Archivos
 
-*   **Motor de Base de Datos:** **MySQL (v5.7+)**. (Migrado desde la idea original de PostgreSQL).
-*   **Driver de Conexión:** **`mysql2`**. Utilizando la API basada en Promesas (`pool.getConnection()`, `execute()`).
-*   **Almacenamiento Híbrido Temporal:** Archivo físico **JSON (`directores.json`)** utilizado como fuente primaria de credenciales que sincroniza de manera automática con la base de datos MySQL.
-*   **Entorno Local:** **Laragon** con **phpMyAdmin** para la administración local de MySQL en el puerto 3306.
+- Los PDFs subidos por los directores se guardan en `backend/uploads/pdfs`.
+- Las rutas y metadatos se registran en `sustentos`.
+- En produccion se recomienda usar disco persistente en Render o almacenamiento externo para evitar perdida de archivos en redeploys.
 
----
+## Desarrollo Y Operacion
 
-## 🛠️ Herramientas de Desarrollo y DevOps
+- **npm:** gestor de paquetes.
+- **nodemon:** reinicio automatico del backend en desarrollo.
+- **Vercel:** despliegue del frontend.
+- **Render:** despliegue del backend.
+- **HeidiSQL / phpMyAdmin:** administracion de MySQL segun el entorno disponible.
 
-*   **Gestor de Tareas:** **`concurrently`** (v8.2+). Permite ejecutar múltiples comandos a la vez en una sola terminal (ej. levantar el frontend en el puerto 3000 y el backend en el puerto 5000 simultáneamente con `npm run dev`).
-*   **Monitor de Cambios:** **`nodemon`** (v3.0+). Reinicia automáticamente el servidor backend cuando detecta cambios en los archivos.
-*   **Gestor de Paquetes:** **npm** (Node Package Manager).
+## Seguridad
+
+- Las contrasenas se almacenan hasheadas.
+- Las rutas privadas usan JWT.
+- Los intentos de login se registran en `sesiones`.
+- Las acciones sensibles se registran en `auditorias`.
+- La API aplica cabeceras de seguridad y rate limit en autenticacion.

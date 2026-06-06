@@ -8,7 +8,7 @@ Este documento detalla el flujo completo de declaración, revisión y auditoría
 
 ---
 
-## 🚦 Estados del Trimestre (`estado_trimestres`)
+## 🚦 Estados del Trimestre (`estados`)
 - 🟡 **Borrador:** El director está registrando información. El sistema guarda temporalmente. El especialista lo ve en ámbar y no puede auditarlo.
 - 🔵 **Enviado:** El director cerró el trimestre. El sistema bloquea la edición para el director y notifica al especialista.
 - 🔴 **Observado:** El especialista encontró discrepancias. El sistema notifica al director y le **desbloquea** la pantalla para corregir.
@@ -22,8 +22,8 @@ Este documento detalla el flujo completo de declaración, revisión y auditoría
 * El Director ingresa sus movimientos mes a mes y sube su PDF consolidado.
 * Al finalizar y estar seguro, presiona el botón **"Cerrar Trimestre"**.
 * **Acción del Backend:** 
-  1. Crea un "candado" en la tabla `cierres_trimestrales` que bloquea toda la interfaz del director.
-  2. Actualiza el estado en la tabla `estado_trimestres` a **"Enviado"**.
+  1. Crea un "candado" en la tabla `cierres` que bloquea toda la interfaz del director.
+  2. Actualiza el estado en la tabla `estados` a **"Enviado"**.
 
 ### Fase 2: Auditoría (El Especialista)
 * El Especialista entra a su panel explorador y ve la carpeta de la institución en color **Azul (Enviado)**.
@@ -35,7 +35,7 @@ Este documento detalla el flujo completo de declaración, revisión y auditoría
 * **Acción del Backend (Transacción):**
   1. El estado cambia a **"Observado"** (Rojo).
   2. Se inserta el mensaje de rechazo en la tabla `notificaciones`.
-  3. **¡Desbloqueo Inteligente!** El sistema elimina el candado de la tabla `cierres_trimestrales`, devolviéndole al director todos sus permisos de escritura de forma automática.
+  3. **¡Desbloqueo Inteligente!** El sistema elimina el candado de la tabla `cierres`, devolviéndole al director todos sus permisos de escritura de forma automática.
 * **Respuesta del Director:** Ingresa al sistema, ve la "campanita" roja parpadeando, lee la observación del especialista, sube el documento faltante y vuelve a presionar *"Cerrar Trimestre"*, reiniciando el ciclo.
 
 #### ✅ Escenario B: Aprobación Definitiva
@@ -43,7 +43,7 @@ Este documento detalla el flujo completo de declaración, revisión y auditoría
 * **Acción del Backend (Transacción):**
   1. El estado cambia a **"Aprobado"** (Verde).
   2. Se envía una notificación de *"Éxito"* al director.
-  3. El candado de `cierres_trimestrales` **se mantiene intacto**, sellando la información del trimestre para siempre y dejándola lista para los reportes consolidados de la UGEL.
+  3. El candado de `cierres` **se mantiene intacto**, sellando la información del trimestre para siempre y dejándola lista para los reportes consolidados de la UGEL.
 
 ---
 *Nota Arquitectónica: Este diseño elimina la necesidad de intervención del departamento de TI (Administradores) para "desbloquear" colegios por error humano, ya que la comunicación bidireccional y el candado dinámico resuelven el problema orgánicamente.*
