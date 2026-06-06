@@ -21,6 +21,8 @@ const REPORTES = {
       { header: 'Institución Educativa', key: 'nombre', width: 48, align: 'left' },
       { header: 'Total Ingresos', key: 'totalIngresos', width: 18, money: true, align: 'right' },
       { header: 'Total Egresos', key: 'totalEgresos', width: 18, money: true, align: 'right' },
+      { header: 'Din. Caja', key: 'dineroEnCaja', width: 16, money: true, align: 'right' },
+      { header: 'Din. Cta. Cte.', key: 'dineroEnBanco', width: 18, money: true, align: 'right' },
       { header: 'Saldo Final', key: 'saldoTotal', width: 18, money: true, align: 'right' },
       { header: 'Estado', key: 'estado', width: 16, align: 'center' }
     ]
@@ -94,6 +96,8 @@ const normalizarFila = (row, index, tipoReporte) => {
     estado: row.estado || 'Borrador',
     totalIngresos: Number(row.totalIngresos || 0),
     totalEgresos: Number(row.totalEgresos || 0),
+    dineroEnCaja: Number(row.dineroEnCaja || 0),
+    dineroEnBanco: Number(row.dineroEnBanco || 0),
     saldoTotal: Number(row.saldoTotal || 0),
     banco: row.banco || '-',
     numeroCuentaCorriente: row.numeroCuentaCorriente || '-',
@@ -196,11 +200,24 @@ const agregarTitulo = (ws, config, periodoText, title = config.title) => {
 const agregarTotalesConsolidado = (ws, reporte) => {
   const totalIngresos = reporte.reduce((sum, r) => sum + Number(r.totalIngresos || 0), 0);
   const totalEgresos = reporte.reduce((sum, r) => sum + Number(r.totalEgresos || 0), 0);
+  const totalCaja = reporte.reduce((sum, r) => sum + Number(r.dineroEnCaja || 0), 0);
+  const totalBanco = reporte.reduce((sum, r) => sum + Number(r.dineroEnBanco || 0), 0);
   const totalSaldo = reporte.reduce((sum, r) => sum + Number(r.saldoTotal || 0), 0);
 
-  const footerRow = ws.addRow(['', '', '', 'TOTAL GENERAL', totalIngresos, totalEgresos, totalSaldo, '']);
+  const footerRow = ws.addRow([
+    '',
+    '',
+    '',
+    'TOTAL GENERAL',
+    totalIngresos,
+    totalEgresos,
+    totalCaja,
+    totalBanco,
+    totalSaldo,
+    ''
+  ]);
   footerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
-  [4, 5, 6, 7].forEach((cellNumber) => {
+  [4, 5, 6, 7, 8, 9].forEach((cellNumber) => {
     footerRow.getCell(cellNumber).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0F172A' } };
     footerRow.getCell(cellNumber).border = BORDER_THIN;
     footerRow.getCell(cellNumber).alignment = {
@@ -208,7 +225,7 @@ const agregarTotalesConsolidado = (ws, reporte) => {
       vertical: 'middle'
     };
   });
-  [5, 6, 7].forEach((cellNumber) => {
+  [5, 6, 7, 8, 9].forEach((cellNumber) => {
     footerRow.getCell(cellNumber).numFmt = MONEY_FORMAT;
   });
   footerRow.height = 24;
