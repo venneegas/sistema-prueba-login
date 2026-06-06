@@ -517,21 +517,37 @@ const ConsolidadoView = ({
       ws.mergeCells(`A${row.number}:B${row.number}`);
       row.getCell(1).font = { bold: true };
       row.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF1F5F9' } };
-      row.getCell(1).alignment = { horizontal: 'left', vertical: 'middle' };
+      row.getCell(1).alignment = { horizontal: 'right', vertical: 'middle' };
+    };
+
+    const addTotalRow = (label, amount, color) => {
+      const row = ws.addRow([label, Number(amount)]);
+      row.font = { bold: true, color: { argb: color } };
+      row.getCell(1).alignment = { horizontal: 'right', vertical: 'middle', wrapText: true };
+      row.getCell(2).alignment = { horizontal: 'right', vertical: 'middle' };
+      return row;
+    };
+
+    const applyFinalRowStyle = (row) => {
+      row.font = { bold: true, size: 12, color: { argb: 'FFFFFFFF' } };
+      row.height = 24;
+      row.eachCell((cell) => {
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0F172A' } };
+        cell.alignment = { horizontal: 'right', vertical: 'middle', wrapText: true };
+      });
     };
 
     addSectionHeader('1. DETALLE DE LOS MOVIMIENTOS DE CAJA');
     addSubHeader('INGRESOS');
     ws.addRow(['+ Saldo inicial del trimestre', Number(saldoInicialCaja)]);
     actual.meses.forEach((mes, index) => ws.addRow([`+ Correspondiente a ${mes}`, Number(movimientos.ingresos[index])]));
-    ws.addRow([`Total Ingresos del ${actual.label}`, Number(totalIngresos)]).font = { bold: true, color: { argb: 'FF065F46' } };
+    addTotalRow(`Total Ingresos del ${actual.label}`, totalIngresos, 'FF065F46');
     
     addSubHeader('EGRESOS');
     actual.meses.forEach((mes, index) => ws.addRow([`- Correspondiente a ${mes}`, Number(movimientos.egresos[index])]));
-    ws.addRow([`Total Egresos del ${actual.label}`, Number(totalEgresos)]).font = { bold: true, color: { argb: 'FF9F1239' } };
+    addTotalRow(`Total Egresos del ${actual.label}`, totalEgresos, 'FF9F1239');
     const rowSaldoCaja = ws.addRow([saldoCajaLabel, Number(dineroEnCaja)]);
-    rowSaldoCaja.font = { bold: true, size: 12, color: { argb: 'FFFFFFFF' } };
-    rowSaldoCaja.eachCell(c => c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0F172A' } });
+    applyFinalRowStyle(rowSaldoCaja);
     
     ws.addRow([]);
     addSectionHeader('2. DETALLE DE LOS MOVIMIENTOS DE LA CUENTA CORRIENTE');
@@ -542,9 +558,7 @@ const ConsolidadoView = ({
     ws.addRow(['Dinero en Caja', Number(dineroEnCaja)]);
     ws.addRow(['Dinero en Cuenta Corriente del Banco de la Nación', Number(dineroEnBanco)]);
     const rowTotal = ws.addRow([saldoDineroLabel, Number(saldoDineroTotal)]);
-    rowTotal.font = { bold: true, size: 12, color: { argb: 'FFFFFFFF' } };
-    rowTotal.eachCell(c => c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0F172A' } });
-    rowTotal.height = 24;
+    applyFinalRowStyle(rowTotal);
 
     const signatureRowNumber = rowTotal.number + 4;
     ws.getCell(`A${signatureRowNumber}`).border = { bottom: { style: 'thin', color: { argb: 'FF0F172A' } } };
@@ -571,9 +585,13 @@ const ConsolidadoView = ({
       const cell = row.getCell(2);
       if (typeof cell.value === 'number') cell.numFmt = '"S/." #,##0.00';
       if (rowNumber > 5 && row.getCell(1).value) {
-        row.eachCell(c => {
+        row.eachCell((c, columnNumber) => {
           c.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
-          c.alignment = { horizontal: c.col === 2 ? 'right' : 'left', vertical: 'middle', wrapText: true };
+          c.alignment = {
+            horizontal: c.alignment?.horizontal || (columnNumber === 2 ? 'right' : 'left'),
+            vertical: 'middle',
+            wrapText: true
+          };
         });
       }
     });
