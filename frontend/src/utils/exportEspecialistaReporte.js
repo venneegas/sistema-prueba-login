@@ -1,59 +1,71 @@
 import ExcelJS from 'exceljs';
 
+const MONEY_FORMAT = '"S/." #,##0.00';
+const BORDER_THIN = {
+  top: { style: 'thin', color: { argb: 'FFCBD5E1' } },
+  bottom: { style: 'thin', color: { argb: 'FFCBD5E1' } },
+  left: { style: 'thin', color: { argb: 'FFCBD5E1' } },
+  right: { style: 'thin', color: { argb: 'FFCBD5E1' } }
+};
+
 const REPORTES = {
   consolidado: {
     sheetName: 'Consolidado Financiero',
     title: 'REPORTE CONSOLIDADO FINANCIERO',
     filePrefix: 'CONSOLIDADO_FINANCIERO',
+    color: 'FF0284C7',
     columns: [
-      { header: 'N°', key: 'n', width: 6 },
-      { header: 'Cod. Modular', key: 'codigoModular', width: 16 },
-      { header: 'N° IE', key: 'numeroIE', width: 12 },
-      { header: 'Institución Educativa', key: 'nombre', width: 46 },
-      { header: 'Total Ingresos', key: 'totalIngresos', width: 18, money: true },
-      { header: 'Total Egresos', key: 'totalEgresos', width: 18, money: true },
-      { header: 'Saldo Final', key: 'saldoTotal', width: 18, money: true },
-      { header: 'Estado', key: 'estado', width: 16 }
+      { header: 'N°', key: 'n', width: 7, align: 'center' },
+      { header: 'Cod. Modular', key: 'codigoModular', width: 16, align: 'center' },
+      { header: 'N° IE', key: 'numeroIE', width: 12, align: 'center' },
+      { header: 'Institución Educativa', key: 'nombre', width: 48, align: 'left' },
+      { header: 'Total Ingresos', key: 'totalIngresos', width: 18, money: true, align: 'right' },
+      { header: 'Total Egresos', key: 'totalEgresos', width: 18, money: true, align: 'right' },
+      { header: 'Saldo Final', key: 'saldoTotal', width: 18, money: true, align: 'right' },
+      { header: 'Estado', key: 'estado', width: 16, align: 'center' }
     ]
   },
   omisos: {
     sheetName: 'Omisos',
     title: 'REPORTE DE OMISOS',
     filePrefix: 'REPORTE_OMISOS',
+    color: 'FF64748B',
     columns: [
-      { header: 'N°', key: 'n', width: 6 },
-      { header: 'Cod. Modular', key: 'codigoModular', width: 16 },
-      { header: 'N° IE', key: 'numeroIE', width: 12 },
-      { header: 'Institución Educativa', key: 'nombre', width: 52 },
-      { header: 'Estado', key: 'estado', width: 16 },
-      { header: 'Observación', key: 'observacion', width: 34 }
+      { header: 'N°', key: 'n', width: 7, align: 'center' },
+      { header: 'Cod. Modular', key: 'codigoModular', width: 16, align: 'center' },
+      { header: 'N° IE', key: 'numeroIE', width: 12, align: 'center' },
+      { header: 'Institución Educativa', key: 'nombre', width: 54, align: 'left' },
+      { header: 'Estado', key: 'estado', width: 16, align: 'center' },
+      { header: 'Observación', key: 'observacion', width: 38, align: 'left' }
     ]
   },
   cuentasCorrientes: {
     sheetName: 'Cuentas Corrientes',
     title: 'REPORTE DE CUENTAS CORRIENTES',
     filePrefix: 'CUENTAS_CORRIENTES',
+    color: 'FF0F766E',
     columns: [
-      { header: 'N°', key: 'n', width: 6 },
-      { header: 'Cod. Modular', key: 'codigoModular', width: 16 },
-      { header: 'N° IE', key: 'numeroIE', width: 12 },
-      { header: 'Institución Educativa', key: 'nombre', width: 46 },
-      { header: 'Banco', key: 'banco', width: 24 },
-      { header: 'Cuenta Corriente', key: 'numeroCuentaCorriente', width: 24 },
-      { header: 'Estado de Cuenta', key: 'estadoCuentaCorriente', width: 18 }
+      { header: 'N°', key: 'n', width: 7, align: 'center' },
+      { header: 'Cod. Modular', key: 'codigoModular', width: 16, align: 'center' },
+      { header: 'N° IE', key: 'numeroIE', width: 12, align: 'center' },
+      { header: 'Institución Educativa', key: 'nombre', width: 48, align: 'left' },
+      { header: 'Banco', key: 'banco', width: 24, align: 'left' },
+      { header: 'Cuenta Corriente', key: 'numeroCuentaCorriente', width: 24, align: 'center' },
+      { header: 'Estado de Cuenta', key: 'estadoCuentaCorriente', width: 18, align: 'center' }
     ]
   },
   rankingRecaudacion: {
     sheetName: 'Ranking',
     title: 'RANKING DE RECAUDACIÓN',
     filePrefix: 'RANKING_RECAUDACION',
+    color: 'FF4F46E5',
     columns: [
-      { header: 'Puesto', key: 'n', width: 8 },
-      { header: 'Cod. Modular', key: 'codigoModular', width: 16 },
-      { header: 'N° IE', key: 'numeroIE', width: 12 },
-      { header: 'Institución Educativa', key: 'nombre', width: 50 },
-      { header: 'Monto', key: 'monto', width: 18, money: true },
-      { header: 'Estado', key: 'estado', width: 16 }
+      { header: 'Puesto', key: 'n', width: 9, align: 'center' },
+      { header: 'Cod. Modular', key: 'codigoModular', width: 16, align: 'center' },
+      { header: 'N° IE', key: 'numeroIE', width: 12, align: 'center' },
+      { header: 'Institución Educativa', key: 'nombre', width: 52, align: 'left' },
+      { header: 'Monto', key: 'monto', width: 18, money: true, align: 'right' },
+      { header: 'Estado', key: 'estado', width: 16, align: 'center' }
     ]
   }
 };
@@ -91,37 +103,94 @@ const normalizarFila = (row, index, tipoReporte) => {
   if (tipoReporte === 'omisos') {
     return {
       ...base,
-      observacion: 'No registra envio para el periodo seleccionado'
+      observacion: 'No registra envío para el periodo seleccionado'
     };
   }
 
   return base;
 };
 
+const prepararWorkbook = () => {
+  const wb = new ExcelJS.Workbook();
+  wb.creator = 'Sistema de Gestión de Recursos Propios - UGEL';
+  wb.created = new Date();
+  wb.modified = new Date();
+  return wb;
+};
+
+const prepararWorksheet = (wb, config) => {
+  const ws = wb.addWorksheet(config.sheetName, {
+    views: [{ state: 'frozen', xSplit: 0, ySplit: 4, showGridLines: false }]
+  });
+
+  ws.properties.defaultRowHeight = 22;
+  ws.pageSetup = {
+    orientation: config.columns.length > 6 ? 'landscape' : 'portrait',
+    fitToPage: true,
+    fitToWidth: 1,
+    fitToHeight: 0,
+    horizontalCentered: true,
+    margins: { left: 0.25, right: 0.25, top: 0.45, bottom: 0.45, header: 0.2, footer: 0.2 }
+  };
+
+  ws.columns = config.columns.map((column) => ({
+    header: '',
+    key: column.key,
+    width: column.width
+  }));
+
+  return ws;
+};
+
 const aplicarEstiloCabecera = (row) => {
   row.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+  row.height = 24;
   row.eachCell((cell) => {
     cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0F172A' } };
     cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
-    cell.border = {
-      top: { style: 'thin' },
-      bottom: { style: 'thin' },
-      left: { style: 'thin' },
-      right: { style: 'thin' }
-    };
+    cell.border = BORDER_THIN;
   });
 };
 
-const aplicarBordes = (row) => {
-  row.eachCell((cell) => {
-    cell.border = {
-      top: { style: 'thin' },
-      bottom: { style: 'thin' },
-      left: { style: 'thin' },
-      right: { style: 'thin' }
+const aplicarEstiloFila = (row, columns, index) => {
+  row.eachCell((cell, columnNumber) => {
+    const column = columns[columnNumber - 1];
+    cell.border = BORDER_THIN;
+    cell.alignment = {
+      horizontal: column?.align || 'left',
+      vertical: 'middle',
+      wrapText: true
     };
-    cell.alignment = { vertical: 'middle', wrapText: true };
+
+    if (column?.money) {
+      cell.numFmt = MONEY_FORMAT;
+    }
+
+    if (index % 2 === 1) {
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF8FAFC' } };
+    }
   });
+};
+
+const agregarTitulo = (ws, config, periodoText, title = config.title) => {
+  const lastColumnLetter = ws.getColumn(config.columns.length).letter;
+
+  ws.mergeCells(`A1:${lastColumnLetter}1`);
+  const titleCell = ws.getCell('A1');
+  titleCell.value = `${title} - ${periodoText}`;
+  titleCell.font = { name: 'Arial', size: 14, bold: true, color: { argb: 'FFFFFFFF' } };
+  titleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: config.color } };
+  titleCell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+  ws.getRow(1).height = 28;
+
+  ws.mergeCells(`A2:${lastColumnLetter}2`);
+  const subtitleCell = ws.getCell('A2');
+  subtitleCell.value = 'Sistema de Gestión de Recursos Propios - UGEL';
+  subtitleCell.font = { bold: true, color: { argb: 'FF334155' } };
+  subtitleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+  ws.getRow(2).height = 20;
+
+  ws.addRow([]);
 };
 
 const agregarTotalesConsolidado = (ws, reporte) => {
@@ -131,43 +200,35 @@ const agregarTotalesConsolidado = (ws, reporte) => {
 
   const footerRow = ws.addRow(['', '', '', 'TOTAL GENERAL', totalIngresos, totalEgresos, totalSaldo, '']);
   footerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
-  footerRow.getCell(4).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0F172A' } };
-  footerRow.getCell(5).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF059669' } };
-  footerRow.getCell(6).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE11D48' } };
-  footerRow.getCell(7).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0284C7' } };
-  footerRow.getCell(5).numFmt = '"S/." #,##0.00';
-  footerRow.getCell(6).numFmt = '"S/." #,##0.00';
-  footerRow.getCell(7).numFmt = '"S/." #,##0.00';
-  aplicarBordes(footerRow);
+  [4, 5, 6, 7].forEach((cellNumber) => {
+    footerRow.getCell(cellNumber).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0F172A' } };
+    footerRow.getCell(cellNumber).border = BORDER_THIN;
+    footerRow.getCell(cellNumber).alignment = {
+      horizontal: cellNumber === 4 ? 'center' : 'right',
+      vertical: 'middle'
+    };
+  });
+  [5, 6, 7].forEach((cellNumber) => {
+    footerRow.getCell(cellNumber).numFmt = MONEY_FORMAT;
+  });
+  footerRow.height = 24;
+};
+
+const finalizarWorksheet = (ws, config, headerRow, lastDataRowNumber) => {
+  ws.autoFilter = {
+    from: { row: headerRow.number, column: 1 },
+    to: { row: lastDataRowNumber, column: config.columns.length }
+  };
+  ws.pageSetup.printArea = `A1:${ws.getColumn(config.columns.length).letter}${ws.lastRow.number}`;
 };
 
 const agregarHojaRanking = ({ wb, sheetName, title, periodoText, reporte, dataKey }) => {
-  const config = REPORTES.rankingRecaudacion;
-  const ws = wb.addWorksheet(sheetName, {
-    views: [{ state: 'frozen', xSplit: 0, ySplit: 4 }]
-  });
+  const config = { ...REPORTES.rankingRecaudacion, sheetName };
+  const ws = prepararWorksheet(wb, config);
+  agregarTitulo(ws, config, periodoText, title);
 
-  ws.columns = config.columns.map((column) => ({
-    header: '',
-    key: column.key,
-    width: column.width
-  }));
-
-  const lastColumnLetter = ws.getColumn(config.columns.length).letter;
-  ws.mergeCells(`A1:${lastColumnLetter}1`);
-  const titleCell = ws.getCell('A1');
-  titleCell.value = `${title} - ${periodoText}`;
-  titleCell.font = { size: 14, bold: true, color: { argb: 'FFFFFFFF' } };
-  titleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4F46E5' } };
-  titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
-
-  ws.mergeCells(`A2:${lastColumnLetter}2`);
-  ws.getCell('A2').value = 'Sistema de Gestión de Recursos Propios - UGEL';
-  ws.getCell('A2').font = { bold: true };
-  ws.getCell('A2').alignment = { horizontal: 'center' };
-
-  ws.addRow([]);
-  aplicarEstiloCabecera(ws.addRow(config.columns.map((column) => column.header)));
+  const headerRow = ws.addRow(config.columns.map((column) => column.header));
+  aplicarEstiloCabecera(headerRow);
 
   const ranking = [...reporte].sort((a, b) => Number(b[dataKey] || 0) - Number(a[dataKey] || 0));
 
@@ -181,9 +242,20 @@ const agregarHojaRanking = ({ wb, sheetName, title, periodoText, reporte, dataKe
       row.estado || 'Borrador'
     ]);
 
-    dataRow.getCell(5).numFmt = '"S/." #,##0.00';
-    aplicarBordes(dataRow);
+    aplicarEstiloFila(dataRow, config.columns, index);
   });
+
+  finalizarWorksheet(ws, config, headerRow, ws.lastRow.number);
+};
+
+const descargarWorkbook = async (wb, filename) => {
+  const buffer = await wb.xlsx.writeBuffer();
+  const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(link.href);
 };
 
 const exportEspecialistaReporte = async ({
@@ -193,7 +265,7 @@ const exportEspecialistaReporte = async ({
   tipoReporte = 'consolidado'
 }) => {
   if (tipoReporte === 'rankingRecaudacion') {
-    const wb = new ExcelJS.Workbook();
+    const wb = prepararWorkbook();
     const periodoText = getPeriodoText(trimestreSeleccionado, anioActual);
 
     agregarHojaRanking({
@@ -214,44 +286,19 @@ const exportEspecialistaReporte = async ({
       dataKey: 'totalEgresos'
     });
 
-    const buffer = await wb.xlsx.writeBuffer();
-    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `${REPORTES.rankingRecaudacion.filePrefix}_${getFilePeriodo(trimestreSeleccionado, anioActual)}.xlsx`;
-    link.click();
-    URL.revokeObjectURL(link.href);
+    await descargarWorkbook(
+      wb,
+      `${REPORTES.rankingRecaudacion.filePrefix}_${getFilePeriodo(trimestreSeleccionado, anioActual)}.xlsx`
+    );
     return;
   }
 
   const config = REPORTES[tipoReporte] || REPORTES.consolidado;
-  const wb = new ExcelJS.Workbook();
-  const ws = wb.addWorksheet(config.sheetName, {
-    views: [{ state: 'frozen', xSplit: 0, ySplit: 4 }]
-  });
-
-  ws.columns = config.columns.map((column) => ({
-    header: '',
-    key: column.key,
-    width: column.width
-  }));
-
-  const lastColumnLetter = ws.getColumn(config.columns.length).letter;
+  const wb = prepararWorkbook();
+  const ws = prepararWorksheet(wb, config);
   const periodoText = getPeriodoText(trimestreSeleccionado, anioActual);
 
-  ws.mergeCells(`A1:${lastColumnLetter}1`);
-  const titleCell = ws.getCell('A1');
-  titleCell.value = `${config.title} - ${periodoText}`;
-  titleCell.font = { size: 14, bold: true, color: { argb: 'FFFFFFFF' } };
-  titleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0284C7' } };
-  titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
-
-  ws.mergeCells(`A2:${lastColumnLetter}2`);
-  ws.getCell('A2').value = 'Sistema de Gestión de Recursos Propios - UGEL';
-  ws.getCell('A2').font = { bold: true };
-  ws.getCell('A2').alignment = { horizontal: 'center' };
-
-  ws.addRow([]);
+  agregarTitulo(ws, config, periodoText);
 
   const headerRow = ws.addRow(config.columns.map((column) => column.header));
   aplicarEstiloCabecera(headerRow);
@@ -259,27 +306,19 @@ const exportEspecialistaReporte = async ({
   reporte.forEach((row, index) => {
     const normalized = normalizarFila(row, index, tipoReporte);
     const dataRow = ws.addRow(config.columns.map((column) => normalized[column.key]));
-
-    config.columns.forEach((column, columnIndex) => {
-      if (column.money) {
-        dataRow.getCell(columnIndex + 1).numFmt = '"S/." #,##0.00';
-      }
-    });
-
-    aplicarBordes(dataRow);
+    aplicarEstiloFila(dataRow, config.columns, index);
   });
 
   if (tipoReporte === 'consolidado') {
     agregarTotalesConsolidado(ws, reporte);
   }
 
-  const buffer = await wb.xlsx.writeBuffer();
-  const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = `${config.filePrefix}_${getFilePeriodo(trimestreSeleccionado, anioActual)}.xlsx`;
-  link.click();
-  URL.revokeObjectURL(link.href);
+  finalizarWorksheet(ws, config, headerRow, ws.lastRow.number);
+
+  await descargarWorkbook(
+    wb,
+    `${config.filePrefix}_${getFilePeriodo(trimestreSeleccionado, anioActual)}.xlsx`
+  );
 };
 
 export default exportEspecialistaReporte;

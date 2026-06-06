@@ -456,13 +456,26 @@ const ConsolidadoView = ({
 
   const handleDownloadExcel = async () => {
     const wb = new ExcelJS.Workbook();
+    wb.creator = 'Sistema de Gestion de Recursos Propios - UGEL';
+    wb.created = new Date();
+    wb.modified = new Date();
+
     const ws = wb.addWorksheet('Consolidado', {
-      views: [{ state: 'frozen', xSplit: 0, ySplit: 4 }] // Congela las primeras 4 filas
+      views: [{ state: 'frozen', xSplit: 0, ySplit: 5, showGridLines: false }]
     });
+    ws.properties.defaultRowHeight = 22;
+    ws.pageSetup = {
+      orientation: 'portrait',
+      fitToPage: true,
+      fitToWidth: 1,
+      fitToHeight: 0,
+      horizontalCentered: true,
+      margins: { left: 0.35, right: 0.35, top: 0.45, bottom: 0.45, header: 0.2, footer: 0.2 }
+    };
 
     ws.columns = [
-      { key: 'concepto', width: 55 },
-      { key: 'importe', width: 20 }
+      { key: 'concepto', width: 58 },
+      { key: 'importe', width: 22 }
     ];
 
     ws.mergeCells('A1:B1');
@@ -471,14 +484,22 @@ const ConsolidadoView = ({
     titleCell.font = { name: 'Arial', size: 16, bold: true, color: { argb: 'FFFFFFFF' } };
     titleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0284C7' } }; // sky-600
     titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+    ws.getRow(1).height = 30;
 
     ws.mergeCells('A2:B2');
-    ws.getCell('A2').value = `Institución Educativa: ${schoolName || 'No disponible'}`;
-    ws.getCell('A2').font = { bold: true };
+    ws.getCell('A2').value = 'Recursos Propios de la Institución Educativa';
+    ws.getCell('A2').font = { bold: true, color: { argb: 'FF0F172A' } };
+    ws.getCell('A2').alignment = { horizontal: 'center', vertical: 'middle' };
 
     ws.mergeCells('A3:B3');
-    ws.getCell('A3').value = `Periodo: ${actual.label} ${anio}`;
-    ws.getCell('A3').font = { bold: true };
+    ws.getCell('A3').value = `Periodo: ${actual.meses.join(', ').toUpperCase()} ${anio}`;
+    ws.getCell('A3').font = { bold: true, color: { argb: 'FF334155' } };
+    ws.getCell('A3').alignment = { horizontal: 'center', vertical: 'middle' };
+
+    ws.mergeCells('A4:B4');
+    ws.getCell('A4').value = `N° IE: ${numeroIE || '-'}    |    Institución Educativa: ${schoolName || 'No disponible'}`;
+    ws.getCell('A4').font = { bold: true, color: { argb: 'FF0369A1' } };
+    ws.getCell('A4').alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
 
     ws.addRow([]); // Fila 4 de separación
 
@@ -486,8 +507,9 @@ const ConsolidadoView = ({
       const row = ws.addRow([title]);
       ws.mergeCells(`A${row.number}:B${row.number}`);
       row.getCell(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
-      row.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0F172A' } }; // slate-900
-      row.getCell(1).alignment = { horizontal: 'left' };
+      row.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0284C7' } }; // sky-600
+      row.getCell(1).alignment = { horizontal: 'left', vertical: 'middle' };
+      row.height = 24;
     };
 
     const addSubHeader = (title) => {
@@ -495,6 +517,7 @@ const ConsolidadoView = ({
       ws.mergeCells(`A${row.number}:B${row.number}`);
       row.getCell(1).font = { bold: true };
       row.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF1F5F9' } };
+      row.getCell(1).alignment = { horizontal: 'left', vertical: 'middle' };
     };
 
     addSectionHeader('1. DETALLE DE LOS MOVIMIENTOS DE CAJA');
@@ -521,15 +544,40 @@ const ConsolidadoView = ({
     const rowTotal = ws.addRow([saldoDineroLabel, Number(saldoDineroTotal)]);
     rowTotal.font = { bold: true, size: 12, color: { argb: 'FFFFFFFF' } };
     rowTotal.eachCell(c => c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0F172A' } });
+    rowTotal.height = 24;
+
+    const signatureRowNumber = rowTotal.number + 4;
+    ws.getCell(`A${signatureRowNumber}`).border = { bottom: { style: 'thin', color: { argb: 'FF0F172A' } } };
+    ws.getCell(`B${signatureRowNumber}`).border = { bottom: { style: 'thin', color: { argb: 'FF0F172A' } } };
+    ws.getCell(`A${signatureRowNumber + 1}`).value = 'Director';
+    ws.getCell(`B${signatureRowNumber + 1}`).value = 'Tesorero';
+    ['A', 'B'].forEach((column) => {
+      ws.getCell(`${column}${signatureRowNumber + 1}`).font = { bold: true, color: { argb: 'FF0F172A' } };
+      ws.getCell(`${column}${signatureRowNumber + 1}`).alignment = { horizontal: 'center' };
+    });
+
+    if (!trimestreCerrado) {
+      ws.mergeCells('A5:B5');
+      const watermarkCell = ws.getCell('A5');
+      watermarkCell.value = 'NO OFICIAL';
+      watermarkCell.font = { bold: true, size: 18, color: { argb: 'FFBE123C' } };
+      watermarkCell.alignment = { horizontal: 'center', vertical: 'middle' };
+      watermarkCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF1F2' } };
+      ws.getRow(5).height = 28;
+    }
 
     // Dar formato moneda y bordes a toda la tabla
     ws.eachRow((row, rowNumber) => {
       const cell = row.getCell(2);
       if (typeof cell.value === 'number') cell.numFmt = '"S/." #,##0.00';
-      if (rowNumber > 4 && row.getCell(1).value) {
-        row.eachCell(c => c.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } });
+      if (rowNumber > 5 && row.getCell(1).value) {
+        row.eachCell(c => {
+          c.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
+          c.alignment = { horizontal: c.col === 2 ? 'right' : 'left', vertical: 'middle', wrapText: true };
+        });
       }
     });
+    ws.pageSetup.printArea = `A1:B${ws.lastRow.number}`;
 
     const buffer = await wb.xlsx.writeBuffer();
     const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });

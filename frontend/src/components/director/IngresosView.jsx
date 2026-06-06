@@ -527,9 +527,22 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
 
   const handleDownloadExcel = async () => {
     const wb = new ExcelJS.Workbook();
+    wb.creator = 'Sistema de Gestion de Recursos Propios - UGEL';
+    wb.created = new Date();
+    wb.modified = new Date();
+
     const ws = wb.addWorksheet('Ingresos', {
-      views: [{ state: 'frozen', xSplit: 0, ySplit: 6 }] // Congela cabecera
+      views: [{ state: 'frozen', xSplit: 0, ySplit: 6, showGridLines: false }]
     });
+    ws.properties.defaultRowHeight = 22;
+    ws.pageSetup = {
+      orientation: 'landscape',
+      fitToPage: true,
+      fitToWidth: 1,
+      fitToHeight: 0,
+      horizontalCentered: true,
+      margins: { left: 0.25, right: 0.25, top: 0.45, bottom: 0.45, header: 0.2, footer: 0.2 }
+    };
 
     // Intento de cargar logo de la UGEL
     try {
@@ -542,22 +555,25 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
     }
 
     ws.columns = [
-      { header: '', key: 'n', width: 5 },
-      { header: '', key: 'fecha', width: 15 },
+      { header: '', key: 'n', width: 7 },
+      { header: '', key: 'fecha', width: 14 },
       { header: '', key: 'tipo', width: 25 },
-      { header: '', key: 'num', width: 20 },
-      { header: '', key: 'concepto', width: 40 },
+      { header: '', key: 'num', width: 18 },
+      { header: '', key: 'concepto', width: 48 },
       { header: '', key: 'importe', width: 18 }
     ];
 
     ws.mergeCells('A1:F1');
     ws.getCell('A1').value = `RELACIÓN DE INGRESOS - ${trimestreMeses[mesActivo].toUpperCase()} ${anio}`;
-    ws.getCell('A1').font = { size: 14, bold: true };
-    ws.getCell('A1').alignment = { horizontal: 'center' };
+    ws.getCell('A1').font = { name: 'Arial', size: 15, bold: true, color: { argb: 'FF0F172A' } };
+    ws.getCell('A1').alignment = { horizontal: 'center', vertical: 'middle' };
+    ws.getRow(1).height = 28;
     
     ws.mergeCells('A2:F2');
     ws.getCell('A2').value = 'Sistema de Gestión de Recursos Propios';
-    ws.getCell('A2').alignment = { horizontal: 'center' };
+    ws.getCell('A2').font = { name: 'Arial', size: 11, color: { argb: 'FF334155' } };
+    ws.getCell('A2').alignment = { horizontal: 'center', vertical: 'middle' };
+    ws.getRow(2).height = 20;
 
     ws.addRow([]); ws.addRow([]); // Espacio debajo del título
 
@@ -572,16 +588,26 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
       row.font = { bold: true, color: { argb: 'FFFFFFFF' } };
       row.eachCell((cell) => {
         cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF2563EB' } }; // blue-600
-        cell.alignment = { horizontal: 'center', vertical: 'middle' };
+        cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
         cell.border = { top: { style: 'thin' }, bottom: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' } };
       });
     });
+    headerTopRow.height = 24;
+    headerSubRow.height = 22;
 
     datosMeses[mesActivo].filter(fila => filaTieneContenido(fila)).forEach((fila, index) => {
       const row = ws.addRow([ index + 1, fila.fecha ? formatearFechaDDMM(fila.fecha) : '', obtenerNombreComprobante(fila.comprobante_id), fila.numero || '', fila.concepto || '', Number(fila.importe || 0) ]);
       row.getCell(6).numFmt = '"S/." #,##0.00';
-      row.eachCell(c => {
+      row.eachCell((c, columnNumber) => {
         c.border = { top: { style: 'thin' }, bottom: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' } };
+        c.alignment = {
+          horizontal: columnNumber === 5 ? 'left' : columnNumber === 6 ? 'right' : 'center',
+          vertical: 'middle',
+          wrapText: true
+        };
+        if (index % 2 === 1) {
+          c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF8FAFC' } };
+        }
       });
     });
 
@@ -590,7 +616,34 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
     rowTotal.getCell(5).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0F172A' } };
     rowTotal.getCell(6).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0F172A' } };
     rowTotal.getCell(6).numFmt = '"S/." #,##0.00';
-    rowTotal.eachCell({ includeEmpty: false }, c => c.border = { top: { style: 'thin' }, bottom: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' } });
+    rowTotal.eachCell({ includeEmpty: false }, (c, columnNumber) => {
+      c.border = { top: { style: 'thin' }, bottom: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' } };
+      c.alignment = { horizontal: columnNumber === 6 ? 'right' : 'center', vertical: 'middle' };
+    });
+    rowTotal.height = 24;
+
+    const signatureRowNumber = rowTotal.number + 4;
+    ws.getCell(`B${signatureRowNumber}`).border = { bottom: { style: 'thin', color: { argb: 'FF0F172A' } } };
+    ws.getCell(`E${signatureRowNumber}`).border = { bottom: { style: 'thin', color: { argb: 'FF0F172A' } } };
+    ws.getCell(`B${signatureRowNumber + 1}`).value = 'Director';
+    ws.getCell(`E${signatureRowNumber + 1}`).value = 'Tesorero';
+    ['B', 'E'].forEach((column) => {
+      ws.getCell(`${column}${signatureRowNumber + 1}`).font = { bold: true, color: { argb: 'FF0F172A' } };
+      ws.getCell(`${column}${signatureRowNumber + 1}`).alignment = { horizontal: 'center' };
+    });
+
+    if (!trimestreCerrado) {
+      ws.mergeCells('A4:F4');
+      const watermarkCell = ws.getCell('A4');
+      watermarkCell.value = 'INVALIDO';
+      watermarkCell.font = { bold: true, size: 18, color: { argb: 'FFBE123C' } };
+      watermarkCell.alignment = { horizontal: 'center', vertical: 'middle' };
+      watermarkCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF1F2' } };
+      ws.getRow(4).height = 28;
+    }
+
+    ws.autoFilter = { from: { row: headerSubRow.number, column: 1 }, to: { row: rowTotal.number, column: 6 } };
+    ws.pageSetup.printArea = `A1:F${ws.lastRow.number}`;
 
     const buffer = await wb.xlsx.writeBuffer();
     const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
