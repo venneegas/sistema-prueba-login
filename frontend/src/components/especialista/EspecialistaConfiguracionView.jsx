@@ -5,11 +5,9 @@ import {
   KeyRound,
   Mail,
   MapPin,
-  Moon,
   Settings,
   ShieldCheck,
   Sparkles,
-  Sun,
   UserRound
 } from 'lucide-react';
 
@@ -19,7 +17,7 @@ const getInitials = (name = '') => {
   return parts.slice(0, 2).map((part) => part[0]).join('').toUpperCase();
 };
 
-const EspecialistaConfiguracionView = ({ user, onOpenChangePassword, isDarkMode, toggleDarkMode }) => {
+const EspecialistaConfiguracionView = ({ user, onOpenChangePassword }) => {
   const nombre = user?.nombre || 'Especialista UGEL';
   const email = user?.email || 'especialista@ugel.edu.pe';
   const iniciales = getInitials(nombre);
@@ -153,30 +151,6 @@ const EspecialistaConfiguracionView = ({ user, onOpenChangePassword, isDarkMode,
             </div>
 
             <div className="divide-y divide-slate-100 dark:divide-slate-700">
-              <div className="p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300 flex items-center justify-center">
-                    {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
-                  </div>
-                  <div>
-                    <p className="font-bold text-slate-800 dark:text-slate-100">Modo oscuro</p>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">Ajusta la apariencia del panel para trabajar con menor brillo.</p>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={toggleDarkMode}
-                  className={`relative inline-flex h-7 w-12 flex-shrink-0 items-center rounded-full transition-colors ${
-                    isDarkMode ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-600'
-                  }`}
-                  aria-pressed={isDarkMode}
-                  title="Cambiar modo de color"
-                >
-                  <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform ${isDarkMode ? 'translate-x-6' : 'translate-x-1'}`} />
-                </button>
-              </div>
-
               <div className="p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div className="flex items-start gap-3">
                   <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-300 flex items-center justify-center">

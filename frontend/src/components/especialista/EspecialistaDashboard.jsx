@@ -12,6 +12,8 @@ import ReportesView from './ReportesView';
 import useEspecialistaColegios from '../../hooks/useEspecialistaColegios';
 import useEspecialistaReporteGlobal from '../../hooks/useEspecialistaReporteGlobal';
 import useEspecialistaStats from '../../hooks/useEspecialistaStats';
+import useTheme from '../../hooks/useTheme';
+import FloatingThemeToggle from '../FloatingThemeToggle';
 import { AlertTriangle, CheckCircle } from 'lucide-react';
 
 const ESTADOS_EXPLORADOR = ['Borrador', 'Enviado', 'Observado', 'Aprobado'];
@@ -37,7 +39,7 @@ const EspecialistaDashboard = ({ user, onLogout }) => {
 
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const { isDarkMode, toggleTheme } = useTheme();
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' }); // ESTADO GLOBAL DEL TOAST
 
   // Auto-ocultar el toast global después de 3 segundos
@@ -69,29 +71,6 @@ const EspecialistaDashboard = ({ user, onLogout }) => {
     window.addEventListener('popstate', handleBrowserBack);
     return () => window.removeEventListener('popstate', handleBrowserBack);
   }, []);
-
-  useEffect(() => {
-    const isDark = localStorage.getItem('theme') === 'dark' ||
-                   (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
-
-    setIsDarkMode(isDark);
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, []);
-
-  const toggleDarkMode = () => {
-    if (isDarkMode) {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    } else {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    }
-    setIsDarkMode(!isDarkMode);
-  };
 
   const { colegios, loading, error } = useEspecialistaColegios({
     trimestreSeleccionado,
@@ -206,8 +185,6 @@ const EspecialistaDashboard = ({ user, onLogout }) => {
           <EspecialistaConfiguracionView
             user={user}
             onOpenChangePassword={() => setIsChangePasswordOpen(true)}
-            isDarkMode={isDarkMode}
-            toggleDarkMode={toggleDarkMode}
           />
         ) : selectedColegio ? (
           <ColegioDetalle
@@ -234,6 +211,8 @@ const EspecialistaDashboard = ({ user, onLogout }) => {
             onSelectColegio={handleSelectColegio}
           />
         )}
+
+        <FloatingThemeToggle isDarkMode={isDarkMode} onToggle={toggleTheme} />
 
         <ChangePasswordModal
           isOpen={isChangePasswordOpen}

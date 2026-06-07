@@ -5,9 +5,12 @@ import UsersView from './UsersView';
 import AuditoriaView from './AuditoriaView';
 import LoginLogsView from './LoginLogsView'; // Importa el nuevo componente para logs de inicio de sesión
 import FlujosView from './FlujosView'; // Importamos el nuevo componente
+import useTheme from '../../hooks/useTheme';
+import FloatingThemeToggle from '../FloatingThemeToggle';
 
 const AdminDashboard = ({ user, onLogout }) => {
   const [activeTab, setActiveTab] = useState('database');
+  const { isDarkMode, toggleTheme } = useTheme();
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' }); // ESTADO GLOBAL DEL TOAST
 
   // Auto-ocultar el toast global después de 3 segundos
@@ -25,7 +28,7 @@ const AdminDashboard = ({ user, onLogout }) => {
   };
 
   return (
-    <div className="flex h-screen bg-slate-50">
+    <div className="flex h-screen bg-slate-50 dark:bg-slate-900">
       {/* Menú Lateral - Azul Oscuro con acentos Dorados */}
       <aside className="w-64 bg-blue-950 text-white flex flex-col shadow-2xl z-20 relative overflow-hidden">
         {/* Decoración de fondo en el sidebar */}
@@ -144,6 +147,8 @@ const AdminDashboard = ({ user, onLogout }) => {
           </div>
         )}
       </main>
+
+      <FloatingThemeToggle isDarkMode={isDarkMode} onToggle={toggleTheme} />
 
       {/* Toast Notification Global */}
       {toast.show && (

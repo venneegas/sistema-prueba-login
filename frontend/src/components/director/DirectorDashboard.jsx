@@ -12,6 +12,8 @@ import EgresosView from './EgresosView';
 import SubirPDFView from './SubirPDFView';
 import EstadoReporteView from './EstadoReporteView';
 import { buildApiUrl } from '../../config/api';
+import useTheme from '../../hooks/useTheme';
+import FloatingThemeToggle from '../FloatingThemeToggle';
 
 const CIERRES_API_URL = buildApiUrl('/api/movimientos/cierres');
 
@@ -55,6 +57,7 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [notificaciones, setNotificaciones] = useState([]);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const { isDarkMode, toggleTheme } = useTheme();
   const dropdownRef = useRef(null);
 
   const cambioObligatorioPendiente = Boolean(user?.debeCambiarPassword);
@@ -538,6 +541,9 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
         onClose={() => setIsSolicitudReemplazoOpen(false)}
         director={user.director}
       />
+      {activeTab === 'general' && !cambioObligatorioPendiente && (
+        <FloatingThemeToggle isDarkMode={isDarkMode} onToggle={toggleTheme} />
+      )}
       </main>
     </div>
   );
