@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
   LayoutDashboard,
@@ -6,8 +6,6 @@ import {
   UploadCloud,
   LogOut,
   Key,
-  Moon,
-  Sun,
   HelpCircle,
   UserMinus,
   User,
@@ -32,21 +30,8 @@ const DirectorSidebar = ({
   onToggleCollapse,
   user,
 }) => {
-  const [isDarkMode, setIsDarkMode] = useState(false);
   const [isSoporteOpen, setIsSoporteOpen] = useState(false);
   const [tooltipData, setTooltipData] = useState(null);
-
-  useEffect(() => {
-    const isDark = localStorage.getItem('theme') === 'dark'
-      || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
-
-    setIsDarkMode(isDark);
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, []);
 
   const movimientoItems = [
     { id: 'general', label: 'CONSOLIDADO', description: 'Revisa el resumen trimestral de ingresos, egresos y saldo.', icon: <LayoutDashboard size={18} /> },
@@ -60,18 +45,6 @@ const DirectorSidebar = ({
     { id: 'informacion', label: 'DIRECCIÓN', description: 'Consulta los datos del director y de la institución educativa.', icon: <UserRound size={18} /> },
     { id: 'tesoreria', label: 'TESORERIA', description: 'Registra datos del tesorero y cuenta corriente.', icon: <WalletCards size={18} /> },
   ];
-
-  const toggleDarkMode = () => {
-    if (isDarkMode) {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-      setIsDarkMode(false);
-    } else {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-      setIsDarkMode(true);
-    }
-  };
 
   const sectionLabelClass = 'px-4 pt-4 pb-1 text-[11px] font-extrabold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500';
 
@@ -180,7 +153,6 @@ const DirectorSidebar = ({
         {[
           { id: 'solicitud', label: 'SOLICITUD', description: 'Solicita el reemplazo del director o responsable registrado.', icon: <UserMinus size={18} />, onClick: onRequestReplacementClick },
           { id: 'credenciales', label: 'CREDENCIALES', description: 'Cambia la contraseña de acceso de tu cuenta.', icon: <Key size={18} />, onClick: onChangePasswordClick },
-          { id: 'tema', label: isDarkMode ? 'TEMA CLARO' : 'TEMA OSCURO', description: 'Alterna la apariencia entre modo claro y oscuro.', icon: isDarkMode ? <Sun size={18} /> : <Moon size={18} />, onClick: toggleDarkMode },
           { id: 'soporte', label: 'SOPORTE', description: 'Consulta teléfono, correo y horario de atención UGEL.', icon: <HelpCircle size={18} />, onClick: () => setIsSoporteOpen(true) },
         ].map(renderSidebarAction)}
       </nav>

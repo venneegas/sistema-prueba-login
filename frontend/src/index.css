@@ -155,3 +155,61 @@ input::-ms-clear {
 .dark .director-sidebar-scrollbar:hover::-webkit-scrollbar-thumb {
   background-color: rgba(100, 116, 139, 0.66);
 }
+
+.dark .admin-theme .bg-white {
+  background-color: #1e293b;
+}
+
+.dark .admin-theme .bg-slate-50,
+.dark .admin-theme .bg-slate-50\/50,
+.dark .admin-theme .hover\:bg-slate-50:hover,
+.dark .admin-theme .hover\:bg-slate-50\/80:hover {
+  background-color: #0f172a;
+}
+
+.dark .admin-theme .bg-slate-100,
+.dark .admin-theme .hover\:bg-slate-100:hover,
+.dark .admin-theme .hover\:bg-slate-200:hover {
+  background-color: #334155;
+}
+
+.dark .admin-theme .border-slate-100,
+.dark .admin-theme .border-slate-200 {
+  border-color: #334155;
+}
+
+.dark .admin-theme .divide-slate-100 > :not([hidden]) ~ :not([hidden]) {
+  border-color: #334155;
+}
+
+.dark .admin-theme .text-slate-800,
+.dark .admin-theme .text-slate-700 {
+  color: #f1f5f9;
+}
+
+.dark .admin-theme .text-slate-600 {
+  color: #cbd5e1;
+}
+
+.dark .admin-theme .text-slate-500,
+.dark .admin-theme .text-slate-400 {
+  color: #94a3b8;
+}
+
+.dark .admin-theme input,
+.dark .admin-theme select,
+.dark .admin-theme textarea {
+  background-color: #0f172a;
+  border-color: #334155;
+  color: #e2e8f0;
+}
+
+.dark .admin-theme input::placeholder,
+.dark .admin-theme textarea::placeholder {
+  color: #64748b;
+}
+
+.dark .admin-theme code.bg-slate-100 {
+  background-color: #0f172a;
+  color: #93c5fd;
+}

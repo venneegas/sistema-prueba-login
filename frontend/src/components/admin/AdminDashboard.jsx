@@ -28,7 +28,7 @@ const AdminDashboard = ({ user, onLogout }) => {
   };
 
   return (
-    <div className="flex h-screen bg-slate-50 dark:bg-slate-900">
+    <div className="admin-theme flex h-screen bg-slate-50 dark:bg-slate-900">
       {/* Menú Lateral - Azul Oscuro con acentos Dorados */}
       <aside className="w-64 bg-blue-950 text-white flex flex-col shadow-2xl z-20 relative overflow-hidden">
         {/* Decoración de fondo en el sidebar */}
