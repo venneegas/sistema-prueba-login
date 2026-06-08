@@ -1,22 +1,8 @@
 const { pool } = require('../config/db');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const nodemailer = require('nodemailer');
 const { logAuditoria } = require('../utils/auditLogger');
-
-// Configuración de Nodemailer
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
-  port: process.env.EMAIL_PORT,
-  secure: process.env.EMAIL_SECURE === 'true', // true para puerto 465
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-  tls: {
-    rejectUnauthorized: false // Importante para evitar errores de certificados autofirmados en cPanel
-  }
-});
+const { getMailFrom, sendMail } = require('../utils/mailer');
 
 const obtenerTieneColumnaDebeCambiarPassword = async (connection) => {
   const [columns] = await connection.execute(
@@ -362,8 +348,8 @@ const solicitarRecuperacion = async (req, res) => {
     connection = null;
 
     // Enviar el correo
-    await transporter.sendMail({
-      from: `"UGEL Soporte" <${process.env.EMAIL_USER}>`,
+    await sendMail({
+      from: getMailFrom('UGEL Soporte'),
       to: email,
       subject: 'Código de Recuperación de Contraseña',
       html: `

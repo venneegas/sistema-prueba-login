@@ -1,19 +1,8 @@
 const { pool } = require('../config/db');
 const bcrypt = require('bcryptjs');
-const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const { logAuditoria } = require('../utils/auditLogger');
-
-// Configuramos el transportador de nodemailer (usa las variables de tu .env)
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST || 'mail.ugelsanta.gob.pe',
-  port: process.env.EMAIL_PORT || 465,
-  secure: process.env.EMAIL_SECURE === 'true' || true,
-  auth: {
-    user: process.env.EMAIL_USER || 'recursos_propios_ie@ugelsanta.gob.pe',
-    pass: process.env.EMAIL_PASS
-  }
-});
+const { getFrontendUrl, getMailFrom, sendMail, sendSpecialistNotification } = require('../utils/mailer');
 
 // POST /api/solicitudes-reemplazo
 const crearSolicitud = async (req, res) => {
@@ -49,6 +38,29 @@ const crearSolicitud = async (req, res) => {
     } catch (auditError) {
       console.error('No se pudo guardar la auditoría:', auditError);
     }
+
+    sendSpecialistNotification({
+      subject: `Nueva solicitud de credenciales - ${school}`,
+      text: `Se registro una nueva solicitud de credenciales para ${school}.`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 620px; margin: 0 auto; color: #1f2937;">
+          <h2 style="color: #1d4ed8; margin-bottom: 8px;">Nueva solicitud de credenciales</h2>
+          <p>Un director ha enviado una solicitud para revision del especialista.</p>
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin: 18px 0;">
+            <p><strong>Institucion:</strong> ${school}</p>
+            <p><strong>Nuevo correo:</strong> ${nuevoCorreo}</p>
+            <p><strong>Telefono:</strong> ${telefono || 'No registrado'}</p>
+            <p><strong>Motivo:</strong> ${motivo || 'No especificado'}</p>
+          </div>
+          <p>
+            Revisa la solicitud desde el panel de especialista:
+            <a href="${getFrontendUrl()}" style="color: #2563eb;">Abrir sistema</a>
+          </p>
+        </div>
+      `
+    }).catch((mailError) => {
+      console.error('Error al enviar aviso de solicitud al especialista:', mailError);
+    });
     
     res.status(201).json({ 
       success: true, 
@@ -125,7 +137,7 @@ const procesarSolicitud = async (req, res) => {
     // 4. Intentamos enviar el correo de notificación al director
     try {
       let mailOptions = {
-        from: `"Sistema UGEL" <${process.env.EMAIL_USER || 'recursos_propios_ie@ugelsanta.gob.pe'}>`,
+        from: getMailFrom('Sistema UGEL'),
         to: solicitud.nuevo_correo,
         subject: estado === 'aprobado' ? '✅ Solicitud de Credenciales Aprobada' : '❌ Solicitud de Credenciales Rechazada',
         html: estado === 'aprobado' 
@@ -163,7 +175,7 @@ const procesarSolicitud = async (req, res) => {
             </div>
           `
       };
-      await transporter.sendMail(mailOptions);
+      await sendMail(mailOptions);
     } catch (mailError) {
       console.error('Error al enviar correo de notificación (pero la solicitud procedió):', mailError);
     }

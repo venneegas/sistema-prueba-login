@@ -1,6 +1,6 @@
 const { pool } = require('../config/db'); 
 const { logAuditoria } = require('../utils/auditLogger');
-const nodemailer = require('nodemailer');
+const { getFrontendUrl, getMailFrom, sendMail } = require('../utils/mailer');
 
 const calcularSaldoInicialCaja = async (directorId, trimestreId, anio) => {
   if (anio < 2026) return 0;
@@ -224,18 +224,8 @@ const auditarDeclaracion = async (req, res) => {
     // 5. ENVIAR CORREO CON NODEMAILER (En segundo plano)
     if (directorData && directorData.email) {
       try {
-        const transporter = nodemailer.createTransport({
-          host: process.env.EMAIL_HOST || 'mail.ugelsanta.gob.pe',
-          port: process.env.EMAIL_PORT || 465,
-          secure: process.env.EMAIL_SECURE === 'true' || true,
-          auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS
-          }
-        });
-
         const mailOptions = {
-          from: `"Sistema Financiero UGEL" <${process.env.EMAIL_USER}>`,
+          from: getMailFrom('Sistema Financiero UGEL'),
           to: directorData.email,
           subject: titulo,
           html: `
@@ -247,7 +237,7 @@ const auditarDeclaracion = async (req, res) => {
                 <p>Hola <strong>${directorData.nombres} ${directorData.apellido_paterno}</strong>,</p>
                 <p>${mensaje}</p>
                 <p style="margin-top: 30px; font-size: 14px; color: #64748b;">
-                  Por favor, ingresa a tu panel en el <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}" style="color: #2563eb; text-decoration: none;">Sistema de Gestión Financiera</a> para visualizar más detalles o levantar la observación si es necesario.
+                  Por favor, ingresa a tu panel en el <a href="${getFrontendUrl()}" style="color: #2563eb; text-decoration: none;">Sistema de Gestión Financiera</a> para visualizar más detalles o levantar la observación si es necesario.
                 </p>
               </div>
             </div>
@@ -255,9 +245,9 @@ const auditarDeclaracion = async (req, res) => {
         };
         
         // No usamos 'await' para no bloquear la respuesta rápida al Frontend del Especialista
-        transporter.sendMail(mailOptions).catch(err => console.error('Error interno de Nodemailer al enviar correo de auditoría:', err));
+        sendMail(mailOptions).catch(err => console.error('Error interno al enviar correo de auditoría:', err));
       } catch (mailErr) {
-        console.error('Error configurando Nodemailer:', mailErr);
+        console.error('Error preparando correo de auditoría:', mailErr);
       }
     }
 

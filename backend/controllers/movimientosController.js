@@ -1,5 +1,6 @@
 const { pool } = require('../config/db');
 const { logAuditoria } = require('../utils/auditLogger');
+const { getFrontendUrl, sendSpecialistNotification } = require('../utils/mailer');
 
 const TIPO_MOVIMIENTO = {
   ingresos: 'INGRESO',
@@ -340,6 +341,53 @@ const cerrarTrimestre = async (req, res) => {
       ip_address: req.ip || req.connection?.remoteAddress
     });
   } catch (err) { console.error('Error registrando auditoría:', err); }
+
+    try {
+      const [[directorInfo]] = await pool.execute(
+        `SELECT
+           d.nombres,
+           d.apellido_paterno,
+           d.apellido_materno,
+           i.numero AS numero_ie,
+           i.nombre AS nombre_ie
+         FROM directores d
+         INNER JOIN instituciones i ON d.institucion_id = i.id
+         WHERE d.id = ?
+         LIMIT 1`,
+        [directorId]
+      );
+
+      const nombreDirector = directorInfo
+        ? `${directorInfo.nombres || ''} ${directorInfo.apellido_paterno || ''} ${directorInfo.apellido_materno || ''}`.trim()
+        : `Director ID ${directorId}`;
+      const institucion = directorInfo
+        ? `${directorInfo.numero_ie ? `${directorInfo.numero_ie} - ` : ''}${directorInfo.nombre_ie}`
+        : `Director ID ${directorId}`;
+
+      sendSpecialistNotification({
+        subject: `Reporte enviado - ${institucion}`,
+        text: `El director ${nombreDirector} envio el reporte del ${trimestreId} trimestre ${anio}.`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 620px; margin: 0 auto; color: #1f2937;">
+            <h2 style="color: #1d4ed8; margin-bottom: 8px;">Reporte financiero enviado</h2>
+            <p>Un director ha cerrado y enviado su reporte trimestral para revision.</p>
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin: 18px 0;">
+              <p><strong>Institucion:</strong> ${institucion}</p>
+              <p><strong>Director:</strong> ${nombreDirector}</p>
+              <p><strong>Periodo:</strong> ${trimestreId} trimestre ${anio}</p>
+            </div>
+            <p>
+              Revisa el reporte desde el panel de especialista:
+              <a href="${getFrontendUrl()}" style="color: #2563eb;">Abrir sistema</a>
+            </p>
+          </div>
+        `
+      }).catch((mailError) => {
+        console.error('Error al enviar aviso de reporte al especialista:', mailError);
+      });
+    } catch (mailSetupError) {
+      console.error('Error preparando aviso de reporte al especialista:', mailSetupError);
+    }
 
     const cierre = await obtenerEstadoCierre(pool, directorId, Number(anio), Number(trimestreId));
 
