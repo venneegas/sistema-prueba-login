@@ -2,7 +2,7 @@ const { pool } = require('../config/db');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const { logAuditoria } = require('../utils/auditLogger');
-const { getFrontendUrl, getMailFrom, sendMail, sendSpecialistNotification } = require('../utils/mailer');
+const { getFrontendUrl, getMailFrom, renderInstitutionalEmail, sendMail, sendSpecialistNotification } = require('../utils/mailer');
 
 // POST /api/solicitudes-reemplazo
 const crearSolicitud = async (req, res) => {
@@ -42,22 +42,19 @@ const crearSolicitud = async (req, res) => {
     sendSpecialistNotification({
       subject: `Nueva solicitud de credenciales - ${school}`,
       text: `Se registro una nueva solicitud de credenciales para ${school}.`,
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 620px; margin: 0 auto; color: #1f2937;">
-          <h2 style="color: #1d4ed8; margin-bottom: 8px;">Nueva solicitud de credenciales</h2>
-          <p>Un director ha enviado una solicitud para revision del especialista.</p>
-          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin: 18px 0;">
-            <p><strong>Institucion:</strong> ${school}</p>
-            <p><strong>Nuevo correo:</strong> ${nuevoCorreo}</p>
-            <p><strong>Telefono:</strong> ${telefono || 'No registrado'}</p>
-            <p><strong>Motivo:</strong> ${motivo || 'No especificado'}</p>
-          </div>
-          <p>
-            Revisa la solicitud desde el panel de especialista:
-            <a href="${getFrontendUrl()}" style="color: #2563eb;">Abrir sistema</a>
-          </p>
-        </div>
-      `
+      html: renderInstitutionalEmail({
+        title: 'Nueva solicitud de credenciales',
+        intro: 'Un director ha enviado una solicitud para revision del especialista.',
+        rows: [
+          { label: 'Institucion', value: school },
+          { label: 'Nuevo correo', value: nuevoCorreo },
+          { label: 'Telefono', value: telefono || 'No registrado' },
+          { label: 'Motivo', value: motivo || 'No especificado' },
+        ],
+        actionLabel: 'Revisar solicitud',
+        actionUrl: getFrontendUrl(),
+        note: 'Atiende esta solicitud desde el modulo de solicitudes del panel de especialista.',
+      })
     }).catch((mailError) => {
       console.error('Error al enviar aviso de solicitud al especialista:', mailError);
     });

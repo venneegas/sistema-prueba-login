@@ -1,6 +1,6 @@
 const { pool } = require('../config/db');
 const { logAuditoria } = require('../utils/auditLogger');
-const { getFrontendUrl, sendSpecialistNotification } = require('../utils/mailer');
+const { getFrontendUrl, renderInstitutionalEmail, sendSpecialistNotification } = require('../utils/mailer');
 
 const TIPO_MOVIMIENTO = {
   ingresos: 'INGRESO',
@@ -367,21 +367,19 @@ const cerrarTrimestre = async (req, res) => {
       sendSpecialistNotification({
         subject: `Reporte enviado - ${institucion}`,
         text: `El director ${nombreDirector} envio el reporte del ${trimestreId} trimestre ${anio}.`,
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 620px; margin: 0 auto; color: #1f2937;">
-            <h2 style="color: #1d4ed8; margin-bottom: 8px;">Reporte financiero enviado</h2>
-            <p>Un director ha cerrado y enviado su reporte trimestral para revision.</p>
-            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin: 18px 0;">
-              <p><strong>Institucion:</strong> ${institucion}</p>
-              <p><strong>Director:</strong> ${nombreDirector}</p>
-              <p><strong>Periodo:</strong> ${trimestreId} trimestre ${anio}</p>
-            </div>
-            <p>
-              Revisa el reporte desde el panel de especialista:
-              <a href="${getFrontendUrl()}" style="color: #2563eb;">Abrir sistema</a>
-            </p>
-          </div>
-        `
+        html: renderInstitutionalEmail({
+          title: 'Reporte financiero enviado',
+          intro: 'Un director ha cerrado y enviado su reporte trimestral para revision del especialista.',
+          rows: [
+            { label: 'Institucion', value: institucion },
+            { label: 'Director', value: nombreDirector },
+            { label: 'Periodo', value: `${trimestreId} trimestre ${anio}` },
+            { label: 'Estado', value: 'Enviado' },
+          ],
+          actionLabel: 'Revisar reporte',
+          actionUrl: getFrontendUrl(),
+          note: 'El reporte ya figura como enviado en el panel de especialista.',
+        })
       }).catch((mailError) => {
         console.error('Error al enviar aviso de reporte al especialista:', mailError);
       });
