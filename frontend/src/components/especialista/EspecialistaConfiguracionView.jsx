@@ -1,13 +1,11 @@
 import React from 'react';
 import {
-  BellRing,
   CheckCircle2,
   KeyRound,
   Mail,
   MapPin,
   Settings,
   ShieldCheck,
-  Sparkles,
   UserRound
 } from 'lucide-react';
 import EspecialistaPageHeader from './EspecialistaPageHeader';
@@ -139,31 +137,6 @@ const EspecialistaConfiguracionView = ({ user, onOpenChangePassword }) => {
               </div>
             </section>
           </div>
-
-          <section className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
-            <div className="p-5 border-b border-slate-100 dark:border-slate-700 flex items-center gap-3 bg-slate-50/70 dark:bg-slate-900/40">
-              <Sparkles className="text-blue-600 dark:text-blue-400" size={20} />
-              <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">Preferencias de Interfaz</h2>
-            </div>
-
-            <div className="divide-y divide-slate-100 dark:divide-slate-700">
-              <div className="p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-300 flex items-center justify-center">
-                    <BellRing size={20} />
-                  </div>
-                  <div>
-                    <p className="font-bold text-slate-800 dark:text-slate-100">Notificaciones por correo</p>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">Avisos cuando un director envíe reportes o solicitudes.</p>
-                  </div>
-                </div>
-
-                <span className="inline-flex w-fit items-center rounded-full bg-slate-100 dark:bg-slate-700 px-3 py-1 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-300">
-                  Próximamente
-                </span>
-              </div>
-            </div>
-          </section>
         </div>
       </div>
     </>
