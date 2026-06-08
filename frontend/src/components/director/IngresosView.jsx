@@ -720,20 +720,20 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
         </div>
 
         {trimestreCerrado && (
-          <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800">
+          <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">
             Este trimestre está cerrado. Puede revisar la información, pero no editarla.
           </div>
         )}
 
         {loading && (
-          <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">
+          <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-200">
             Cargando ingresos del trimestre...
           </div>
         )}
 
         {hayBorradores[mesActivo] && !trimestreCerrado && (
-          <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 flex items-center justify-between shadow-sm">
-            <div className="flex items-center gap-2 text-amber-800">
+          <div className="mb-4 flex items-center justify-between rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 shadow-sm dark:border-amber-500/30 dark:bg-amber-500/10">
+            <div className="flex items-center gap-2 text-amber-800 dark:text-amber-200">
               <span className="flex h-2.5 w-2.5 relative">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
@@ -742,7 +742,7 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
             </div>
             <button
               onClick={() => descartarBorrador(mesActivo)}
-              className="text-sm text-amber-700 hover:text-amber-900 hover:underline font-bold transition-colors"
+              className="text-sm text-amber-700 hover:text-amber-900 hover:underline font-bold transition-colors dark:text-amber-200 dark:hover:text-amber-100"
             >
               Descartar cambios
             </button>

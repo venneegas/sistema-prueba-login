@@ -213,7 +213,7 @@ const SubirPDFView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
         </div>
 
         {trimestreCerrado && (
-          <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800">
+          <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">
             Este trimestre está cerrado. Puede revisar y descargar los documentos, pero no subir ni eliminar archivos.
           </div>
         )}
@@ -265,28 +265,28 @@ const SubirPDFView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
               </div>
             ) : (
               archivos.map(archivo => (
-                <div key={archivo.id} className="p-5 flex items-center justify-between hover:bg-slate-50 transition-colors group dark:hover:bg-slate-800/80">
-                  <div className="flex items-center space-x-4">
+                <div key={archivo.id} className="group flex flex-col gap-4 p-5 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/80 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex min-w-0 items-center space-x-4">
                     <div className="p-3 bg-rose-100 text-rose-600 rounded-xl shadow-sm border border-rose-200">
                       <FileText size={24} />
                     </div>
-                    <div>
-                      <p className="text-sm font-bold text-slate-800 dark:text-slate-100">{archivo.nombre}</p>
-                      <div className="flex items-center gap-3 text-xs text-slate-500 mt-1 font-medium dark:text-slate-400">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-bold text-slate-800 dark:text-slate-100">{archivo.nombre}</p>
+                      <div className="mt-1 flex flex-wrap items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400">
                         <span>{archivo.tamano}</span>
                         <span className="bg-slate-200 text-slate-700 px-2.5 py-0.5 rounded-md font-bold uppercase tracking-wider dark:bg-slate-700 dark:text-slate-200">Trimestre Consolidado</span>
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="flex items-center gap-1.5 text-xs text-emerald-600 font-bold bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200 mr-2">
+                  <div className="flex shrink-0 items-center justify-end gap-2">
+                    <span className="mr-1 flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-600 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-200">
                       <CheckCircle size={14} /> Listo
                     </span>
                     <a 
                       href={buildApiUrl(archivo.ruta)}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="p-2.5 text-slate-400 hover:text-white hover:bg-sky-500 rounded-xl transition-all shadow-sm opacity-0 group-hover:opacity-100 focus:opacity-100"
+                      className="rounded-xl border border-slate-200 p-2.5 text-slate-500 shadow-sm transition-all hover:border-sky-500 hover:bg-sky-500 hover:text-white focus:border-sky-500 focus:bg-sky-500 focus:text-white dark:border-slate-700 dark:text-slate-300 dark:hover:border-sky-500"
                       title="Ver documento"
                       onClick={() => {
                         registrarAccion('Sustentos PDF', 'DESCARGAR', `Visualizó/Descargó el archivo ${archivo.nombre}`);
@@ -297,7 +297,7 @@ const SubirPDFView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
                     {!trimestreCerrado && (
                       <button 
                         onClick={() => eliminarArchivo(archivo.id)}
-                        className="p-2.5 text-slate-400 hover:text-white hover:bg-rose-500 rounded-xl transition-all shadow-sm opacity-0 group-hover:opacity-100 focus:opacity-100"
+                        className="rounded-xl border border-slate-200 p-2.5 text-slate-500 shadow-sm transition-all hover:border-rose-500 hover:bg-rose-500 hover:text-white focus:border-rose-500 focus:bg-rose-500 focus:text-white dark:border-slate-700 dark:text-slate-300"
                         title="Eliminar archivo"
                       >
                         <Trash2 size={18} />

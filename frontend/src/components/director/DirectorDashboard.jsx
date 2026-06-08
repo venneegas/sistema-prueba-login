@@ -302,7 +302,7 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
 
       <main className="flex-1 overflow-y-auto bg-[radial-gradient(circle_at_top_left,_rgba(37,99,235,0.08),_transparent_30%),linear-gradient(180deg,_#f8fbff_0%,_#eef3f8_100%)] p-8 dark:bg-none dark:bg-[#111827]">
         <div className="mx-auto max-w-7xl">
-        <div className="relative z-[200] mb-6 flex justify-between items-center bg-white/90 dark:bg-slate-800/95 p-5 rounded-2xl shadow-[0_14px_40px_-28px_rgba(15,23,42,0.8)] border border-slate-200/80 dark:border-slate-700 backdrop-blur">
+        <div className="relative z-[200] mb-6 flex flex-col gap-4 bg-white/90 dark:bg-slate-800/95 p-5 rounded-2xl shadow-[0_14px_40px_-28px_rgba(15,23,42,0.8)] border border-slate-200/80 dark:border-slate-700 backdrop-blur lg:flex-row lg:items-center lg:justify-between">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-blue-600 dark:text-blue-300">
               Panel de Director
@@ -317,7 +317,7 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
             )}
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-3 sm:gap-4">
       <select
         value={anioActual}
         onChange={(e) => setAnioActual(Number(e.target.value))}
