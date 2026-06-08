@@ -76,6 +76,7 @@ const obtenerEstadoCierre = async (connection, directorId, anio, trimestre) => {
 
 const registroTieneContenido = (registro) => (
   Boolean(registro?.fecha)
+  || Boolean(String(registro?.serie || '').trim())
   || Boolean(String(registro?.numero_comprobante || '').trim())
   || Boolean(String(registro?.concepto || '').trim())
   || Number(registro?.monto || 0) > 0
@@ -120,7 +121,7 @@ const listarMovimientos = async (req, res) => {
 
   try {
     const [rows] = await pool.execute(
-      `SELECT m.id, m.director_id, m.fecha, c.nombre as tipo_comprobante, m.comprobante_id, m.numero_comprobante, m.concepto, m.monto, m.color
+      `SELECT m.id, m.director_id, m.fecha, c.nombre as tipo_comprobante, m.comprobante_id, m.serie, m.numero_comprobante, m.concepto, m.monto, m.color
        FROM movimientos m
        JOIN comprobantes c ON m.comprobante_id = c.id
        WHERE m.director_id = ? AND m.tipo_movimiento = ? AND m.fecha BETWEEN ? AND ?
@@ -188,6 +189,7 @@ const guardarMovimientos = async (req, res) => {
     .map((registro) => ({
       fecha: registro.fecha,
       comprobante_id: Number(registro.comprobante_id),
+      serie: String(registro.serie || '').trim() || null,
       numero_comprobante: registro.numero_comprobante.trim(),
       concepto: registro.concepto.trim(),
       monto: Number(registro.monto),
@@ -220,6 +222,7 @@ const guardarMovimientos = async (req, res) => {
         tipoMovimiento,
         registro.fecha,
         registro.comprobante_id,
+        registro.serie,
         registro.numero_comprobante,
         registro.concepto,
         registro.monto,
@@ -228,7 +231,7 @@ const guardarMovimientos = async (req, res) => {
 
       await connection.query(
         `INSERT INTO movimientos
-         (director_id, tipo_movimiento, fecha, comprobante_id, numero_comprobante, concepto, monto, color)
+         (director_id, tipo_movimiento, fecha, comprobante_id, serie, numero_comprobante, concepto, monto, color)
          VALUES ?`,
         [values]
       );

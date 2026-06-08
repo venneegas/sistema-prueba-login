@@ -181,6 +181,7 @@ CREATE TABLE IF NOT EXISTS movimientos (
   tipo_movimiento    ENUM('INGRESO', 'EGRESO') NOT NULL,
   fecha              DATE NOT NULL,
   comprobante_id     INT NOT NULL COMMENT 'FK al catalogo de comprobantes',
+  serie              VARCHAR(20) DEFAULT NULL COMMENT 'Serie del comprobante para egresos',
   numero_comprobante VARCHAR(100) NOT NULL,
   concepto           VARCHAR(255) NOT NULL,
   monto              DECIMAL(12,2) NOT NULL DEFAULT 0.00,

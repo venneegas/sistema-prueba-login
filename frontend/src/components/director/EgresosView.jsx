@@ -13,6 +13,7 @@ const crearFilaVacia = () => ({
   id: `tmp-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
   fecha: '',
   comprobante_id: '',
+  serie: '',
   numero: '',
   concepto: '',
   importe: 0,
@@ -25,6 +26,7 @@ const formatearFechaApi = (fecha) => {
 
 const filaTieneContenido = (fila) => (
   Boolean(fila.fecha)
+  || Boolean(String(fila.serie || '').trim())
   || Boolean(String(fila.numero || '').trim())
   || Boolean(String(fila.concepto || '').trim())
   || Number(fila.importe || 0) > 0
@@ -168,6 +170,7 @@ const EgresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestreC
               id: registro.id,
               fecha: formatearFechaApi(registro.fecha),
               comprobante_id: registro.comprobante_id || '',
+              serie: registro.serie || '',
               numero: registro.numero_comprobante || '',
               concepto: registro.concepto || '',
               importe: registro.monto ?? 0,
@@ -301,6 +304,7 @@ const EgresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestreC
       .map((fila) => ({
         fecha: fila.fecha,
         comprobante_id: fila.comprobante_id,
+        serie: fila.serie,
         numero_comprobante: fila.numero,
         concepto: fila.concepto,
         monto: fila.importe,
@@ -470,6 +474,7 @@ const EgresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestreC
         index + 1,
         fila.fecha ? formatearFechaDDMM(fila.fecha) : '',
         obtenerNombreComprobante(fila.comprobante_id),
+        fila.serie || '',
         fila.numero || '',
         fila.concepto || '',
         `S/. ${Number(fila.importe || 0).toFixed(2)}`
@@ -481,16 +486,16 @@ const EgresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestreC
         [
           { content: 'N°', rowSpan: 2 },
           { content: 'Fecha', rowSpan: 2 },
-          { content: 'Comprobante', colSpan: 2, styles: { halign: 'center' } },
+          { content: 'Comprobante', colSpan: 3, styles: { halign: 'center' } },
           { content: 'Concepto', rowSpan: 2 },
           { content: 'Importe', rowSpan: 2 },
         ],
-        ['Tipo', 'N°'],
+        ['Tipo', 'Serie', 'N°'],
       ],
       body: tableData,
       theme: 'grid',
       headStyles: { fillColor: [225, 29, 72] }, // Color rose-600
-      foot: [['', '', '', '', 'TOTAL EGRESOS', `S/. ${calcularTotal(mesActivo).toFixed(2)}`]],
+      foot: [['', '', '', '', '', 'TOTAL EGRESOS', `S/. ${calcularTotal(mesActivo).toFixed(2)}`]],
       footStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255], fontStyle: 'bold' } // slate-900
     });
 
@@ -558,18 +563,19 @@ const EgresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestreC
       { header: '', key: 'n', width: 7 },
       { header: '', key: 'fecha', width: 14 },
       { header: '', key: 'tipo', width: 25 },
-      { header: '', key: 'num', width: 18 },
+      { header: '', key: 'serie', width: 14 },
+      { header: '', key: 'num', width: 16 },
       { header: '', key: 'concepto', width: 48 },
       { header: '', key: 'importe', width: 18 }
     ];
 
-    ws.mergeCells('A1:F1');
+    ws.mergeCells('A1:G1');
     ws.getCell('A1').value = `RELACIÓN DE EGRESOS - ${trimestreMeses[mesActivo].toUpperCase()} ${anio}`;
     ws.getCell('A1').font = { name: 'Arial', size: 15, bold: true, color: { argb: 'FF0F172A' } };
     ws.getCell('A1').alignment = { horizontal: 'center', vertical: 'middle' };
     ws.getRow(1).height = 28;
     
-    ws.mergeCells('A2:F2');
+    ws.mergeCells('A2:G2');
     ws.getCell('A2').value = 'Sistema de Gestión de Recursos Propios';
     ws.getCell('A2').font = { name: 'Arial', size: 11, color: { argb: 'FF334155' } };
     ws.getCell('A2').alignment = { horizontal: 'center', vertical: 'middle' };
@@ -577,13 +583,13 @@ const EgresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestreC
 
     ws.addRow([]); ws.addRow([]);
 
-    const headerTopRow = ws.addRow(['N°', 'Fecha', 'Comprobante', '', 'Concepto', 'Importe']);
-    const headerSubRow = ws.addRow(['', '', 'Tipo', 'N°', '', '']);
+    const headerTopRow = ws.addRow(['N°', 'Fecha', 'Comprobante', '', '', 'Concepto', 'Importe']);
+    const headerSubRow = ws.addRow(['', '', 'Tipo', 'Serie', 'N°', '', '']);
     ws.mergeCells(`A${headerTopRow.number}:A${headerSubRow.number}`);
     ws.mergeCells(`B${headerTopRow.number}:B${headerSubRow.number}`);
-    ws.mergeCells(`C${headerTopRow.number}:D${headerTopRow.number}`);
-    ws.mergeCells(`E${headerTopRow.number}:E${headerSubRow.number}`);
+    ws.mergeCells(`C${headerTopRow.number}:E${headerTopRow.number}`);
     ws.mergeCells(`F${headerTopRow.number}:F${headerSubRow.number}`);
+    ws.mergeCells(`G${headerTopRow.number}:G${headerSubRow.number}`);
     [headerTopRow, headerSubRow].forEach((row) => {
       row.font = { bold: true, color: { argb: 'FFFFFFFF' } };
       row.eachCell((cell) => {
@@ -596,12 +602,12 @@ const EgresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestreC
     headerSubRow.height = 22;
 
     datosMeses[mesActivo].filter(fila => filaTieneContenido(fila)).forEach((fila, index) => {
-      const row = ws.addRow([ index + 1, fila.fecha ? formatearFechaDDMM(fila.fecha) : '', obtenerNombreComprobante(fila.comprobante_id), fila.numero || '', fila.concepto || '', Number(fila.importe || 0) ]);
-      row.getCell(6).numFmt = '"S/." #,##0.00';
+      const row = ws.addRow([ index + 1, fila.fecha ? formatearFechaDDMM(fila.fecha) : '', obtenerNombreComprobante(fila.comprobante_id), fila.serie || '', fila.numero || '', fila.concepto || '', Number(fila.importe || 0) ]);
+      row.getCell(7).numFmt = '"S/." #,##0.00';
       row.eachCell((c, columnNumber) => {
         c.border = { top: { style: 'thin' }, bottom: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' } };
         c.alignment = {
-          horizontal: columnNumber === 5 ? 'left' : columnNumber === 6 ? 'right' : 'center',
+          horizontal: columnNumber === 6 ? 'left' : columnNumber === 7 ? 'right' : 'center',
           vertical: 'middle',
           wrapText: true
         };
@@ -611,29 +617,29 @@ const EgresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestreC
       });
     });
 
-    const rowTotal = ws.addRow(['', '', '', '', 'TOTAL EGRESOS', Number(calcularTotal(mesActivo))]);
+    const rowTotal = ws.addRow(['', '', '', '', '', 'TOTAL EGRESOS', Number(calcularTotal(mesActivo))]);
     rowTotal.font = { bold: true, color: { argb: 'FFFFFFFF' } };
-    rowTotal.getCell(5).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0F172A' } };
     rowTotal.getCell(6).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0F172A' } };
-    rowTotal.getCell(6).numFmt = '"S/." #,##0.00';
+    rowTotal.getCell(7).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0F172A' } };
+    rowTotal.getCell(7).numFmt = '"S/." #,##0.00';
     rowTotal.eachCell({ includeEmpty: false }, (c, columnNumber) => {
       c.border = { top: { style: 'thin' }, bottom: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' } };
-      c.alignment = { horizontal: columnNumber === 6 ? 'right' : 'center', vertical: 'middle' };
+      c.alignment = { horizontal: columnNumber === 7 ? 'right' : 'center', vertical: 'middle' };
     });
     rowTotal.height = 24;
 
     const signatureRowNumber = rowTotal.number + 4;
     ws.getCell(`B${signatureRowNumber}`).border = { bottom: { style: 'thin', color: { argb: 'FF0F172A' } } };
-    ws.getCell(`E${signatureRowNumber}`).border = { bottom: { style: 'thin', color: { argb: 'FF0F172A' } } };
+    ws.getCell(`F${signatureRowNumber}`).border = { bottom: { style: 'thin', color: { argb: 'FF0F172A' } } };
     ws.getCell(`B${signatureRowNumber + 1}`).value = 'Director';
-    ws.getCell(`E${signatureRowNumber + 1}`).value = 'Tesorero';
-    ['B', 'E'].forEach((column) => {
+    ws.getCell(`F${signatureRowNumber + 1}`).value = 'Tesorero';
+    ['B', 'F'].forEach((column) => {
       ws.getCell(`${column}${signatureRowNumber + 1}`).font = { bold: true, color: { argb: 'FF0F172A' } };
       ws.getCell(`${column}${signatureRowNumber + 1}`).alignment = { horizontal: 'center' };
     });
 
     if (!trimestreCerrado) {
-      ws.mergeCells('A4:F4');
+      ws.mergeCells('A4:G4');
       const watermarkCell = ws.getCell('A4');
       watermarkCell.value = 'INVALIDO';
       watermarkCell.font = { bold: true, size: 18, color: { argb: 'FFBE123C' } };
@@ -642,8 +648,8 @@ const EgresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestreC
       ws.getRow(4).height = 28;
     }
 
-    ws.autoFilter = { from: { row: headerSubRow.number, column: 1 }, to: { row: rowTotal.number, column: 6 } };
-    ws.pageSetup.printArea = `A1:F${ws.lastRow.number}`;
+    ws.autoFilter = { from: { row: headerSubRow.number, column: 1 }, to: { row: rowTotal.number, column: 7 } };
+    ws.pageSetup.printArea = `A1:G${ws.lastRow.number}`;
 
     const buffer = await wb.xlsx.writeBuffer();
     const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
@@ -745,14 +751,15 @@ const EgresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestreC
               <tr className="bg-gradient-to-r from-rose-600 to-red-600 text-white">
                 <th rowSpan="2" className="border border-rose-700/50 px-4 py-3 align-middle text-center text-[11px] font-black uppercase leading-5 tracking-[0.14em] text-white/95 w-12">N°</th>
                 <th rowSpan="2" className="border border-rose-700/50 px-4 py-3 align-middle text-center text-[11px] font-black uppercase leading-5 tracking-[0.14em] text-white/95 w-28">Fecha</th>
-                <th colSpan="2" className="border border-rose-700/50 px-4 py-3 align-middle text-center text-[11px] font-black uppercase leading-5 tracking-[0.14em] text-white/95">Comprobante</th>
+                <th colSpan="3" className="border border-rose-700/50 px-4 py-3 align-middle text-center text-[11px] font-black uppercase leading-5 tracking-[0.14em] text-white/95">Comprobante</th>
                 <th rowSpan="2" className="border border-rose-700/50 px-4 py-3 align-middle text-center text-[11px] font-black uppercase leading-5 tracking-[0.14em] text-white/95">Concepto</th>
                 <th rowSpan="2" className="border border-rose-700/50 px-4 py-3 align-middle text-right text-[11px] font-black uppercase leading-5 tracking-[0.14em] text-white/95 w-36">Importe (S/.)</th>
                 <th rowSpan="2" className="border border-rose-700/50 px-4 py-3 align-middle text-center text-[11px] font-black uppercase leading-5 tracking-[0.14em] text-white/95 w-24">Acción</th>
               </tr>
               <tr className="bg-gradient-to-r from-rose-600 to-red-600 text-white">
                 <th className="border border-rose-700/50 px-4 py-2 align-middle text-center text-[11px] font-black uppercase leading-5 tracking-[0.14em] text-white/95 w-40">Tipo</th>
-                <th className="border border-rose-700/50 px-4 py-2 align-middle text-center text-[11px] font-black uppercase leading-5 tracking-[0.14em] text-white/95 w-36">N°</th>
+                <th className="border border-rose-700/50 px-4 py-2 align-middle text-center text-[11px] font-black uppercase leading-5 tracking-[0.14em] text-white/95 w-28">Serie</th>
+                <th className="border border-rose-700/50 px-4 py-2 align-middle text-center text-[11px] font-black uppercase leading-5 tracking-[0.14em] text-white/95 w-32">N°</th>
               </tr>
             </thead>
             <tbody>
@@ -820,6 +827,16 @@ const EgresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestreC
                   <td className="border border-slate-300 p-1">
                     <input
                       type="text"
+                      value={fila.serie}
+                      onChange={(e) => handleInputChange(mesActivo, fila.id, 'serie', e.target.value)}
+                      disabled={trimestreCerrado}
+                      className={inputClass}
+                      placeholder="Serie"
+                    />
+                  </td>
+                  <td className="border border-slate-300 p-1">
+                    <input
+                      type="text"
                       value={fila.numero}
                       onChange={(e) => handleInputChange(mesActivo, fila.id, 'numero', e.target.value)}
                       disabled={trimestreCerrado}
@@ -866,7 +883,7 @@ const EgresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestreC
                 </tr>
               ))}
               <tr className="bg-slate-900 text-white font-bold">
-                <td colSpan="5" className="border border-slate-700 px-4 py-3 text-right uppercase tracking-wider text-xs">
+                <td colSpan="6" className="border border-slate-700 px-4 py-3 text-right uppercase tracking-wider text-xs">
                   Total {trimestreMeses[mesActivo]}
                 </td>
                 <td className="border border-slate-700 px-4 py-3 text-right font-mono text-base text-white">
