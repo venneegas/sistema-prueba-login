@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { AlertCircle, Building2, Loader2, Search, Grid3x3, List, LayoutDashboard } from 'lucide-react';
 import EspecialistaPeriodoFilters from './EspecialistaPeriodoFilters';
 import EspecialistaPageHeader from './EspecialistaPageHeader';
+import { getEstadoReporteBadgeClass, getEstadoReporteLabel } from '../../utils/estadoReporte';
 
 const EspecialistaExploradorView = ({
   anioActual,
@@ -97,7 +98,7 @@ const EspecialistaExploradorView = ({
             >
               {estadosDisponibles.map((estado) => (
                 <option key={estado} value={estado} className="bg-white dark:bg-slate-900 text-black dark:text-white">
-                  {estado === 'Todos' ? 'Todos los estados' : estado}
+                  {estado === 'Todos' ? 'Todos los estados' : getEstadoReporteLabel(estado)}
                 </option>
               ))}
             </select>
@@ -169,19 +170,9 @@ const EspecialistaExploradorView = ({
                     </div>
 
                     <div
-                      className={`mt-auto w-full py-2 rounded-xl text-[11px] font-bold tracking-wide uppercase transition-colors ${
-                        colegio.estado === 'Aprobado'
-                          ? 'bg-emerald-50 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
-                          : colegio.estado === 'Observado'
-                            ? 'bg-rose-50 dark:bg-rose-900/50 text-rose-600 dark:text-rose-300 border border-rose-200 dark:border-rose-800'
-                            : colegio.estado === 'Enviado'
-                              ? 'bg-blue-50 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300 border border-blue-200 dark:border-blue-800'
-                              : colegio.estado === 'Borrador'
-                                ? 'bg-amber-50 dark:bg-amber-900/50 text-amber-600 dark:text-amber-300 border border-amber-200 dark:border-amber-800'
-                                : 'bg-slate-50 dark:bg-slate-700 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-600'
-                      }`}
+                      className={`mt-auto w-full py-2 rounded-xl border text-[11px] font-bold tracking-wide uppercase transition-colors ${getEstadoReporteBadgeClass(colegio.estado)}`}
                     >
-                      {colegio.estado}
+                      {getEstadoReporteLabel(colegio.estado)}
                     </div>
                   </div>
                 ))}
@@ -230,19 +221,9 @@ const EspecialistaExploradorView = ({
 
                     <div className="col-span-1 lg:col-span-2">
                       <span
-                        className={`inline-flex items-center justify-center w-full px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wide transition-colors ${
-                          colegio.estado === 'Aprobado'
-                            ? 'bg-emerald-50 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
-                            : colegio.estado === 'Observado'
-                              ? 'bg-rose-50 dark:bg-rose-900/50 text-rose-600 dark:text-rose-300 border border-rose-200 dark:border-rose-800'
-                              : colegio.estado === 'Enviado'
-                                ? 'bg-blue-50 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300 border border-blue-200 dark:border-blue-800'
-                                : colegio.estado === 'Borrador'
-                                  ? 'bg-amber-50 dark:bg-amber-900/50 text-amber-600 dark:text-amber-300 border border-amber-200 dark:border-amber-800'
-                                  : 'bg-slate-50 dark:bg-slate-700 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-600'
-                        }`}
+                        className={`inline-flex items-center justify-center w-full px-3 py-1.5 rounded-lg border text-xs font-bold uppercase tracking-wide transition-colors ${getEstadoReporteBadgeClass(colegio.estado)}`}
                       >
-                        {colegio.estado}
+                        {getEstadoReporteLabel(colegio.estado)}
                       </span>
                     </div>
                   </div>

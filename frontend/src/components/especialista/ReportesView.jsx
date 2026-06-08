@@ -13,6 +13,7 @@ import {
 import EspecialistaPeriodoFilters from './EspecialistaPeriodoFilters';
 import exportEspecialistaReporte from '../../utils/exportEspecialistaReporte';
 import EspecialistaPageHeader from './EspecialistaPageHeader';
+import { isEstadoPendiente } from '../../utils/estadoReporte';
 
 const ReportesView = ({
   anioActual,
@@ -27,7 +28,7 @@ const ReportesView = ({
   const [exportingReport, setExportingReport] = useState(null);
 
   const omisos = useMemo(
-    () => reporteGlobal.filter((row) => (row.estado || 'Borrador').toLowerCase() === 'borrador'),
+    () => reporteGlobal.filter((row) => isEstadoPendiente(row.estado)),
     [reporteGlobal]
   );
 
@@ -55,7 +56,7 @@ const ReportesView = ({
     {
       id: 'omisos',
       title: 'Reporte de Omisos',
-      description: 'Lista las instituciones que aún no enviaron su declaración y permanecen como borrador en el periodo seleccionado.',
+      description: 'Lista las instituciones que aun no enviaron su declaracion y permanecen como pendientes en el periodo seleccionado.',
       icon: AlertTriangle,
       accent: 'amber',
       data: omisos,

@@ -142,8 +142,8 @@ const EspecialistaReportesView = ({
                 <Clock size={24} />
               </div>
               <div>
-                <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider mb-0.5">En Borrador</p>
-                <p className="text-2xl font-bold text-slate-800 dark:text-slate-100">{stats.borradores}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider mb-0.5">Pendientes</p>
+                <p className="text-2xl font-bold text-slate-800 dark:text-slate-100">{stats.pendientes}</p>
               </div>
             </div>
           </div>

@@ -15,8 +15,9 @@ import useEspecialistaStats from '../../hooks/useEspecialistaStats';
 import useTheme from '../../hooks/useTheme';
 import FloatingThemeToggle from '../FloatingThemeToggle';
 import { AlertTriangle, CheckCircle } from 'lucide-react';
+import { ESTADOS_REPORTE } from '../../utils/estadoReporte';
 
-const ESTADOS_EXPLORADOR = ['Borrador', 'Enviado', 'Observado', 'Aprobado'];
+const ESTADOS_EXPLORADOR = ESTADOS_REPORTE;
 const COLEGIO_DETALLE_HISTORY_STATE = 'especialista-colegio-detalle';
 
 const obtenerTrimestreActual = () => {

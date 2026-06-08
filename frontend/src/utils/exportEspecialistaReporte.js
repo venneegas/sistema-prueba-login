@@ -1,4 +1,5 @@
 import ExcelJS from 'exceljs';
+import { getEstadoReporteLabel } from './estadoReporte';
 
 const MONEY_FORMAT = '"S/." #,##0.00';
 const BORDER_THIN = {
@@ -93,7 +94,7 @@ const normalizarFila = (row, index, tipoReporte) => {
     codigoModular: row.codigoModular || '-',
     numeroIE: row.numeroIE || '-',
     nombre: row.nombre || 'Institución Desconocida',
-    estado: row.estado || 'Borrador',
+    estado: getEstadoReporteLabel(row.estado),
     totalIngresos: Number(row.totalIngresos || 0),
     totalEgresos: Number(row.totalEgresos || 0),
     dineroEnCaja: Number(row.dineroEnCaja || 0),
@@ -256,7 +257,7 @@ const agregarHojaRanking = ({ wb, sheetName, title, periodoText, reporte, dataKe
       row.numeroIE || '-',
       row.nombre || 'Institución Desconocida',
       Number(row[dataKey] || 0),
-      row.estado || 'Borrador'
+      getEstadoReporteLabel(row.estado)
     ]);
 
     aplicarEstiloFila(dataRow, config.columns, index);
