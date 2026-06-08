@@ -607,8 +607,8 @@ const ConsolidadoView = ({
     URL.revokeObjectURL(link.href);
   };
 
-  const tdLabelClass = 'border-b border-slate-200 px-5 py-3.5 text-sm text-slate-700 dark:border-slate-700 dark:text-slate-300';
-  const tdValueClass = 'border-b border-slate-200 px-5 py-3.5 text-sm text-right font-mono font-semibold text-slate-900 dark:border-slate-700 dark:text-slate-100';
+  const tdLabelClass = 'border-b border-slate-200 px-5 py-3.5 text-sm text-slate-700';
+  const tdValueClass = 'border-b border-slate-200 px-5 py-3.5 text-sm text-right font-mono font-semibold text-slate-900';
   const sectionHeaderClass = 'bg-sky-700 text-white px-5 py-3 font-bold text-sm uppercase tracking-[0.16em] text-left';
   const finalRowClass = 'bg-[#12314a] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]';
   const totalLabelClass = 'border-b px-5 py-3.5 text-right text-xs font-extrabold uppercase tracking-wide';
@@ -616,12 +616,12 @@ const ConsolidadoView = ({
   const finalValueClass = 'px-5 py-3.5 text-right font-mono text-sm font-extrabold text-white';
 
   const trEditableClass = trimestreCerrado
-    ? 'hover:bg-slate-50/80 transition-colors dark:hover:bg-slate-800/70'
-    : 'bg-amber-50/30 hover:bg-amber-100/40 transition-colors dark:bg-amber-500/10 dark:hover:bg-amber-500/15';
+    ? 'hover:bg-slate-50/80 transition-colors'
+    : 'bg-amber-50/30 hover:bg-amber-100/40 transition-colors';
 
   const tdInputContainerClass = trimestreCerrado
-    ? 'border-b border-slate-200 p-0 text-sm text-right font-mono text-slate-900 focus-within:ring-2 focus-within:ring-inset focus-within:ring-sky-500 dark:border-slate-700 dark:text-slate-100'
-    : 'border-b border-slate-200 p-0 text-sm text-right font-mono text-slate-900 focus-within:ring-2 focus-within:ring-inset focus-within:ring-amber-500 dark:border-slate-700 dark:text-slate-100';
+    ? 'border-b border-slate-200 p-0 text-sm text-right font-mono text-slate-900 focus-within:ring-2 focus-within:ring-inset focus-within:ring-sky-500'
+    : 'border-b border-slate-200 p-0 text-sm text-right font-mono text-slate-900 focus-within:ring-2 focus-within:ring-inset focus-within:ring-amber-500';
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
@@ -668,8 +668,8 @@ const ConsolidadoView = ({
           </div>
         )}
 
-        <div className="overflow-hidden rounded-[22px] border border-slate-200 shadow-sm dark:border-slate-700">
-          <table className="w-full border-collapse bg-white dark:bg-slate-900">
+        <div className="overflow-hidden rounded-[22px] border border-slate-200 shadow-sm dark:border-slate-600 dark:shadow-[0_18px_50px_-28px_rgba(0,0,0,0.9)]">
+          <table className="w-full border-collapse bg-white">
             <colgroup>
               <col className="w-[86%]" />
               <col className="w-[14%]" />
@@ -716,7 +716,7 @@ const ConsolidadoView = ({
               <tr><td colSpan="2" className={sectionHeaderClass}>2. DETALLE DE LOS MOVIMIENTOS DE LA CUENTA CORRIENTE</td></tr>
               <tr>
                 <td colSpan="2" className="border-b border-slate-200 p-0">
-                  <div className="flex justify-between items-center text-[11px] px-5 py-2.5 bg-slate-50 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                  <div className="flex justify-between items-center text-[11px] px-5 py-2.5 bg-slate-50 text-slate-600">
                     <span>Segun el Estado de Cuenta mensual emitido por el Banco de la Nación:</span>
                     {!trimestreCerrado && (
                       <span className="flex items-center gap-1.5 font-bold text-amber-700 bg-amber-100/80 px-2.5 py-0.5 rounded-md border border-amber-200">
@@ -744,7 +744,7 @@ const ConsolidadoView = ({
                         }
                       }}
                       disabled={trimestreCerrado}
-                      className="w-full h-full px-4 py-3 bg-transparent text-right outline-none disabled:cursor-not-allowed disabled:bg-slate-50 disabled:opacity-70 dark:disabled:bg-slate-800"
+                      className="w-full h-full px-4 py-3 bg-transparent text-right outline-none disabled:cursor-not-allowed disabled:bg-slate-50 disabled:opacity-70"
                       placeholder="0.00"
                     />
                   </td>
@@ -752,7 +752,7 @@ const ConsolidadoView = ({
               ))}
 
               <tr>
-                <td colSpan="2" className="border-b border-slate-200 bg-white px-5 py-3.5 text-right dark:border-slate-700 dark:bg-slate-900">
+                <td colSpan="2" className="border-b border-slate-200 bg-white px-5 py-3.5 text-right">
                   <div className="flex items-center justify-end gap-3">
                     <Toast message={mensajeSaldos} type="success" onClose={() => setMensajeSaldos('')} />
                     <Toast message={errorSaldos} type="error" onClose={() => setErrorSaldos('')} />

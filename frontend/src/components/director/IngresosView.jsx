@@ -655,7 +655,7 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
     URL.revokeObjectURL(link.href);
   };
 
-  const inputClass = 'w-full p-2 outline-none bg-transparent text-slate-800 font-medium focus:bg-white focus:ring-2 focus:ring-blue-500/20 rounded transition-all dark:text-slate-100 dark:focus:bg-slate-800';
+  const inputClass = 'w-full p-2 outline-none bg-transparent text-slate-800 font-medium focus:bg-white focus:ring-2 focus:ring-blue-500/20 rounded transition-all';
 
   const limitesMesActivo = obtenerRangoMes(trimestreId, mesActivo);
 
@@ -739,8 +739,8 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
       <Toast message={mensaje} type="success" onClose={() => setMensaje('')} />
       <Toast message={error} type="error" onClose={() => setError('')} />
 
-        <div className="overflow-x-auto rounded-[26px] border border-slate-300 shadow-sm dark:border-slate-700">
-          <table className="w-full border-collapse bg-white text-sm dark:bg-slate-900">
+        <div className="overflow-x-auto rounded-[26px] border border-slate-300 shadow-sm dark:border-slate-600 dark:shadow-[0_18px_50px_-28px_rgba(0,0,0,0.9)]">
+          <table className="w-full border-collapse bg-white text-sm">
             <thead>
               <tr className="bg-blue-600 text-white">
                 <th rowSpan="2" className="border border-blue-700/50 px-4 py-3 align-middle text-center text-[11px] font-black uppercase leading-5 tracking-[0.14em] text-white/95 w-12">N°</th>
@@ -757,9 +757,9 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
             </thead>
             <tbody>
               {datosMeses[mesActivo].map((fila, index) => (
-                <tr key={fila.id} className="hover:bg-slate-50/80 transition-colors group/row dark:hover:bg-slate-800/70">
-                  <td className="border border-slate-300 bg-slate-50 px-2 py-2 text-center font-medium text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">{index + 1}</td>
-                  <td className="border border-slate-300 p-1 dark:border-slate-700">
+                <tr key={fila.id} className="hover:bg-slate-50/80 transition-colors group/row">
+                  <td className="border border-slate-300 bg-slate-50 px-2 py-2 text-center font-medium text-slate-500">{index + 1}</td>
+                  <td className="border border-slate-300 p-1">
                     <button
                       type="button"
                       onClick={() => {
@@ -790,7 +790,7 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
                       <span className={`block w-full p-2 text-center font-mono text-sm font-medium rounded transition-colors pointer-events-none ${
                         filasFechaInvalida.has(fila.id)
                           ? 'bg-red-50 text-red-600 ring-2 ring-red-500 group-hover:bg-red-100'
-                          : 'text-slate-700 group-hover:bg-slate-200 dark:text-slate-200 dark:group-hover:bg-slate-700'
+                          : 'text-slate-700 group-hover:bg-slate-200'
                       }`}>
                         {fila.fecha ? formatearFechaDDMM(fila.fecha) : '--'}
                       </span>
@@ -799,7 +799,7 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
                       <p className="px-1 pt-1 text-xs text-red-600 text-center">Requerido</p>
                     )}
                   </td>
-                  <td className="border border-slate-300 p-1 dark:border-slate-700">
+                  <td className="border border-slate-300 p-1">
                     <select
                       value={fila.comprobante_id}
                       onChange={(e) => handleInputChange(mesActivo, fila.id, 'comprobante_id', e.target.value)}
@@ -817,7 +817,7 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
                       <p className="px-1 pt-1 text-xs text-red-600">Campo obligatorio</p>
                     )}
                   </td>
-                  <td className="border border-slate-300 p-1 dark:border-slate-700">
+                  <td className="border border-slate-300 p-1">
                     <input
                       type="text"
                       value={fila.numero}
@@ -826,7 +826,7 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
                       className={inputClass}
                     />
                   </td>
-                  <td className="border border-slate-300 p-1 dark:border-slate-700">
+                  <td className="border border-slate-300 p-1">
                     <input
                       type="text"
                       value={fila.concepto}
@@ -835,7 +835,7 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
                       className={inputClass}
                     />
                   </td>
-                  <td className="border border-slate-300 p-1 dark:border-slate-700">
+                  <td className="border border-slate-300 p-1">
                     <input
                       type="number"
                       min="0"
@@ -851,7 +851,7 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
                       className={`${inputClass} text-right font-mono text-base`}
                     />
                   </td>
-                  <td className="border border-slate-300 p-1 text-center dark:border-slate-700">
+                  <td className="border border-slate-300 p-1 text-center">
                     <div className="flex items-center justify-center gap-1.5">
                       <button
                         onClick={() => eliminarFila(mesActivo, fila.id)}
