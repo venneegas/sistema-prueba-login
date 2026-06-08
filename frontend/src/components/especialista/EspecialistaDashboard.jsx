@@ -39,6 +39,7 @@ const EspecialistaDashboard = ({ user, onLogout }) => {
 
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const { isDarkMode, toggleTheme } = useTheme();
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' }); // ESTADO GLOBAL DEL TOAST
 
@@ -142,6 +143,8 @@ const EspecialistaDashboard = ({ user, onLogout }) => {
         user={user}
         onChangeView={handleChangeView}
         onLogout={() => setIsLogoutModalOpen(true)}
+        isCollapsed={isSidebarCollapsed}
+        onToggleCollapse={() => setIsSidebarCollapsed((prev) => !prev)}
       />
 
       <main className="flex-1 flex flex-col overflow-hidden">

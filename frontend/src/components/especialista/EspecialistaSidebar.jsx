@@ -1,61 +1,313 @@
-import React from 'react';
-import { Bell, FileSpreadsheet, Key, LayoutDashboard, LogOut, PieChart, Settings, User, UserCheck } from 'lucide-react';
+import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
+import {
+  Bell,
+  Clock,
+  FileSpreadsheet,
+  HelpCircle,
+  Key,
+  LayoutDashboard,
+  LogOut,
+  Mail,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Phone,
+  PieChart,
+  Settings,
+  User,
+  UserCheck,
+  X
+} from 'lucide-react';
 
-const menuItems = [
-  { id: 'explorador', label: 'Explorador', icon: LayoutDashboard },
-  { id: 'estadisticas', label: 'Estadísticas', icon: PieChart },
-  { id: 'alertas', label: 'Alertas', icon: Bell },
-  { id: 'reportes', label: 'Reportes y Descargas', icon: FileSpreadsheet },
-  { id: 'solicitudes', label: 'Solicitudes', icon: Key },
-  { id: 'configuracion', label: 'Configuración', icon: Settings }
+const monitoringItems = [
+  {
+    id: 'explorador',
+    label: 'EXPLORADOR',
+    description: 'Consulta los colegios asignados y abre el detalle de cada reporte.',
+    icon: LayoutDashboard
+  },
+  {
+    id: 'estadisticas',
+    label: 'ESTADISTICAS',
+    description: 'Revisa el avance financiero y los indicadores del periodo.',
+    icon: PieChart
+  },
+  {
+    id: 'alertas',
+    label: 'ALERTAS',
+    description: 'Visualiza alertas o anomalías detectadas en los reportes.',
+    icon: Bell
+  }
 ];
 
-const EspecialistaSidebar = ({ activeView, user, onChangeView, onLogout }) => {
-  return (
-    <aside className="w-64 bg-blue-950 text-white flex flex-col shadow-xl z-20 border-r border-blue-800">
-      <div className="p-6 border-b border-blue-900/50">
-        <div className="flex items-center gap-3">
-          <UserCheck className="text-blue-400" size={24} />
-          <h2 className="text-xl font-bold text-blue-200 uppercase">Especialista</h2>
-        </div>
-        <p className="text-xs text-blue-400 mt-2 font-medium tracking-wide">Supervisión y Auditoría</p>
-      </div>
+const managementItems = [
+  {
+    id: 'reportes',
+    label: 'REPORTES',
+    description: 'Exporta reportes consolidados, omisos y cuentas corrientes.',
+    icon: FileSpreadsheet
+  },
+  {
+    id: 'solicitudes',
+    label: 'SOLICITUDES',
+    description: 'Gestiona solicitudes de reemplazo y credenciales.',
+    icon: Key
+  }
+];
 
-      <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-        {menuItems.map(({ id, label, icon: Icon }) => (
-          <button
-            key={id}
-            onClick={() => onChangeView(id)}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors shadow-sm ${
-              activeView === id
-                ? 'bg-blue-600 text-white'
-                : 'text-blue-200 hover:bg-blue-900/50 hover:text-white'
-            }`}
-          >
-            <Icon size={20} />
-            <span className="font-medium">{label}</span>
-          </button>
-        ))}
-      </nav>
+const EspecialistaSidebar = ({
+  activeView,
+  user,
+  onChangeView,
+  onLogout,
+  isCollapsed = false,
+  onToggleCollapse
+}) => {
+  const [isSupportOpen, setIsSupportOpen] = useState(false);
+  const [tooltipData, setTooltipData] = useState(null);
 
-      <div className="p-4 border-t border-blue-900/50 bg-blue-950">
-        <div className="flex items-center gap-3 mb-4 px-2">
-          <div className="w-10 h-10 rounded-full bg-blue-800 flex items-center justify-center border-2 border-blue-600">
-            <User size={20} className="text-blue-200" />
-          </div>
-          <div className="overflow-hidden">
-            <p className="text-sm font-medium truncate">{user?.nombre || 'Especialista'}</p>
-            <p className="text-xs text-blue-400 truncate text-ellipsis">UGEL Sede</p>
-          </div>
-        </div>
+  const configItems = [
+    {
+      id: 'configuracion',
+      label: 'CONFIGURACION',
+      description: 'Consulta tu perfil y cambia la contraseña de acceso.',
+      icon: Settings
+    },
+    {
+      id: 'soporte',
+      label: 'SOPORTE',
+      description: 'Consulta teléfono, correo y horario de atención UGEL.',
+      icon: HelpCircle,
+      onClick: () => setIsSupportOpen(true)
+    }
+  ];
+
+  const sectionLabelClass = 'px-4 pt-4 pb-1 text-[11px] font-extrabold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500';
+
+  const showTooltip = (event, item) => {
+    if (!item.description) return;
+
+    const rect = event.currentTarget.getBoundingClientRect();
+    setTooltipData({
+      id: item.id,
+      label: item.label,
+      description: item.description,
+      top: rect.top + rect.height / 2,
+      left: rect.right + 12
+    });
+  };
+
+  const renderTooltipPortal = () => {
+    if (!tooltipData) return null;
+
+    return createPortal(
+      <div
+        className="pointer-events-none fixed z-[650] w-64 -translate-y-1/2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-left shadow-[0_18px_45px_-22px_rgba(15,23,42,0.6)] transition-opacity duration-150 dark:border-slate-700 dark:bg-slate-900"
+        style={{ top: tooltipData.top, left: tooltipData.left }}
+      >
+        <span className="block text-[11px] font-extrabold uppercase tracking-[0.16em] text-blue-600 dark:text-blue-300">
+          {tooltipData.label}
+        </span>
+        <span className="mt-1 block text-xs font-medium leading-5 text-slate-600 dark:text-slate-300">
+          {tooltipData.description}
+        </span>
+      </div>,
+      document.body
+    );
+  };
+
+  const renderSidebarAction = (item) => {
+    const Icon = item.icon;
+    const isActive = activeView === item.id;
+
+    return (
+      <div
+        key={item.id}
+        className="group/sidebar-item relative"
+        onMouseEnter={(event) => showTooltip(event, item)}
+        onMouseLeave={() => setTooltipData(null)}
+      >
         <button
-          onClick={onLogout}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white rounded-xl transition-colors font-medium"
+          type="button"
+          onClick={(event) => {
+            setTooltipData(null);
+            event.currentTarget.blur();
+            if (item.onClick) {
+              item.onClick();
+              return;
+            }
+            onChangeView(item.id);
+          }}
+          aria-label={item.description ? `${item.label}: ${item.description}` : item.label}
+          className={`group relative w-full flex items-center overflow-hidden rounded-xl text-sm text-left transition-all duration-200 ${
+            isCollapsed ? 'justify-center px-0 py-3' : 'justify-start gap-3 px-4 py-3'
+          } ${
+            isActive
+              ? 'bg-blue-50 text-blue-700 font-bold shadow-sm ring-1 ring-blue-100 dark:bg-blue-600 dark:text-white dark:ring-blue-500/40'
+              : 'text-slate-600 hover:bg-blue-50/80 hover:text-blue-700 hover:shadow-sm font-semibold dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white'
+          }`}
         >
-          <LogOut size={18} />
-          <span>Cerrar Sesión</span>
+          <span
+            className={`absolute left-0 top-2 bottom-2 w-1 rounded-r-full transition-all duration-200 ${
+              isActive ? 'bg-blue-600 opacity-100' : 'bg-blue-500 opacity-0 group-hover:opacity-100'
+            }`}
+          />
+          <Icon size={18} className={`shrink-0 transition-transform duration-200 ${isActive ? 'translate-x-0.5' : 'group-hover:translate-x-0.5'}`} />
+          {!isCollapsed && <span>{item.label}</span>}
         </button>
       </div>
+    );
+  };
+
+  const renderSection = (label, items) => (
+    <>
+      {isCollapsed ? (
+        <div className="mx-2 my-3 h-px bg-slate-200 dark:bg-slate-800" />
+      ) : (
+        <p className={sectionLabelClass}>{label}</p>
+      )}
+      {items.map(renderSidebarAction)}
+    </>
+  );
+
+  return (
+    <aside className={`${isCollapsed ? 'w-20' : 'w-64'} bg-white dark:bg-[#07111f] text-slate-800 dark:text-white h-screen min-h-0 shrink-0 flex flex-col shadow-[10px_0_35px_-28px_rgba(15,23,42,0.9)] z-20 border-r border-slate-200 dark:border-slate-800 transition-all duration-300`}>
+      <div className={`${isCollapsed ? 'px-3 py-5' : 'p-6'} relative shrink-0 border-b border-slate-200 dark:border-slate-800 text-center flex justify-center bg-white dark:bg-[#07111f]`}>
+        <div className={`${isCollapsed ? 'items-center' : 'items-start'} flex flex-col`}>
+          <img
+            src="https://ugelsanta.gob.pe/wp-content/uploads/2026/02/Logo_US3.png"
+            alt="Logo UGEL"
+            className={`${isCollapsed ? 'mt-1 h-10 w-12 object-contain' : 'h-14 w-auto object-contain'} drop-shadow-sm transition-all duration-300`}
+            onError={(event) => { event.currentTarget.src = 'https://via.placeholder.com/150?text=Logo+UGEL'; }}
+          />
+          {!isCollapsed && (
+            <div className="mt-4 text-left">
+              <div className="flex items-center gap-2">
+                <UserCheck className="text-blue-600 dark:text-blue-300" size={19} />
+                <h2 className="text-lg font-extrabold uppercase tracking-tight text-slate-900 dark:text-slate-100">
+                  Especialista
+                </h2>
+              </div>
+              <p className="mt-1 text-xs font-bold uppercase tracking-[0.18em] text-blue-600 dark:text-blue-300">
+                Revision y auditoria
+              </p>
+            </div>
+          )}
+        </div>
+
+        <button
+          type="button"
+          onClick={onToggleCollapse}
+          className={`${isCollapsed ? 'right-1 top-1 h-7 w-7' : 'right-3 top-3 h-8 w-8'} absolute flex items-center justify-center rounded-lg text-slate-400 transition-all hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-slate-800 dark:hover:text-white`}
+          title={isCollapsed ? 'Expandir menu' : 'Contraer menu'}
+        >
+          {isCollapsed ? <PanelLeftOpen size={17} /> : <PanelLeftClose size={18} />}
+        </button>
+      </div>
+
+      <nav
+        className={`director-sidebar-scrollbar ${isCollapsed ? 'p-3' : 'p-4'} min-h-0 flex-1 space-y-1.5 overflow-y-auto overflow-x-hidden`}
+        onScroll={() => setTooltipData(null)}
+      >
+        {renderSection('Monitoreo', monitoringItems)}
+        {renderSection('Gestion', managementItems)}
+        {renderSection('Configuracion', configItems)}
+      </nav>
+
+      <div className={`${isCollapsed ? 'p-3' : 'p-4'} shrink-0 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-[#091426]`}>
+        {isSupportOpen && createPortal((
+          <div className="fixed inset-0 z-[500] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden animate-in fade-in zoom-in duration-200 border border-slate-200 dark:border-slate-700">
+              <div className="flex items-center justify-between p-5 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+                <h3 className="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                  <HelpCircle className="text-blue-500" size={20} />
+                  Soporte Tecnico UGEL
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => setIsSupportOpen(false)}
+                  className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 p-1.5 rounded-lg transition-colors"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="p-6">
+                <p className="text-sm text-slate-600 dark:text-slate-300 mb-6 font-medium">
+                  Comunicate con soporte si tienes problemas durante la revision o exportacion de reportes.
+                </p>
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4">
+                    <div className="p-2.5 bg-blue-50 dark:bg-blue-900/30 rounded-xl text-blue-600 dark:text-blue-400">
+                      <Phone size={20} />
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Telefono / WhatsApp</p>
+                      <p className="text-sm font-bold text-slate-800 dark:text-slate-200">986675438</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="p-2.5 bg-emerald-50 dark:bg-emerald-900/30 rounded-xl text-emerald-600 dark:text-emerald-400">
+                      <Mail size={20} />
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Correo Electronico</p>
+                      <p className="text-sm font-bold text-slate-800 dark:text-slate-200 break-all">recursos_propios_ie@ugelsanta.gob.pe</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="p-2.5 bg-amber-50 dark:bg-amber-900/30 rounded-xl text-amber-600 dark:text-amber-400">
+                      <Clock size={20} />
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Horario de Atencion</p>
+                      <p className="text-sm font-bold text-slate-800 dark:text-slate-200">Lunes a Viernes de 8:00 AM a 5:00 PM</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-5 border-t border-slate-100 dark:border-slate-700 flex justify-end bg-slate-50 dark:bg-slate-800/50">
+                <button
+                  type="button"
+                  onClick={() => setIsSupportOpen(false)}
+                  className="px-6 py-2.5 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-sm transition-colors"
+                >
+                  Entendido
+                </button>
+              </div>
+            </div>
+          </div>
+        ), document.body)}
+
+        <div className={`${isCollapsed ? 'justify-center px-0' : 'gap-3 px-2'} flex items-center mb-4`}>
+          <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-slate-800 flex items-center justify-center border-2 border-blue-200 dark:border-slate-600 shrink-0">
+            <User size={20} className="text-blue-600 dark:text-slate-300" />
+          </div>
+          {!isCollapsed && (
+            <div className="overflow-hidden">
+              <p className="text-sm font-bold truncate text-slate-800 dark:text-white">
+                {user?.nombre || 'Especialista'}
+              </p>
+              <p className="text-xs font-medium text-slate-500 dark:text-slate-400 truncate text-ellipsis">
+                UGEL Sede
+              </p>
+            </div>
+          )}
+        </div>
+
+        <button
+          type="button"
+          onClick={onLogout}
+          title={isCollapsed ? 'Cerrar Sesion' : undefined}
+          className={`w-full flex items-center justify-center gap-2 ${isCollapsed ? 'px-0 py-3' : 'px-4 py-2.5'} bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-500/10 dark:text-red-400 dark:hover:bg-red-500 dark:hover:text-white rounded-xl transition-colors font-bold text-sm`}
+        >
+          <LogOut size={18} />
+          {!isCollapsed && <span>Cerrar Sesion</span>}
+        </button>
+      </div>
+
+      {renderTooltipPortal()}
     </aside>
   );
 };
