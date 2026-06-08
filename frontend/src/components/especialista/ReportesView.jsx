@@ -93,32 +93,28 @@ const ReportesView = ({
 
   const accentClasses = {
     blue: {
-      panel: 'from-blue-900 to-blue-950',
-      icon: 'bg-blue-500/20 text-blue-100 border-blue-300/20',
-      stat: 'bg-blue-950/50 border-blue-300/15 text-blue-50',
-      ghost: 'text-blue-800/30',
-      button: 'bg-blue-500 hover:bg-blue-400 focus:ring-blue-300/30'
+      border: 'border-l-blue-600',
+      icon: 'bg-blue-50 text-blue-700 border-blue-100 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800',
+      stat: 'bg-blue-50/70 border-blue-100 text-blue-800 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-200',
+      button: 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-300/30'
     },
     amber: {
-      panel: 'from-amber-800 to-slate-950',
-      icon: 'bg-amber-500/20 text-amber-100 border-amber-300/20',
-      stat: 'bg-slate-950/45 border-amber-300/15 text-amber-50',
-      ghost: 'text-amber-700/25',
-      button: 'bg-amber-500 hover:bg-amber-400 focus:ring-amber-300/30'
+      border: 'border-l-amber-500',
+      icon: 'bg-amber-50 text-amber-700 border-amber-100 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-800',
+      stat: 'bg-amber-50/70 border-amber-100 text-amber-800 dark:bg-amber-900/20 dark:border-amber-800 dark:text-amber-200',
+      button: 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-300/30'
     },
     emerald: {
-      panel: 'from-emerald-800 to-slate-950',
-      icon: 'bg-emerald-500/20 text-emerald-100 border-emerald-300/20',
-      stat: 'bg-slate-950/45 border-emerald-300/15 text-emerald-50',
-      ghost: 'text-emerald-700/25',
-      button: 'bg-emerald-500 hover:bg-emerald-400 focus:ring-emerald-300/30'
+      border: 'border-l-emerald-600',
+      icon: 'bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-800',
+      stat: 'bg-emerald-50/70 border-emerald-100 text-emerald-800 dark:bg-emerald-900/20 dark:border-emerald-800 dark:text-emerald-200',
+      button: 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-300/30'
     },
     indigo: {
-      panel: 'from-indigo-900 to-slate-950',
-      icon: 'bg-indigo-500/20 text-indigo-100 border-indigo-300/20',
-      stat: 'bg-slate-950/45 border-indigo-300/15 text-indigo-50',
-      ghost: 'text-indigo-700/25',
-      button: 'bg-indigo-500 hover:bg-indigo-400 focus:ring-indigo-300/30'
+      border: 'border-l-indigo-600',
+      icon: 'bg-indigo-50 text-indigo-700 border-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-800',
+      stat: 'bg-indigo-50/70 border-indigo-100 text-indigo-800 dark:bg-indigo-900/20 dark:border-indigo-800 dark:text-indigo-200',
+      button: 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-300/30'
     }
   };
 
@@ -173,11 +169,9 @@ const ReportesView = ({
               return (
                 <article
                   key={reporte.id}
-                  className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${classes.panel} p-6 md:p-8 shadow-md text-white`}
+                  className={`rounded-2xl border border-l-4 ${classes.border} border-slate-200 bg-white p-6 shadow-sm transition-colors hover:border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:hover:border-slate-600 md:p-7`}
                 >
-                  <Icon size={220} className={`absolute -right-10 -top-16 ${classes.ghost}`} />
-
-                  <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                  <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
                     <div className="flex flex-col gap-5 md:flex-row md:items-start">
                       <div className={`w-14 h-14 rounded-2xl border flex flex-shrink-0 items-center justify-center ${classes.icon}`}>
                         <Icon size={28} />
@@ -185,14 +179,14 @@ const ReportesView = ({
 
                       <div className="min-w-0">
                         <div className="flex flex-col gap-2 md:flex-row md:items-center">
-                          <h2 className="text-xl md:text-2xl font-black leading-tight">{reporte.title}</h2>
+                          <h2 className="text-xl font-black leading-tight text-slate-900 dark:text-slate-100 md:text-2xl">{reporte.title}</h2>
                           {reporte.id === 'cuentasCorrientes' && (
                             <div className="flex items-center gap-2 text-xs font-bold">
-                              <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-1 text-emerald-100 ring-1 ring-white/15">
+                              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-emerald-700 ring-1 ring-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-300 dark:ring-emerald-800">
                                 <CheckCircle2 size={14} />
                                 {cuentasCorrientes.conCuenta}
                               </span>
-                              <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-1 text-rose-100 ring-1 ring-white/15">
+                              <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 px-2.5 py-1 text-rose-700 ring-1 ring-rose-100 dark:bg-rose-900/30 dark:text-rose-300 dark:ring-rose-800">
                                 <XCircle size={14} />
                                 {cuentasCorrientes.sinCuenta}
                               </span>
@@ -200,14 +194,14 @@ const ReportesView = ({
                           )}
                         </div>
 
-                        <p className="mt-2 max-w-3xl text-sm md:text-base leading-relaxed text-white/80">
+                        <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slate-500 dark:text-slate-400 md:text-base">
                           {reporte.description}
                         </p>
 
                         <div className="mt-5 grid grid-cols-2 gap-3 sm:max-w-md">
                           {reporte.stats.map((stat) => (
                             <div key={stat.label} className={`rounded-xl border px-4 py-3 ${classes.stat}`}>
-                              <p className="text-[11px] uppercase tracking-wider font-bold text-white/55">{stat.label}</p>
+                              <p className="text-[11px] uppercase tracking-wider font-bold opacity-70">{stat.label}</p>
                               <p className="mt-1 text-xl font-black">{stat.value}</p>
                             </div>
                           ))}
@@ -218,7 +212,7 @@ const ReportesView = ({
                     <button
                       onClick={() => handleExportar(reporte)}
                       disabled={disabled}
-                      className={`w-full lg:w-auto lg:min-w-[190px] flex items-center justify-center gap-2 px-6 py-4 text-white rounded-xl font-bold text-base transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 focus:outline-none focus:ring-4 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none ${classes.button}`}
+                      className={`w-full lg:w-auto lg:min-w-[190px] flex items-center justify-center gap-2 px-6 py-3.5 text-white rounded-xl font-bold text-sm transition-all shadow-sm hover:shadow-md focus:outline-none focus:ring-4 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none ${classes.button}`}
                     >
                       {isExporting ? <Loader2 size={20} className="animate-spin" /> : <Download size={20} />}
                       {isExporting ? 'Generando...' : 'Exportar Excel'}

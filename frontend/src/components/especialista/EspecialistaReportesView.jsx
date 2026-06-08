@@ -26,7 +26,7 @@ const RankingCard = ({ title, subtitle, data, dataKey, icon: Icon, tone }) => {
 
   return (
     <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
-      <div className="p-6 border-b border-slate-100 dark:border-slate-700 flex items-start gap-4">
+      <div className="p-5 border-b border-slate-100 bg-slate-50/70 dark:border-slate-700 dark:bg-slate-900/40 flex items-start gap-4">
         <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${classes.icon}`}>
           <Icon size={22} />
         </div>
@@ -110,8 +110,8 @@ const EspecialistaReportesView = ({
       <div className="flex-1 overflow-y-auto p-8 bg-slate-50/50 dark:bg-slate-900">
         <div className="max-w-6xl mx-auto space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-600 hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex items-center gap-4 group cursor-default">
-              <div className="w-12 h-12 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-300">
+            <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-800 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
                 <Building2 size={24} />
               </div>
               <div>
@@ -119,8 +119,8 @@ const EspecialistaReportesView = ({
                 <p className="text-2xl font-bold text-slate-800 dark:text-slate-100">{stats.total}</p>
               </div>
             </div>
-            <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 hover:border-emerald-300 dark:hover:border-emerald-600 hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex items-center gap-4 group cursor-default">
-              <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 group-hover:bg-emerald-600 group-hover:text-white transition-colors duration-300">
+            <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-100 dark:border-emerald-800 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
                 <CheckCircle2 size={24} />
               </div>
               <div>
@@ -128,8 +128,8 @@ const EspecialistaReportesView = ({
                 <p className="text-2xl font-bold text-slate-800 dark:text-slate-100">{stats.subidos}</p>
               </div>
             </div>
-            <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 hover:border-amber-300 dark:hover:border-amber-600 hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex items-center gap-4 group cursor-default">
-              <div className="w-12 h-12 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400 group-hover:bg-amber-500 group-hover:text-white transition-colors duration-300">
+            <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-amber-50 dark:bg-amber-900/30 border border-amber-100 dark:border-amber-800 flex items-center justify-center text-amber-600 dark:text-amber-400">
                 <Inbox size={24} />
               </div>
               <div>
@@ -137,8 +137,8 @@ const EspecialistaReportesView = ({
                 <p className="text-2xl font-bold text-slate-800 dark:text-slate-100">{stats.enviados}</p>
               </div>
             </div>
-            <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-600 hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex items-center gap-4 group cursor-default">
-              <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-700/50 flex items-center justify-center text-slate-500 dark:text-slate-400 group-hover:bg-slate-600 group-hover:text-white transition-colors duration-300">
+            <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-400">
                 <Clock size={24} />
               </div>
               <div>
@@ -149,7 +149,7 @@ const EspecialistaReportesView = ({
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center text-center">
+            <div className="bg-white dark:bg-slate-800 p-7 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center text-center">
               <div className="relative w-32 h-32 mb-6">
                 <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
                   <circle className="text-slate-100 dark:text-slate-700" strokeWidth="10" stroke="currentColor" fill="transparent" r="40" cx="50" cy="50" />
@@ -176,7 +176,7 @@ const EspecialistaReportesView = ({
               </p>
             </div>
 
-            <div className="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center text-center">
+            <div className="bg-white dark:bg-slate-800 p-7 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center text-center">
               <div className="relative w-32 h-32 mb-6">
                 <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
                   <circle className="text-slate-100 dark:text-slate-700" strokeWidth="10" stroke="currentColor" fill="transparent" r="40" cx="50" cy="50" />
@@ -203,7 +203,7 @@ const EspecialistaReportesView = ({
               </p>
             </div>
 
-            <div className="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center text-center">
+            <div className="bg-white dark:bg-slate-800 p-7 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center text-center">
               <div className="relative w-32 h-32 mb-6">
                 <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
                   <circle className="text-slate-100 dark:text-slate-700" strokeWidth="10" stroke="currentColor" fill="transparent" r="40" cx="50" cy="50" />
