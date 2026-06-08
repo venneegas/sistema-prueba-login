@@ -1,5 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, FileText, DollarSign, Download, Eye, Building2, CheckCircle, XCircle, AlertCircle, X, Loader2 } from 'lucide-react';
+import {
+  ArrowLeft,
+  FileText,
+  DollarSign,
+  Download,
+  Eye,
+  Building2,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  X,
+  Loader2,
+  ClipboardCheck,
+  Landmark,
+  WalletCards
+} from 'lucide-react';
 import { getEstadoReporteBadgeClass, getEstadoReporteLabel, isEstadoPendiente } from '../../utils/estadoReporte';
 
 const API_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
@@ -163,209 +178,230 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio }) => {
     }
   };
 
+  const periodoLabel = `${trimestre}º Trimestre ${anio}`;
+  const estadoLabel = getEstadoReporteLabel(colegio.estado);
+  const pendiente = isEstadoPendiente(colegio.estado);
+  const resumenFinanciero = [
+    {
+      label: 'Total ingresos',
+      value: finanzas.ingresos,
+      icon: DollarSign,
+      tone: 'text-blue-600 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/30 border-blue-100 dark:border-blue-800'
+    },
+    {
+      label: 'Total egresos',
+      value: finanzas.egresos,
+      icon: DollarSign,
+      tone: 'text-rose-600 dark:text-rose-300 bg-rose-50 dark:bg-rose-900/30 border-rose-100 dark:border-rose-800'
+    },
+    {
+      label: 'Saldo en caja',
+      value: finanzas.dineroEnCaja,
+      icon: WalletCards,
+      tone: 'text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-900/30 border-sky-100 dark:border-sky-800'
+    },
+    {
+      label: 'Cuenta corriente',
+      value: finanzas.dineroEnBanco,
+      icon: Landmark,
+      tone: 'text-teal-700 dark:text-teal-300 bg-teal-50 dark:bg-teal-900/30 border-teal-100 dark:border-teal-800'
+    }
+  ];
+
   return (
     <div className="flex-1 flex flex-col h-full bg-slate-50 dark:bg-slate-900 overflow-hidden">
-      {/* Cabecera de Navegación */}
-      <header className="bg-white dark:bg-slate-800 shadow-sm px-8 py-5 flex items-center gap-4 z-10 border-b border-slate-200 dark:border-slate-700">
-        <button 
+      <header className="relative z-[120] mx-8 mt-8 flex flex-col gap-4 rounded-2xl border border-slate-200/80 bg-white/90 p-5 shadow-[0_14px_40px_-28px_rgba(15,23,42,0.8)] backdrop-blur dark:border-slate-700 dark:bg-slate-800/95 lg:flex-row lg:items-center lg:justify-between">
+        <button
           onClick={onBack}
-          className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-colors text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400"
-          title="Volver a las carpetas"
+          className="absolute left-4 top-4 flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 text-slate-500 transition-colors hover:bg-blue-50 hover:text-blue-700 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white lg:static"
+          title="Volver a los colegios"
         >
-          <ArrowLeft size={24} />
+          <ArrowLeft size={20} />
         </button>
-        
-        <div className="flex-1">
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-            <Building2 size={24} className="text-blue-500" />
-            {colegio.nombre}
-          </h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400 font-mono mt-1 flex items-center gap-2">
-            {colegio.numeroIE ? `N° IE: ${colegio.numeroIE}` : 'N° IE: -'}
-            <span className="text-slate-300 dark:text-slate-600">|</span>
-            Código Modular: {colegio.codigoModular}
-            <span className="text-slate-300 dark:text-slate-600">|</span>
-            <span className="text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded font-bold text-xs tracking-wide border border-blue-100 dark:border-blue-800">Trimestre {trimestre}</span>
+
+        <div className="min-w-0 flex-1 pl-12 lg:pl-0">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-blue-600 dark:text-blue-300">
+            Detalle de reporte
           </p>
+          <h1 className="mt-1 flex items-center gap-3 text-2xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
+            <Building2 size={26} className="shrink-0 text-blue-600 dark:text-blue-300" />
+            <span className="truncate">{colegio.nombre}</span>
+          </h1>
+          <div className="mt-3 flex flex-wrap items-center gap-2 text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+            <span className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 dark:border-slate-700 dark:bg-slate-900">
+              {colegio.numeroIE ? `IE ${colegio.numeroIE}` : 'IE -'}
+            </span>
+            <span className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 font-mono dark:border-slate-700 dark:bg-slate-900">
+              {colegio.codigoModular || '-'}
+            </span>
+            <span className="rounded-lg border border-blue-100 bg-blue-50 px-3 py-1.5 text-blue-700 dark:border-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+              {periodoLabel}
+            </span>
+          </div>
         </div>
-        
-        <div className={`px-4 py-1.5 rounded-xl text-xs font-bold tracking-wider uppercase border shadow-sm ${getEstadoReporteBadgeClass(colegio.estado)}`}>
-          {getEstadoReporteLabel(colegio.estado)}
+
+        <div className={`inline-flex w-fit items-center gap-2 rounded-xl border px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] shadow-sm ${getEstadoReporteBadgeClass(colegio.estado)}`}>
+          <ClipboardCheck size={16} />
+          {estadoLabel}
         </div>
       </header>
 
-      {/* Contenido (Scrollable) */}
       <div className="flex-1 overflow-y-auto p-8">
         <div className="max-w-6xl mx-auto space-y-6">
-          
-          {/* Panel de Acciones de Auditoría */}
-          <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-            <div>
-              <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">Resolución de Auditoría</h2>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Evalúa la declaración tras contrastarla con los sustentos adjuntos.</p>
+          <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+            <div className="flex flex-col gap-5 border-b border-slate-100 bg-slate-50/70 p-6 dark:border-slate-700 dark:bg-slate-900/40 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex items-start gap-4">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-blue-100 bg-blue-50 text-blue-600 dark:border-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                  <ClipboardCheck size={24} />
+                </div>
+                <div>
+                  <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-blue-600 dark:text-blue-300">
+                    Auditoria del reporte
+                  </p>
+                  <h2 className="mt-1 text-xl font-black text-slate-900 dark:text-slate-100">
+                    Resolucion de auditoria
+                  </h2>
+                  <p className="mt-1 max-w-2xl text-sm font-medium leading-6 text-slate-500 dark:text-slate-400">
+                    Contrasta los montos declarados con los sustentos adjuntos antes de aprobar u observar el informe.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex w-full flex-col gap-3 sm:flex-row lg:w-auto">
+                {pendiente ? (
+                  <div className="flex w-full items-center justify-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-bold text-amber-700 dark:border-amber-800 dark:bg-amber-900/30 dark:text-amber-300 lg:w-auto">
+                    <AlertCircle size={18} />
+                    Pendiente de envio
+                  </div>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => setIsRejectModalOpen(true)}
+                      className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-5 py-3 text-sm font-bold text-rose-600 transition-colors hover:bg-rose-100 dark:border-rose-800 dark:bg-rose-900/30 dark:text-rose-300 dark:hover:bg-rose-900/50 lg:flex-none"
+                    >
+                      <XCircle size={19} />
+                      Observar
+                    </button>
+                    <button
+                      onClick={() => setIsApproveModalOpen(true)}
+                      className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-3 text-sm font-bold text-white shadow-sm transition-all hover:bg-emerald-700 hover:shadow lg:flex-none"
+                    >
+                      <CheckCircle size={19} />
+                      Aprobar informe
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
-            
-            <div className="flex items-center gap-3 w-full md:w-auto">
-              {isEstadoPendiente(colegio.estado) ? (
-                <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 px-4 py-2.5 rounded-xl border border-amber-200 dark:border-amber-800 text-sm font-bold w-full md:w-auto justify-center">
-                  <AlertCircle size={18} />
-                  En fase pendiente (no auditable)
+
+            <div className="grid grid-cols-1 gap-4 p-6 md:grid-cols-3">
+              <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900/40">
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Estado actual</p>
+                <p className="mt-2 text-lg font-black text-slate-900 dark:text-slate-100">{estadoLabel}</p>
+              </div>
+              <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900/40">
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Sustentos PDF</p>
+                <p className="mt-2 text-lg font-black text-slate-900 dark:text-slate-100">{pdfs.length}</p>
+              </div>
+              <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900/40">
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Accion disponible</p>
+                <p className="mt-2 text-lg font-black text-slate-900 dark:text-slate-100">{pendiente ? 'Solo consulta' : 'Auditable'}</p>
+              </div>
+            </div>
+          </section>
+
+          <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+            <div className="border-b border-slate-100 bg-slate-50/70 p-5 dark:border-slate-700 dark:bg-slate-900/40">
+              <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-blue-600 dark:text-blue-300">Resumen financiero</p>
+              <h2 className="mt-1 text-xl font-black text-slate-900 dark:text-slate-100">Montos declarados</h2>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 p-6 md:grid-cols-2 xl:grid-cols-4">
+              {resumenFinanciero.map(({ label, value, icon: Icon, tone }) => (
+                <div key={label} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900/40">
+                  <div className={`mb-4 flex h-11 w-11 items-center justify-center rounded-xl border ${tone}`}>
+                    <Icon size={22} />
+                  </div>
+                  <p className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">{label}</p>
+                  {loadingFinanzas ? (
+                    <Loader2 size={22} className="mt-3 animate-spin text-blue-500" />
+                  ) : (
+                    <p className="mt-2 text-2xl font-black text-slate-900 dark:text-slate-100">{formatearMoneda(value)}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <div className="border-t border-slate-100 bg-slate-950 px-6 py-4 text-white dark:border-slate-700">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-sm font-black uppercase tracking-wide">Saldo total al cierre del trimestre</p>
+                {loadingFinanzas ? (
+                  <Loader2 size={20} className="animate-spin text-blue-300" />
+                ) : (
+                  <p className="text-xl font-black text-blue-200">{formatearMoneda(finanzas.saldoTotal)}</p>
+                )}
+              </div>
+            </div>
+          </section>
+
+          <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+            <div className="flex flex-col gap-3 border-b border-slate-100 bg-slate-50/70 p-5 dark:border-slate-700 dark:bg-slate-900/40 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-blue-600 dark:text-blue-300">Sustento documental</p>
+                <h2 className="mt-1 text-xl font-black text-slate-900 dark:text-slate-100">PDF enviados por la institucion</h2>
+              </div>
+              <span className="w-fit rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-black text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+                {pdfs.length} archivo(s)
+              </span>
+            </div>
+
+            <div className="divide-y divide-slate-100 dark:divide-slate-700">
+              {loadingPdfs ? (
+                <div className="flex items-center justify-center gap-3 p-10 text-slate-500 dark:text-slate-400">
+                  <Loader2 size={24} className="animate-spin text-blue-500" />
+                  <span className="font-medium">Cargando documentos...</span>
+                </div>
+              ) : pdfs.length === 0 ? (
+                <div className="p-10 text-center text-slate-500 dark:text-slate-400">
+                  <FileText size={38} className="mx-auto mb-3 text-slate-300 dark:text-slate-600" />
+                  <p className="font-bold text-slate-700 dark:text-slate-200">No hay sustentos subidos</p>
+                  <p className="mt-1 text-sm">Aun no se encontraron documentos para este periodo.</p>
                 </div>
               ) : (
-                <>
-                  <button 
-                    onClick={() => setIsRejectModalOpen(true)}
-                    className="flex-1 md:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/50 hover:text-rose-700 dark:hover:text-rose-300 rounded-xl font-bold transition-colors border border-rose-200 dark:border-rose-800"
-                  >
-                    <XCircle size={20} />
-                    Observar / Rechazar
-                  </button>
-                  <button 
-                    onClick={() => setIsApproveModalOpen(true)}
-                    className="flex-1 md:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-emerald-500 text-white hover:bg-emerald-600 shadow-sm hover:shadow rounded-xl font-bold transition-all"
-                  >
-                    <CheckCircle size={20} />
-                    Aprobar Informe
-                  </button>
-                </>
+                pdfs.map((pdf) => (
+                  <div key={pdf.id} className="flex flex-col gap-4 p-5 transition-colors hover:bg-slate-50 dark:hover:bg-slate-900/50 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex min-w-0 items-center gap-4">
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-rose-100 bg-rose-50 text-rose-600 dark:border-rose-800 dark:bg-rose-900/30 dark:text-rose-300">
+                        <FileText size={24} />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-black text-slate-800 dark:text-slate-100" title={pdf.nombre_original}>{pdf.nombre_original}</p>
+                        <div className="mt-1 flex flex-wrap items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400">
+                          <span>{formatearFecha(pdf.subido_en)}</span>
+                          <span className="rounded-md bg-slate-100 px-2 py-0.5 dark:bg-slate-700">{formatearTamano(pdf.tamanio_bytes)}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex shrink-0 items-center justify-end gap-2">
+                      <span className="mr-1 inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300">
+                        <CheckCircle size={14} />
+                        Recibido
+                      </span>
+                      <a href={getPdfUrl(pdf.ruta_archivo)} target="_blank" rel="noopener noreferrer" className="rounded-xl border border-slate-200 p-2.5 text-slate-500 shadow-sm transition-all hover:border-sky-500 hover:bg-sky-500 hover:text-white dark:border-slate-700 dark:text-slate-300" title="Ver PDF">
+                        <Eye size={18} />
+                      </a>
+                      <a href={getPdfUrl(pdf.ruta_archivo)} download target="_blank" rel="noopener noreferrer" className="rounded-xl border border-slate-200 p-2.5 text-slate-500 shadow-sm transition-all hover:border-blue-600 hover:bg-blue-600 hover:text-white dark:border-slate-700 dark:text-slate-300" title="Descargar">
+                        <Download size={18} />
+                      </a>
+                    </div>
+                  </div>
+                ))
               )}
             </div>
-          </div>
-
-          {/* Tarjetas de Resumen Financiero */}
-          <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 border-b border-slate-200 dark:border-slate-700 pb-2">Dinero en caja de la I.E</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
-                <DollarSign size={24} />
-              </div>
-              <div>
-                <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Total Ingresos</p>
-                {loadingFinanzas ? (
-                  <Loader2 size={24} className="animate-spin text-slate-400 dark:text-slate-500 mt-1" />
-                ) : (
-                  <p className="text-2xl font-bold text-slate-800 dark:text-slate-100">{formatearMoneda(finanzas.ingresos)}</p>
-                )}
-              </div>
-            </div>
-            
-            <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center text-rose-600 dark:text-rose-400">
-                <DollarSign size={24} />
-              </div>
-              <div>
-                <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Total Egresos</p>
-                {loadingFinanzas ? (
-                  <Loader2 size={24} className="animate-spin text-slate-400 dark:text-slate-500 mt-1" />
-                ) : (
-                  <p className="text-2xl font-bold text-slate-800 dark:text-slate-100">{formatearMoneda(finanzas.egresos)}</p>
-                )}
-              </div>
-            </div>
-
-            <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
-                <DollarSign size={24} />
-              </div>
-              <div>
-                <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Saldo Trimestral</p>
-                {loadingFinanzas ? (
-                  <Loader2 size={24} className="animate-spin text-slate-400 dark:text-slate-500 mt-1" />
-                ) : (
-                  <p className="text-2xl font-bold text-slate-800 dark:text-slate-100">{formatearMoneda(finanzas.dineroEnCaja)}</p>
-                )}
-              </div>
-            </div>
-          </div>
-
-          <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 border-b border-slate-200 dark:border-slate-700 pb-2 mt-8">Dinero en Cuenta Corriente</h2>
-          <div className="grid grid-cols-1 gap-6">
-            <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-teal-100 dark:bg-teal-900/30 flex items-center justify-center text-teal-600 dark:text-teal-400">
-                <Building2 size={24} />
-              </div>
-              <div>
-                <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Dinero en Cuenta Corriente</p>
-                {loadingFinanzas ? (
-                  <Loader2 size={24} className="animate-spin text-slate-400 dark:text-slate-500 mt-1" />
-                ) : (
-                  <p className="text-2xl font-bold text-slate-800 dark:text-slate-100">{formatearMoneda(finanzas.dineroEnBanco)}</p>
-                )}
-              </div>
-            </div>
-
-            <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-blue-200 dark:border-blue-800 flex items-center gap-4 relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-1 h-full bg-blue-500"></div>
-              <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
-                <DollarSign size={24} />
-              </div>
-              <div>
-                <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">Saldo Total al cierre del Trimestre</p>
-                {loadingFinanzas ? (
-                  <Loader2 size={24} className="animate-spin text-blue-400 mt-1" />
-                ) : (
-                  <p className="text-2xl font-bold text-blue-950 dark:text-slate-100">{formatearMoneda(finanzas.saldoTotal)}</p>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Sección de Documentos PDF */}
-          <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 border-b border-slate-200 dark:border-slate-700 pb-2 mt-8">Sustentos Subidos (PDF)</h2>
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 text-sm border-b border-slate-200 dark:border-slate-700">
-                  <th className="p-4 font-medium">Nombre del Archivo</th>
-                  <th className="p-4 font-medium">Fecha de Subida</th>
-                  <th className="p-4 font-medium">Tamaño</th>
-                  <th className="p-4 font-medium text-center">Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {loadingPdfs ? (
-                  <tr>
-                    <td colSpan="4" className="p-8 text-center text-slate-500 dark:text-slate-400">
-                      <Loader2 size={32} className="animate-spin mx-auto mb-2 text-blue-500" />
-                      Cargando documentos...
-                    </td>
-                  </tr>
-                ) : pdfs.length === 0 ? (
-                  <tr>
-                    <td colSpan="4" className="p-8 text-center text-slate-500 dark:text-slate-400">
-                      <FileText size={32} className="mx-auto mb-2 text-slate-300 dark:text-slate-600" />
-                      No se encontraron sustentos subidos para este trimestre.
-                    </td>
-                  </tr>
-                ) : (
-                  pdfs.map((pdf) => (
-                    <tr key={pdf.id} className="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
-                      <td className="p-4 font-medium text-slate-700 dark:text-slate-200 flex items-center gap-3">
-                        <FileText className="text-red-500 flex-shrink-0" size={20} />
-                        <span className="truncate max-w-xs block" title={pdf.nombre_original}>{pdf.nombre_original}</span>
-                      </td>
-                      <td className="p-4 text-slate-500 dark:text-slate-400 text-sm">{formatearFecha(pdf.subido_en)}</td>
-                      <td className="p-4 text-slate-500 dark:text-slate-400 text-sm whitespace-nowrap">{formatearTamano(pdf.tamanio_bytes)}</td>
-                      <td className="p-4 text-center">
-                        <div className="flex justify-center gap-2">
-                          {/* Usamos target="_blank" para abrir el archivo directamente desde nuestro servidor de uploads */}
-                          <a href={getPdfUrl(pdf.ruta_archivo)} target="_blank" rel="noopener noreferrer" className="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-lg transition-colors" title="Ver PDF">
-                            <Eye size={18} />
-                          </a>
-                          <a href={getPdfUrl(pdf.ruta_archivo)} download target="_blank" rel="noopener noreferrer" className="p-1.5 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors" title="Descargar">
-                            <Download size={18} />
-                          </a>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+          </section>
         </div>
       </div>
-
       {/* --- MODAL DE RECHAZO / OBSERVACIÓN --- */}
       {isRejectModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
@@ -526,3 +562,4 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio }) => {
 };
 
 export default ColegioDetalle;
+
