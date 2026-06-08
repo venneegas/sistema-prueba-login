@@ -62,11 +62,11 @@ const PerfilDirectorView = ({ director }) => {
 
   return (
     <div className="py-8 px-4 max-w-5xl mx-auto space-y-8">
-      <div className="bg-white p-6 md:p-8 rounded-[28px] shadow-[0_24px_60px_-30px_rgba(15,23,42,0.45)] border border-slate-200">
-        <div className="mb-6 overflow-hidden rounded-3xl border border-slate-200 bg-gradient-to-br from-blue-50 via-white to-slate-50">
+      <div className="bg-white p-6 md:p-8 rounded-[28px] shadow-[0_24px_60px_-30px_rgba(15,23,42,0.45)] border border-slate-200 dark:border-slate-700 dark:bg-slate-800/95">
+        <div className="mb-6 overflow-hidden rounded-3xl border border-slate-200 bg-gradient-to-br from-blue-50 via-white to-slate-50 dark:border-slate-700 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
           <div className="p-6">
             <div className="flex flex-col gap-5 md:flex-row md:items-center">
-              <div className="flex h-28 w-28 shrink-0 items-center justify-center overflow-hidden rounded-full border-4 border-white bg-blue-100 text-blue-700 shadow-lg">
+              <div className="flex h-28 w-28 shrink-0 items-center justify-center overflow-hidden rounded-full border-4 border-white bg-blue-100 text-blue-700 shadow-lg dark:border-slate-700 dark:bg-blue-500/10 dark:text-blue-300">
                 {perfil.foto_director ? (
                   <img src={buildAssetUrl(perfil.foto_director)} alt="Foto del director" className="h-full w-full object-cover" />
                 ) : (
@@ -74,8 +74,8 @@ const PerfilDirectorView = ({ director }) => {
                 )}
               </div>
               <div>
-                <p className="text-xs font-bold uppercase tracking-[0.2em] text-blue-600">Perfil del director</p>
-                <h2 className="mt-2 text-3xl font-black leading-tight text-slate-950">{obtenerNombreCompleto(director)}</h2>
+                <p className="text-xs font-bold uppercase tracking-[0.2em] text-blue-600 dark:text-blue-300">Perfil del director</p>
+                <h2 className="mt-2 text-3xl font-black leading-tight text-slate-950 dark:text-slate-100">{obtenerNombreCompleto(director)}</h2>
                 {loading && <p className="mt-2 text-sm font-semibold text-slate-400">Cargando perfil...</p>}
               </div>
             </div>
@@ -84,9 +84,9 @@ const PerfilDirectorView = ({ director }) => {
 
         <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
           {datosDirector.map((item) => (
-            <div key={item.label} className="rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm transition-all hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md">
-              <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-slate-400">{item.label}</p>
-              <p className="mt-2 break-words text-[15px] font-bold leading-6 text-slate-950">{item.value}</p>
+            <div key={item.label} className="rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm transition-all hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md dark:border-slate-700 dark:bg-slate-900/60 dark:hover:border-blue-500/50">
+              <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-slate-400 dark:text-slate-500">{item.label}</p>
+              <p className="mt-2 break-words text-[15px] font-bold leading-6 text-slate-950 dark:text-slate-100">{item.value}</p>
             </div>
           ))}
         </div>

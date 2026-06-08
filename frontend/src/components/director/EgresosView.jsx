@@ -661,22 +661,22 @@ const EgresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestreC
     URL.revokeObjectURL(link.href);
   };
 
-  const inputClass = 'w-full p-2 outline-none bg-transparent text-slate-800 font-medium focus:bg-white focus:ring-2 focus:ring-rose-500/20 rounded transition-all';
+  const inputClass = 'w-full p-2 outline-none bg-transparent text-slate-800 font-medium focus:bg-white focus:ring-2 focus:ring-rose-500/20 rounded transition-all dark:text-slate-100 dark:focus:bg-slate-800';
 
   const limitesMesActivo = obtenerRangoMes(trimestreId, mesActivo);
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
-      <div className="bg-white p-8 rounded-[28px] shadow-[0_24px_60px_-30px_rgba(15,23,42,0.45)] border border-slate-200">
-        <div className="flex gap-2 mb-8 bg-slate-50 p-2 rounded-2xl border border-slate-200 overflow-x-auto">
+      <div className="bg-white p-8 rounded-[28px] shadow-[0_24px_60px_-30px_rgba(15,23,42,0.45)] border border-slate-200 dark:border-slate-700 dark:bg-slate-800/95">
+        <div className="flex gap-2 mb-8 bg-slate-50 p-2 rounded-2xl border border-slate-200 overflow-x-auto dark:border-slate-700 dark:bg-slate-900/50">
         {trimestreMeses.map((mes, index) => (
           <button
             key={mes}
             onClick={() => setMesActivo(index)}
             className={`flex-1 px-6 py-3 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${
               mesActivo === index
-                ? 'bg-white text-rose-700 shadow-sm border border-slate-200'
-                : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700'
+                ? 'bg-white text-rose-700 shadow-sm border border-slate-200 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-200'
+                : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100'
             }`}
           >
             <CalendarDays size={18} />
@@ -691,10 +691,10 @@ const EgresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestreC
         ))}
       </div>
 
-        <div className="flex justify-between items-center mb-6 rounded-3xl border border-slate-300 bg-slate-50/80 p-5 shadow-sm">
-          <h2 className="text-[15px] font-black uppercase tracking-[0.14em] text-slate-900">
-            <span className="text-rose-700">Relación de egresos</span>
-            <span className="mx-2 text-slate-300">/</span>
+        <div className="flex justify-between items-center mb-6 rounded-3xl border border-slate-300 bg-slate-50/80 p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900/45">
+          <h2 className="text-[15px] font-black uppercase tracking-[0.14em] text-slate-900 dark:text-slate-100">
+            <span className="text-rose-700 dark:text-rose-300">Relación de egresos</span>
+            <span className="mx-2 text-slate-300 dark:text-slate-600">/</span>
             <span>{trimestreMeses[mesActivo]} {anio}</span>
           </h2>
 
@@ -704,7 +704,7 @@ const EgresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestreC
                 type="button"
                 onClick={declararSinMovimientos}
                 disabled={saving || loading}
-                className="flex items-center gap-2 bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl text-sm hover:bg-slate-300 transition-all font-bold shadow-sm disabled:opacity-50"
+                className="flex items-center gap-2 bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl text-sm hover:bg-slate-300 transition-all font-bold shadow-sm disabled:opacity-50 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
               >
                 Declarar Mes en Cero
               </button>
@@ -745,8 +745,8 @@ const EgresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestreC
       <Toast message={mensaje} type="success" onClose={() => setMensaje('')} />
       <Toast message={error} type="error" onClose={() => setError('')} />
 
-        <div className="overflow-x-auto rounded-[26px] border border-slate-300 shadow-sm">
-          <table className="w-full border-collapse bg-white text-sm">
+        <div className="overflow-x-auto rounded-[26px] border border-slate-300 shadow-sm dark:border-slate-700">
+          <table className="w-full border-collapse bg-white text-sm dark:bg-slate-900">
             <thead>
               <tr className="bg-gradient-to-r from-rose-600 to-red-600 text-white">
                 <th rowSpan="2" className="border border-rose-700/50 px-4 py-3 align-middle text-center text-[11px] font-black uppercase leading-5 tracking-[0.14em] text-white/95 w-12">N°</th>
@@ -764,9 +764,9 @@ const EgresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestreC
             </thead>
             <tbody>
               {datosMeses[mesActivo].map((fila, index) => (
-                <tr key={fila.id} className="hover:bg-slate-50/80 transition-colors group/row">
-                  <td className="border border-slate-300 bg-slate-50 px-2 py-2 text-center font-medium text-slate-500">{index + 1}</td>
-                  <td className="border border-slate-300 p-1">
+                <tr key={fila.id} className="hover:bg-slate-50/80 transition-colors group/row dark:hover:bg-slate-800/70">
+                  <td className="border border-slate-300 bg-slate-50 px-2 py-2 text-center font-medium text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">{index + 1}</td>
+                  <td className="border border-slate-300 p-1 dark:border-slate-700">
                     <button
                       type="button"
                       onClick={() => {
@@ -797,7 +797,7 @@ const EgresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestreC
                       <span className={`block w-full p-2 text-center font-mono text-sm font-medium rounded transition-colors pointer-events-none ${
                         filasFechaInvalida.has(fila.id)
                           ? 'bg-red-50 text-red-600 ring-2 ring-red-500 group-hover:bg-red-100'
-                          : 'text-slate-700 group-hover:bg-slate-200'
+                          : 'text-slate-700 group-hover:bg-slate-200 dark:text-slate-200 dark:group-hover:bg-slate-700'
                       }`}>
                         {fila.fecha ? formatearFechaDDMM(fila.fecha) : '--'}
                       </span>
@@ -806,7 +806,7 @@ const EgresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestreC
                       <p className="px-1 pt-1 text-xs text-red-600 text-center">Requerido</p>
                     )}
                   </td>
-                  <td className="border border-slate-300 p-1">
+                  <td className="border border-slate-300 p-1 dark:border-slate-700">
                     <select
                       value={fila.comprobante_id}
                       onChange={(e) => handleInputChange(mesActivo, fila.id, 'comprobante_id', e.target.value)}
@@ -824,7 +824,7 @@ const EgresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestreC
                       <p className="px-1 pt-1 text-xs text-red-600">Campo obligatorio</p>
                     )}
                   </td>
-                  <td className="border border-slate-300 p-1">
+                  <td className="border border-slate-300 p-1 dark:border-slate-700">
                     <input
                       type="text"
                       value={fila.serie}
@@ -834,7 +834,7 @@ const EgresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestreC
                       placeholder="Serie"
                     />
                   </td>
-                  <td className="border border-slate-300 p-1">
+                  <td className="border border-slate-300 p-1 dark:border-slate-700">
                     <input
                       type="text"
                       value={fila.numero}
@@ -843,7 +843,7 @@ const EgresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestreC
                       className={inputClass}
                     />
                   </td>
-                  <td className="border border-slate-300 p-1">
+                  <td className="border border-slate-300 p-1 dark:border-slate-700">
                     <input
                       type="text"
                       value={fila.concepto}
@@ -852,7 +852,7 @@ const EgresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestreC
                       className={inputClass}
                     />
                   </td>
-                  <td className="border border-slate-300 p-1">
+                  <td className="border border-slate-300 p-1 dark:border-slate-700">
                     <input
                       type="number"
                       min="0"
@@ -868,7 +868,7 @@ const EgresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestreC
                       className={`${inputClass} text-right font-mono text-base`}
                     />
                   </td>
-                  <td className="border border-slate-300 p-1 text-center">
+                  <td className="border border-slate-300 p-1 text-center dark:border-slate-700">
                     <div className="flex items-center justify-center gap-1.5">
                       <button
                         onClick={() => eliminarFila(mesActivo, fila.id)}
@@ -910,14 +910,14 @@ const EgresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestreC
             <button
               type="button"
               onClick={handleDownloadPDF}
-              className="flex items-center justify-center gap-2 bg-white text-red-600 border border-red-200 px-6 py-3.5 rounded-2xl hover:bg-red-50 transition-all shadow-sm font-bold uppercase tracking-wide text-sm"
+              className="flex items-center justify-center gap-2 bg-white text-red-600 border border-red-200 px-6 py-3.5 rounded-2xl hover:bg-red-50 transition-all shadow-sm font-bold uppercase tracking-wide text-sm dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-200 dark:hover:bg-red-500/20"
             >
               <FileText size={20} /> Descargar PDF
             </button>
             <button
               type="button"
               onClick={handleDownloadExcel}
-              className="flex items-center justify-center gap-2 bg-white text-emerald-700 border border-emerald-200 px-6 py-3.5 rounded-2xl hover:bg-emerald-50 transition-all shadow-sm font-bold uppercase tracking-wide text-sm"
+              className="flex items-center justify-center gap-2 bg-white text-emerald-700 border border-emerald-200 px-6 py-3.5 rounded-2xl hover:bg-emerald-50 transition-all shadow-sm font-bold uppercase tracking-wide text-sm dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-200 dark:hover:bg-emerald-500/20"
             >
               <Download size={20} /> Descargar Excel
             </button>

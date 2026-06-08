@@ -607,8 +607,8 @@ const ConsolidadoView = ({
     URL.revokeObjectURL(link.href);
   };
 
-  const tdLabelClass = 'border-b border-slate-200 px-5 py-3.5 text-sm text-slate-700';
-  const tdValueClass = 'border-b border-slate-200 px-5 py-3.5 text-sm text-right font-mono font-semibold text-slate-900';
+  const tdLabelClass = 'border-b border-slate-200 px-5 py-3.5 text-sm text-slate-700 dark:border-slate-700 dark:text-slate-300';
+  const tdValueClass = 'border-b border-slate-200 px-5 py-3.5 text-sm text-right font-mono font-semibold text-slate-900 dark:border-slate-700 dark:text-slate-100';
   const sectionHeaderClass = 'bg-sky-700 text-white px-5 py-3 font-bold text-sm uppercase tracking-[0.16em] text-left';
   const finalRowClass = 'bg-[#12314a] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]';
   const totalLabelClass = 'border-b px-5 py-3.5 text-right text-xs font-extrabold uppercase tracking-wide';
@@ -616,29 +616,29 @@ const ConsolidadoView = ({
   const finalValueClass = 'px-5 py-3.5 text-right font-mono text-sm font-extrabold text-white';
 
   const trEditableClass = trimestreCerrado
-    ? 'hover:bg-slate-50/80 transition-colors'
-    : 'bg-amber-50/30 hover:bg-amber-100/40 transition-colors';
+    ? 'hover:bg-slate-50/80 transition-colors dark:hover:bg-slate-800/70'
+    : 'bg-amber-50/30 hover:bg-amber-100/40 transition-colors dark:bg-amber-500/10 dark:hover:bg-amber-500/15';
 
   const tdInputContainerClass = trimestreCerrado
-    ? 'border-b border-slate-200 p-0 text-sm text-right font-mono text-slate-900 focus-within:ring-2 focus-within:ring-inset focus-within:ring-sky-500'
-    : 'border-b border-slate-200 p-0 text-sm text-right font-mono text-slate-900 focus-within:ring-2 focus-within:ring-inset focus-within:ring-amber-500';
+    ? 'border-b border-slate-200 p-0 text-sm text-right font-mono text-slate-900 focus-within:ring-2 focus-within:ring-inset focus-within:ring-sky-500 dark:border-slate-700 dark:text-slate-100'
+    : 'border-b border-slate-200 p-0 text-sm text-right font-mono text-slate-900 focus-within:ring-2 focus-within:ring-inset focus-within:ring-amber-500 dark:border-slate-700 dark:text-slate-100';
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
-      <div className="bg-white/95 p-7 rounded-[28px] shadow-[0_24px_60px_-34px_rgba(15,23,42,0.55)] border border-slate-200/90">
-        <div className="mb-6 rounded-3xl border border-slate-300 bg-slate-50/80 p-5 shadow-sm">
+      <div className="bg-white/95 p-7 rounded-[28px] shadow-[0_24px_60px_-34px_rgba(15,23,42,0.55)] border border-slate-200/90 dark:border-slate-700 dark:bg-slate-800/95">
+        <div className="mb-6 rounded-3xl border border-slate-300 bg-slate-50/80 p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900/45">
           <div className="grid grid-cols-12 gap-2 text-sm">
-            <div className="col-span-3 rounded-2xl font-bold bg-slate-200 p-3 border border-slate-300">Trimestre:</div>
-            <div className="col-span-7 rounded-2xl p-3 border border-slate-300 bg-white text-center font-bold uppercase shadow-sm">
+            <div className="col-span-3 rounded-2xl font-bold bg-slate-200 p-3 border border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">Trimestre:</div>
+            <div className="col-span-7 rounded-2xl p-3 border border-slate-300 bg-white text-center font-bold uppercase shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
               {actual.meses.join(', ')}
             </div>
-            <div className="col-span-2 rounded-2xl p-3 border border-slate-300 bg-white text-center font-bold shadow-sm">{anio}</div>
+            <div className="col-span-2 rounded-2xl p-3 border border-slate-300 bg-white text-center font-bold shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">{anio}</div>
 
-            <div className="col-span-3 rounded-2xl font-bold bg-slate-200 p-3 border border-slate-300">Número de la II.EE.</div>
-            <div className="col-span-9 rounded-2xl p-3 border border-slate-300 bg-white text-center font-bold shadow-sm">{numeroIE || '-'}</div>
+            <div className="col-span-3 rounded-2xl font-bold bg-slate-200 p-3 border border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">Número de la II.EE.</div>
+            <div className="col-span-9 rounded-2xl p-3 border border-slate-300 bg-white text-center font-bold shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">{numeroIE || '-'}</div>
 
-            <div className="col-span-3 rounded-2xl font-bold bg-slate-200 p-3 border border-slate-300">Nombre de la II.EE.</div>
-            <div className="col-span-9 rounded-2xl p-3 border border-slate-300 bg-white text-center font-bold uppercase text-sky-800 shadow-sm">{schoolName || 'I.E. Sideral Carrion'}</div>
+            <div className="col-span-3 rounded-2xl font-bold bg-slate-200 p-3 border border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">Nombre de la II.EE.</div>
+            <div className="col-span-9 rounded-2xl p-3 border border-slate-300 bg-white text-center font-bold uppercase text-sky-800 shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-sky-200">{schoolName || 'I.E. Sideral Carrion'}</div>
           </div>
         </div>
 
@@ -646,8 +646,8 @@ const ConsolidadoView = ({
           <div
             className={`mb-6 rounded-2xl border px-5 py-4 text-sm shadow-sm ${
               errorCierre
-                ? 'border-red-200 bg-red-50 text-red-800'
-                : 'border-emerald-200 bg-emerald-50 text-emerald-800'
+                ? 'border-red-200 bg-red-50 text-red-800 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-200'
+                : 'border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-200'
             }`}
           >
             <div className="flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
@@ -668,8 +668,8 @@ const ConsolidadoView = ({
           </div>
         )}
 
-        <div className="overflow-hidden rounded-[22px] border border-slate-200 shadow-sm">
-          <table className="w-full border-collapse bg-white">
+        <div className="overflow-hidden rounded-[22px] border border-slate-200 shadow-sm dark:border-slate-700">
+          <table className="w-full border-collapse bg-white dark:bg-slate-900">
             <colgroup>
               <col className="w-[86%]" />
               <col className="w-[14%]" />
@@ -716,7 +716,7 @@ const ConsolidadoView = ({
               <tr><td colSpan="2" className={sectionHeaderClass}>2. DETALLE DE LOS MOVIMIENTOS DE LA CUENTA CORRIENTE</td></tr>
               <tr>
                 <td colSpan="2" className="border-b border-slate-200 p-0">
-                  <div className="flex justify-between items-center text-[11px] px-5 py-2.5 bg-slate-50 text-slate-600">
+                  <div className="flex justify-between items-center text-[11px] px-5 py-2.5 bg-slate-50 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                     <span>Segun el Estado de Cuenta mensual emitido por el Banco de la Nación:</span>
                     {!trimestreCerrado && (
                       <span className="flex items-center gap-1.5 font-bold text-amber-700 bg-amber-100/80 px-2.5 py-0.5 rounded-md border border-amber-200">
@@ -744,7 +744,7 @@ const ConsolidadoView = ({
                         }
                       }}
                       disabled={trimestreCerrado}
-                      className="w-full h-full px-4 py-3 bg-transparent text-right outline-none disabled:cursor-not-allowed disabled:bg-slate-50 disabled:opacity-70"
+                      className="w-full h-full px-4 py-3 bg-transparent text-right outline-none disabled:cursor-not-allowed disabled:bg-slate-50 disabled:opacity-70 dark:disabled:bg-slate-800"
                       placeholder="0.00"
                     />
                   </td>
@@ -752,7 +752,7 @@ const ConsolidadoView = ({
               ))}
 
               <tr>
-                <td colSpan="2" className="border-b border-slate-200 bg-white px-5 py-3.5 text-right">
+                <td colSpan="2" className="border-b border-slate-200 bg-white px-5 py-3.5 text-right dark:border-slate-700 dark:bg-slate-900">
                   <div className="flex items-center justify-end gap-3">
                     <Toast message={mensajeSaldos} type="success" onClose={() => setMensajeSaldos('')} />
                     <Toast message={errorSaldos} type="error" onClose={() => setErrorSaldos('')} />
@@ -760,7 +760,7 @@ const ConsolidadoView = ({
                       type="button"
                       onClick={guardarSaldos}
                       disabled={trimestreCerrado || savingSaldos}
-                      className="inline-flex items-center gap-2 rounded-xl border border-sky-200 bg-white px-4 py-2.5 text-sm font-extrabold text-sky-700 shadow-sm transition-all hover:-translate-y-0.5 hover:border-sky-300 hover:bg-sky-50 hover:shadow-md disabled:translate-y-0 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400 disabled:shadow-none"
+                      className="inline-flex items-center gap-2 rounded-xl border border-sky-200 bg-white px-4 py-2.5 text-sm font-extrabold text-sky-700 shadow-sm transition-all hover:-translate-y-0.5 hover:border-sky-300 hover:bg-sky-50 hover:shadow-md disabled:translate-y-0 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400 disabled:shadow-none dark:border-sky-500/30 dark:bg-sky-500/10 dark:text-sky-200 dark:hover:bg-sky-500/20 dark:disabled:border-slate-700 dark:disabled:bg-slate-800 dark:disabled:text-slate-500"
                     >
                       <Save size={17} /> {savingSaldos ? 'Guardando...' : 'Guardar saldos'}
                     </button>
@@ -793,7 +793,7 @@ const ConsolidadoView = ({
 
         <div className="mt-8 space-y-4">
           {trimestreCerrado ? (
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm font-semibold text-slate-600">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm font-semibold text-slate-600 dark:border-slate-700 dark:bg-slate-900/50 dark:text-slate-300">
               Este trimestre ya no admite modificaciones. Puedes descargar el consolidado en PDF o Excel.
             </div>
           ) : (
@@ -807,11 +807,11 @@ const ConsolidadoView = ({
             </button>
           )}
 
-          <div className="flex gap-4 pt-4 border-t border-slate-200 mt-6">
+          <div className="flex gap-4 pt-4 border-t border-slate-200 mt-6 dark:border-slate-700">
             <button
               type="button"
               onClick={handleDownloadPDF}
-              className="flex-1 flex items-center justify-center gap-2 rounded-2xl border-2 border-red-600 text-red-600 bg-white py-3.5 text-sm font-bold uppercase tracking-wide hover:bg-red-50 hover:shadow-md transition-all"
+              className="flex-1 flex items-center justify-center gap-2 rounded-2xl border-2 border-red-600 text-red-600 bg-white py-3.5 text-sm font-bold uppercase tracking-wide hover:bg-red-50 hover:shadow-md transition-all dark:border-red-500/50 dark:bg-red-500/10 dark:text-red-200 dark:hover:bg-red-500/20"
             >
               <FileText size={20} /> Descargar Consolidado (PDF)
             </button>
@@ -819,7 +819,7 @@ const ConsolidadoView = ({
             <button
               type="button"
               onClick={handleDownloadExcel}
-              className="flex-1 flex items-center justify-center gap-2 rounded-2xl border-2 border-emerald-600 text-emerald-600 bg-white py-3.5 text-sm font-bold uppercase tracking-wide hover:bg-emerald-50 hover:shadow-md transition-all"
+              className="flex-1 flex items-center justify-center gap-2 rounded-2xl border-2 border-emerald-600 text-emerald-600 bg-white py-3.5 text-sm font-bold uppercase tracking-wide hover:bg-emerald-50 hover:shadow-md transition-all dark:border-emerald-500/50 dark:bg-emerald-500/10 dark:text-emerald-200 dark:hover:bg-emerald-500/20"
             >
               <Download size={20} /> Descargar Consolidado (Excel)
             </button>

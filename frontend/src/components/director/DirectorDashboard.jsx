@@ -360,9 +360,9 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
               </button>
 
               {isNotificationsOpen && (
-                <div className="absolute right-0 z-[230] mt-2 w-80 bg-white rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.3)] border border-slate-200 overflow-hidden">
-                  <div className="bg-slate-50 border-b border-slate-200 px-4 py-3 flex justify-between items-center">
-                    <h3 className="text-sm font-bold text-slate-800">Centro de Alertas</h3>
+                <div className="absolute right-0 z-[230] mt-2 w-80 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-[0_10px_40px_-10px_rgba(0,0,0,0.3)] dark:border-slate-700 dark:bg-slate-800">
+                  <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-700 dark:bg-slate-900/50">
+                    <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100">Centro de Alertas</h3>
                     {unreadCount > 0 && (
                       <span className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded-full font-bold">
                         {unreadCount} nuevas
@@ -375,8 +375,8 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
                       <div className="flex gap-3">
                         <div className="mt-0.5 text-red-500"><Bell size={18} /></div>
                         <div>
-                          <p className="text-sm font-bold text-slate-800">Trimestre Finalizado</p>
-                          <p className="text-xs text-slate-500 mt-1">El plazo venció el {fechaLimite.toLocaleDateString('es-PE', { day: '2-digit', month: 'long', year: 'numeric' })}.</p>
+                          <p className="text-sm font-bold text-slate-800 dark:text-slate-100">Trimestre Finalizado</p>
+                          <p className="text-xs text-slate-500 mt-1 dark:text-slate-400">El plazo venció el {fechaLimite.toLocaleDateString('es-PE', { day: '2-digit', month: 'long', year: 'numeric' })}.</p>
                           <p className="text-xs font-bold text-red-600 mt-2">Sistema bloqueado automáticamente.</p>
                         </div>
                       </div>
@@ -384,16 +384,16 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
                       <div className="flex gap-3">
                         <div className="mt-0.5 text-emerald-500"><Bell size={18} /></div>
                         <div>
-                          <p className="text-sm font-bold text-slate-800">Trimestre Cerrado</p>
-                          <p className="text-xs text-slate-500 mt-1">Has cerrado este trimestre manualmente. Todo está en orden.</p>
+                          <p className="text-sm font-bold text-slate-800 dark:text-slate-100">Trimestre Cerrado</p>
+                          <p className="text-xs text-slate-500 mt-1 dark:text-slate-400">Has cerrado este trimestre manualmente. Todo está en orden.</p>
                         </div>
                       </div>
                     ) : (
                       <div className="flex gap-3">
                         <div className="mt-0.5 text-amber-500"><Bell size={18} /></div>
                         <div>
-                          <p className="text-sm font-bold text-slate-800">Aviso de Cierre Próximo</p>
-                          <p className="text-xs text-slate-500 mt-1">
+                          <p className="text-sm font-bold text-slate-800 dark:text-slate-100">Aviso de Cierre Próximo</p>
+                          <p className="text-xs text-slate-500 mt-1 dark:text-slate-400">
                             Tienes hasta el <span className="font-bold">{fechaLimite.toLocaleDateString('es-PE', { day: '2-digit', month: 'long', year: 'numeric' })}</span> a las 11:59 PM para declarar tus sustentos.
                           </p>
                           <p className={`text-xs font-bold mt-2 ${diasRestantes <= 5 ? 'text-red-600' : 'text-amber-600'}`}>
@@ -404,10 +404,10 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
                     )}
 
                     {/* --- NOTIFICACIONES DE LA BD (ESPECIALISTA) --- */}
-                    {notificaciones.length > 0 && <div className="border-t border-slate-100 my-2"></div>}
+                    {notificaciones.length > 0 && <div className="border-t border-slate-100 my-2 dark:border-slate-700"></div>}
                     
                     {notificaciones.map((notif) => (
-                      <div key={notif.id} className={`flex gap-3 p-3 rounded-xl transition-colors ${!notif.leida ? 'bg-blue-50/50' : 'hover:bg-slate-50'}`}>
+                      <div key={notif.id} className={`flex gap-3 p-3 rounded-xl transition-colors ${!notif.leida ? 'bg-blue-50/50 dark:bg-blue-500/10' : 'hover:bg-slate-50 dark:hover:bg-slate-700/60'}`}>
                         <div className="mt-0.5">
                           <div className={`w-2 h-2 rounded-full mt-1.5 ${
                             notif.tipo === 'error' ? 'bg-rose-500' : 
@@ -416,13 +416,13 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
                         </div>
                         <div className="flex-1">
                           <p className={`text-sm font-bold ${
-                            notif.tipo === 'error' ? 'text-rose-700' : 
-                            notif.tipo === 'exito' ? 'text-emerald-700' : 'text-slate-800'
+                            notif.tipo === 'error' ? 'text-rose-700 dark:text-rose-300' : 
+                            notif.tipo === 'exito' ? 'text-emerald-700 dark:text-emerald-300' : 'text-slate-800 dark:text-slate-100'
                           }`}>
                             {notif.titulo}
                           </p>
-                          <p className="text-xs text-slate-600 mt-1 leading-relaxed">{notif.mensaje}</p>
-                          <p className="text-[10px] text-slate-400 mt-2 font-medium">
+                          <p className="text-xs text-slate-600 mt-1 leading-relaxed dark:text-slate-300">{notif.mensaje}</p>
+                          <p className="text-[10px] text-slate-400 mt-2 font-medium dark:text-slate-500">
                             {new Date(notif.fecha_creacion).toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                           </p>
                         </div>
@@ -541,7 +541,7 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
         onClose={() => setIsSolicitudReemplazoOpen(false)}
         director={user.director}
       />
-      {activeTab === 'general' && !cambioObligatorioPendiente && (
+      {!cambioObligatorioPendiente && (
         <FloatingThemeToggle isDarkMode={isDarkMode} onToggle={toggleTheme} />
       )}
       </main>

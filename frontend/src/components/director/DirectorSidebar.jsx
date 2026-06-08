@@ -146,9 +146,11 @@ const DirectorSidebar = ({
         {!isCollapsed && <p className={sectionLabelClass}>Información Económica</p>}
         {movimientoItems.map(renderSidebarAction)}
 
+        {isCollapsed && <div className="mx-2 my-3 h-px bg-slate-200 dark:bg-slate-800" />}
         {!isCollapsed && <p className={sectionLabelClass}>Datos de Responsables</p>}
         {datosItems.map(renderSidebarAction)}
 
+        {isCollapsed && <div className="mx-2 my-3 h-px bg-slate-200 dark:bg-slate-800" />}
         {!isCollapsed && <p className={sectionLabelClass}>Configuración</p>}
         {[
           { id: 'solicitud', label: 'SOLICITUD', description: 'Solicita el reemplazo del director o responsable registrado.', icon: <UserMinus size={18} />, onClick: onRequestReplacementClick },

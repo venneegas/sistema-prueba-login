@@ -193,19 +193,19 @@ const SubirPDFView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
       <Toast message={mensaje} type="success" onClose={() => setMensaje('')} />
       <Toast message={error} type="error" onClose={() => setError('')} />
 
-      <div className="bg-white p-8 rounded-[28px] shadow-[0_24px_60px_-30px_rgba(15,23,42,0.45)] border border-slate-200">
+      <div className="bg-white p-8 rounded-[28px] shadow-[0_24px_60px_-30px_rgba(15,23,42,0.45)] border border-slate-200 dark:border-slate-700 dark:bg-slate-800/95">
         
         {/* Encabezado */}
-        <div className="flex justify-between items-center mb-6 rounded-3xl border border-slate-300 bg-slate-50/80 p-5 shadow-sm">
+        <div className="flex justify-between items-center mb-6 rounded-3xl border border-slate-300 bg-slate-50/80 p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900/45">
           <div className="space-y-2">
-            <h2 className="text-[15px] font-black uppercase tracking-[0.14em] text-slate-900">
-              <span className="text-blue-700">Sustento documental</span>
-              <span className="mx-2 text-slate-300">/</span>
+            <h2 className="text-[15px] font-black uppercase tracking-[0.14em] text-slate-900 dark:text-slate-100">
+              <span className="text-blue-700 dark:text-blue-300">Sustento documental</span>
+              <span className="mx-2 text-slate-300 dark:text-slate-600">/</span>
               <span>Informe económico trimestral</span>
             </h2>
-            <p className="text-sm font-semibold leading-6 text-slate-500">
+            <p className="text-sm font-semibold leading-6 text-slate-500 dark:text-slate-300">
               Imprimir, firmar, escanear y subir el PDF correspondiente a
-              <span className="ml-1 font-black uppercase tracking-[0.12em] text-slate-700">
+              <span className="ml-1 font-black uppercase tracking-[0.12em] text-slate-700 dark:text-slate-100">
                 {etiquetaTrimestre} {anio}
               </span>.
             </p>
@@ -225,56 +225,56 @@ const SubirPDFView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
           onDrop={handleDrop}
           className={`group flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-3xl transition-all ${
             trimestreCerrado
-              ? 'border-slate-300 bg-slate-100/50 cursor-not-allowed opacity-75'
+              ? 'border-slate-300 bg-slate-100/50 cursor-not-allowed opacity-75 dark:border-slate-700 dark:bg-slate-900/40'
               : isUploading 
-                ? 'border-blue-400 bg-blue-50/50 cursor-wait' 
+                ? 'border-blue-400 bg-blue-50/50 cursor-wait dark:bg-blue-500/10' 
                 : isDragging
-                  ? 'border-blue-500 bg-blue-100/50 scale-[1.02]' // Efecto visual al arrastrar encima
-                  : 'border-slate-300 bg-slate-50/50 hover:bg-blue-50/50 hover:border-blue-400 cursor-pointer'
+                  ? 'border-blue-500 bg-blue-100/50 scale-[1.02] dark:bg-blue-500/15'
+                  : 'border-slate-300 bg-slate-50/50 hover:bg-blue-50/50 hover:border-blue-400 cursor-pointer dark:border-slate-700 dark:bg-slate-900/40 dark:hover:border-blue-500/60 dark:hover:bg-blue-500/10'
           }`}
         >
           {isUploading ? (
             <div className="flex flex-col items-center justify-center pt-5 pb-6">
               <Loader2 size={40} className="text-blue-500 animate-spin mb-4" />
-              <p className="mb-2 text-sm text-slate-700 font-bold">Subiendo y guardando archivos...</p>
-              <p className="text-xs text-slate-400 font-medium">Por favor, espera un momento</p>
+              <p className="mb-2 text-sm text-slate-700 font-bold dark:text-slate-100">Subiendo y guardando archivos...</p>
+              <p className="text-xs text-slate-400 font-medium dark:text-slate-400">Por favor, espera un momento</p>
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center pt-5 pb-6">
-              <div className={`p-4 bg-white shadow-sm border border-slate-200 rounded-2xl mb-4 transition-all duration-300 ${trimestreCerrado ? 'text-slate-400' : 'text-blue-600 group-hover:scale-110 group-hover:bg-blue-600 group-hover:text-white'}`}>
+              <div className={`p-4 bg-white shadow-sm border border-slate-200 rounded-2xl mb-4 transition-all duration-300 dark:border-slate-700 dark:bg-slate-800 ${trimestreCerrado ? 'text-slate-400' : 'text-blue-600 group-hover:scale-110 group-hover:bg-blue-600 group-hover:text-white dark:text-blue-300'}`}>
                 {trimestreCerrado ? <CheckCircle size={32} /> : <Upload size={32} />}
               </div>
-              <p className="mb-2 text-sm text-slate-700 font-bold">{trimestreCerrado ? 'Subida deshabilitada' : 'Haz clic para subir o arrastra y suelta'}</p>
-              <p className="text-xs text-slate-400 font-medium uppercase tracking-wide">{trimestreCerrado ? 'Trimestre Finalizado' : 'Solo formato PDF (Máx. 5MB por archivo)'}</p>
+              <p className="mb-2 text-sm text-slate-700 font-bold dark:text-slate-100">{trimestreCerrado ? 'Subida deshabilitada' : 'Haz clic para subir o arrastra y suelta'}</p>
+              <p className="text-xs text-slate-400 font-medium uppercase tracking-wide dark:text-slate-500">{trimestreCerrado ? 'Trimestre Finalizado' : 'Solo formato PDF (Máx. 5MB por archivo)'}</p>
             </div>
           )}
           <input type="file" className="hidden" accept=".pdf" multiple onChange={handleFileUpload} disabled={isUploading || trimestreCerrado} />
         </label>
 
         {/* Lista de Archivos Subidos */}
-        <div className="mt-8 rounded-[26px] border border-slate-300 shadow-sm overflow-hidden bg-white">
-          <div className="p-5 bg-slate-50/80 border-b border-slate-200 flex justify-between items-center">
-            <h3 className="font-bold text-slate-700 uppercase tracking-wide text-sm">Archivos cargados ({archivos.length})</h3>
+        <div className="mt-8 rounded-[26px] border border-slate-300 shadow-sm overflow-hidden bg-white dark:border-slate-700 dark:bg-slate-900/50">
+          <div className="p-5 bg-slate-50/80 border-b border-slate-200 flex justify-between items-center dark:border-slate-700 dark:bg-slate-900/60">
+            <h3 className="font-bold text-slate-700 uppercase tracking-wide text-sm dark:text-slate-200">Archivos cargados ({archivos.length})</h3>
           </div>
           
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-slate-100 dark:divide-slate-700">
             {archivos.length === 0 ? (
-              <div className="p-10 text-center text-slate-400 flex flex-col items-center">
+              <div className="p-10 text-center text-slate-400 flex flex-col items-center dark:text-slate-500">
                 <AlertCircle size={40} className="mb-3 opacity-20" />
                 <p className="font-medium text-sm">No hay documentos cargados para este trimestre.</p>
               </div>
             ) : (
               archivos.map(archivo => (
-                <div key={archivo.id} className="p-5 flex items-center justify-between hover:bg-slate-50 transition-colors group">
+                <div key={archivo.id} className="p-5 flex items-center justify-between hover:bg-slate-50 transition-colors group dark:hover:bg-slate-800/80">
                   <div className="flex items-center space-x-4">
                     <div className="p-3 bg-rose-100 text-rose-600 rounded-xl shadow-sm border border-rose-200">
                       <FileText size={24} />
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-slate-800">{archivo.nombre}</p>
-                      <div className="flex items-center gap-3 text-xs text-slate-500 mt-1 font-medium">
+                      <p className="text-sm font-bold text-slate-800 dark:text-slate-100">{archivo.nombre}</p>
+                      <div className="flex items-center gap-3 text-xs text-slate-500 mt-1 font-medium dark:text-slate-400">
                         <span>{archivo.tamano}</span>
-                        <span className="bg-slate-200 text-slate-700 px-2.5 py-0.5 rounded-md font-bold uppercase tracking-wider">Trimestre Consolidado</span>
+                        <span className="bg-slate-200 text-slate-700 px-2.5 py-0.5 rounded-md font-bold uppercase tracking-wider dark:bg-slate-700 dark:text-slate-200">Trimestre Consolidado</span>
                       </div>
                     </div>
                   </div>

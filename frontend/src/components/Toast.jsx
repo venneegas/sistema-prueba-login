@@ -19,8 +19,10 @@ const Toast = ({ message, type = 'success', onClose }) => {
 
   if (!message) return null;
 
-  const bgColor = type === 'success' ? 'bg-emerald-50 border-emerald-200' : 'bg-red-50 border-red-200';
-  const textColor = type === 'success' ? 'text-emerald-800' : 'text-red-800';
+  const bgColor = type === 'success'
+    ? 'bg-emerald-50 border-emerald-200 dark:bg-emerald-500/10 dark:border-emerald-500/30'
+    : 'bg-red-50 border-red-200 dark:bg-red-500/10 dark:border-red-500/30';
+  const textColor = type === 'success' ? 'text-emerald-800 dark:text-emerald-100' : 'text-red-800 dark:text-red-100';
   const Icon = type === 'success' ? CheckCircle : AlertCircle;
   const iconColor = type === 'success' ? 'text-emerald-500' : 'text-red-500';
 
@@ -30,7 +32,7 @@ const Toast = ({ message, type = 'success', onClose }) => {
       <p className="text-sm font-bold">{message}</p>
       <button 
         onClick={() => { setIsVisible(false); setTimeout(() => { if (onClose) onClose(); }, 300); }} 
-        className="ml-4 text-gray-400 hover:text-gray-700 transition-colors"
+        className="ml-4 text-gray-400 transition-colors hover:text-gray-700 dark:text-slate-400 dark:hover:text-slate-100"
       >
         <X className="w-5 h-5" />
       </button>

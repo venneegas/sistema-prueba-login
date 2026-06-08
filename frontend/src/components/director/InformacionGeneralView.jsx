@@ -92,29 +92,29 @@ const InformacionGeneralView = ({ director, section = 'perfil' }) => {
     return <PerfilDirectorView director={director} />;
   }
 
-  const labelClass = 'mb-2 block text-[11px] font-extrabold uppercase tracking-[0.16em] text-slate-400';
-  const inputClass = 'w-full rounded-2xl border border-slate-200 bg-white px-5 py-4 text-[15px] font-bold leading-6 text-slate-950 shadow-sm outline-none transition-all placeholder:font-semibold placeholder:text-slate-400 hover:border-blue-200 hover:shadow-md focus:border-blue-400 focus:ring-2 focus:ring-blue-500/30';
+  const labelClass = 'mb-2 block text-[11px] font-extrabold uppercase tracking-[0.16em] text-slate-400 dark:text-slate-500';
+  const inputClass = 'w-full rounded-2xl border border-slate-200 bg-white px-5 py-4 text-[15px] font-bold leading-6 text-slate-950 shadow-sm outline-none transition-all placeholder:font-semibold placeholder:text-slate-400 hover:border-blue-200 hover:shadow-md focus:border-blue-400 focus:ring-2 focus:ring-blue-500/30 dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-100 dark:placeholder:text-slate-500 dark:hover:border-blue-500/50';
 
   return (
     <div className="py-8 px-4 max-w-5xl mx-auto space-y-8">
       {section === 'tesoreria' && (
         <div className="space-y-6">
           <div className="px-1">
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-blue-600">Tesorería</p>
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-blue-600 dark:text-blue-300">Tesorería</p>
           </div>
 
           {loading ? (
-            <div className="rounded-[28px] border border-slate-200 bg-white p-8 shadow-[0_24px_60px_-30px_rgba(15,23,42,0.45)]">
+            <div className="rounded-[28px] border border-slate-200 bg-white p-8 shadow-[0_24px_60px_-30px_rgba(15,23,42,0.45)] dark:border-slate-700 dark:bg-slate-800/95">
             <div className="flex justify-center py-8">
               <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
             </div>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_24px_60px_-30px_rgba(15,23,42,0.45)] md:p-8">
+              <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_24px_60px_-30px_rgba(15,23,42,0.45)] md:p-8 dark:border-slate-700 dark:bg-slate-800/95">
                 <div className="mb-5">
-                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">Responsable</p>
-                  <h3 className="mt-1 text-xl font-black text-slate-900">Tesorero(a)</h3>
+                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400 dark:text-slate-500">Responsable</p>
+                  <h3 className="mt-1 text-xl font-black text-slate-900 dark:text-slate-100">Tesorero(a)</h3>
                 </div>
                 <div className="mt-5 grid grid-cols-1 gap-6 md:grid-cols-2">
                   <div>
@@ -159,10 +159,10 @@ const InformacionGeneralView = ({ director, section = 'perfil' }) => {
                 </div>
               </div>
 
-              <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_24px_60px_-30px_rgba(15,23,42,0.45)] md:p-8">
+              <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_24px_60px_-30px_rgba(15,23,42,0.45)] md:p-8 dark:border-slate-700 dark:bg-slate-800/95">
                 <div className="mb-5">
-                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">Banco</p>
-                  <h3 className="mt-1 text-xl font-black text-slate-900">Cuenta corriente</h3>
+                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400 dark:text-slate-500">Banco</p>
+                  <h3 className="mt-1 text-xl font-black text-slate-900 dark:text-slate-100">Cuenta corriente</h3>
                 </div>
                 <div className="mt-5 grid grid-cols-1 gap-6 md:grid-cols-2">
                   <div>
@@ -194,15 +194,15 @@ const InformacionGeneralView = ({ director, section = 'perfil' }) => {
               {message && (
                 <div className={`rounded-lg border p-4 text-sm font-medium ${
                   message.type === 'success'
-                    ? 'border-green-200 bg-green-50 text-green-700'
-                    : 'border-red-200 bg-red-50 text-red-700'
+                    ? 'border-green-200 bg-green-50 text-green-700 dark:border-green-500/30 dark:bg-green-500/10 dark:text-green-200'
+                    : 'border-red-200 bg-red-50 text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-200'
                 }`}
                 >
                   {message.text}
                 </div>
               )}
 
-              <div className="flex justify-end rounded-[24px] border border-slate-200 bg-white px-6 py-5 shadow-[0_18px_45px_-34px_rgba(15,23,42,0.55)]">
+              <div className="flex justify-end rounded-[24px] border border-slate-200 bg-white px-6 py-5 shadow-[0_18px_45px_-34px_rgba(15,23,42,0.55)] dark:border-slate-700 dark:bg-slate-800/95">
                 <button
                   type="submit"
                   disabled={saving || !director?.id}
