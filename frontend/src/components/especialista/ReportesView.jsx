@@ -102,19 +102,19 @@ const ReportesView = ({
       border: 'border-l-amber-500',
       icon: 'bg-amber-50 text-amber-700 border-amber-100 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-800',
       stat: 'bg-amber-50/70 border-amber-100 text-amber-800 dark:bg-amber-900/20 dark:border-amber-800 dark:text-amber-200',
-      button: 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-300/30'
+      button: 'bg-amber-500 hover:bg-amber-600 focus:ring-amber-300/40'
     },
     emerald: {
       border: 'border-l-emerald-600',
       icon: 'bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-800',
       stat: 'bg-emerald-50/70 border-emerald-100 text-emerald-800 dark:bg-emerald-900/20 dark:border-emerald-800 dark:text-emerald-200',
-      button: 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-300/30'
+      button: 'bg-emerald-600 hover:bg-emerald-700 focus:ring-emerald-300/30'
     },
     indigo: {
       border: 'border-l-indigo-600',
       icon: 'bg-indigo-50 text-indigo-700 border-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-800',
       stat: 'bg-indigo-50/70 border-indigo-100 text-indigo-800 dark:bg-indigo-900/20 dark:border-indigo-800 dark:text-indigo-200',
-      button: 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-300/30'
+      button: 'bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-300/30'
     }
   };
 
