@@ -262,6 +262,10 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
     datosMeses[mesIndex].reduce((sum, fila) => sum + parseFloat(fila.importe || 0), 0)
   );
 
+  const formatearTotalMensual = (mesIndex) => (
+    new Intl.NumberFormat('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(calcularTotal(mesIndex))
+  );
+
   const formatearFechaDDMM = (fecha) => {
     if (!fecha) return '';
     const [, mes, dia] = fecha.split('-');
@@ -667,20 +671,29 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
           <button
             key={mes}
             onClick={() => setMesActivo(index)}
-            className={`flex-1 px-6 py-3 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${
+            className={`min-w-[180px] flex-1 rounded-xl px-5 py-3 text-left transition-all ${
               mesActivo === index
                 ? 'bg-white text-blue-700 shadow-sm border border-slate-200 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-200'
                 : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100'
             }`}
           >
-            <CalendarDays size={18} />
-            {mes.toUpperCase()}
-            {hayBorradores[index] && (
-              <span className="flex h-2.5 w-2.5 relative ml-1">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500" title="Borrador local sin guardar"></span>
+            <span className="flex w-full items-center justify-between gap-3">
+              <span className="flex items-center gap-2 text-sm font-black uppercase tracking-[0.08em]">
+                <CalendarDays size={18} />
+                {mes.toUpperCase()}
               </span>
-            )}
+              {hayBorradores[index] && (
+                <span className="flex h-2.5 w-2.5 relative">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500" title="Borrador local sin guardar"></span>
+                </span>
+              )}
+            </span>
+            <span className={`mt-1.5 block text-[11px] font-extrabold uppercase tracking-[0.14em] ${
+              mesActivo === index ? 'text-blue-600 dark:text-blue-200' : 'text-slate-400 dark:text-slate-500'
+            }`}>
+              Total S/. {formatearTotalMensual(index)}
+            </span>
           </button>
         ))}
       </div>
@@ -741,7 +754,7 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
 
         <div className="overflow-x-auto rounded-[26px] border border-slate-300 shadow-sm dark:border-slate-600 dark:shadow-[0_18px_50px_-28px_rgba(0,0,0,0.9)]">
           <table className="w-full border-collapse bg-white text-sm">
-            <thead>
+            <thead className="sticky top-0 z-10">
               <tr className="bg-blue-600 text-white">
                 <th rowSpan="2" className="border border-blue-700/50 px-4 py-3 align-middle text-center text-[11px] font-black uppercase leading-5 tracking-[0.14em] text-white/95 w-12">N°</th>
                 <th rowSpan="2" className="border border-blue-700/50 px-4 py-3 align-middle text-center text-[11px] font-black uppercase leading-5 tracking-[0.14em] text-white/95 w-28">Fecha</th>
