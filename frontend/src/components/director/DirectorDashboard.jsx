@@ -52,6 +52,7 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
   const [trimestreCerrado, setTrimestreCerrado] = useState(false);
   const [cerrandoTrimestre, setCerrandoTrimestre] = useState(false);
   const [cerradoEn, setCerradoEn] = useState(null);
+  const [estadoReporte, setEstadoReporte] = useState(null);
   const [mensajeCierre, setMensajeCierre] = useState('');
   const [errorCierre, setErrorCierre] = useState('');
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -206,6 +207,7 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
 
       setErrorCierre('');
       setMensajeCierre('');
+      setEstadoReporte(null);
 
       try {
         const query = new URLSearchParams({
@@ -225,6 +227,7 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
 
         setTrimestreCerrado(Boolean(data.data?.trimestreCerrado));
         setCerradoEn(data.data?.cerradoEn || null);
+        setEstadoReporte(data.data?.estadoReporte || null);
       } catch (loadError) {
         console.error(loadError);
         setErrorCierre(loadError.message || 'No se pudo consultar el cierre del trimestre.');
@@ -263,6 +266,7 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
 
       setTrimestreCerrado(true);
       setCerradoEn(data.data?.cerradoEn || new Date().toISOString());
+      setEstadoReporte(data.data?.estadoReporte || { estado: 'Enviado' });
       setMensajeCierre('El trimestre fue cerrado y ya no admite cambios.');
       setIsCerrarTrimestreOpen(false);
     } catch (closeError) {
@@ -501,6 +505,7 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
                 mensajeCierre={mensajeCierreEfectivo}
                 errorCierre={errorCierre}
                 cerradoEn={cerradoEn}
+                estadoReporte={estadoReporte}
               />
             )}
 

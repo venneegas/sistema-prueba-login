@@ -31,6 +31,7 @@ const EstadoReporteView = ({
   mensajeCierre,
   errorCierre,
   cerradoEn,
+  estadoReporte,
 }) => {
   const periodoActual = periodos[String(trimestreId)] || periodos['1'];
   const fechaFinPeriodo = new Intl.DateTimeFormat('es-PE', {
@@ -39,7 +40,15 @@ const EstadoReporteView = ({
     year: 'numeric',
   }).format(new Date(Number(anio), periodoActual.fin.mes, periodoActual.fin.dia));
 
-  const estadoReporte = errorCierre
+  const estadoAuditoria = estadoReporte?.estado || (trimestreCerrado ? 'Enviado' : 'Pendiente');
+  const comentarioObservacion = estadoReporte?.comentarioObservacion || '';
+  const fechaAuditoria = estadoReporte?.fechaAuditoria ? formatearFechaCierre(estadoReporte.fechaAuditoria) : '';
+  const esPendiente = estadoAuditoria === 'Pendiente' || estadoAuditoria === 'Borrador';
+  const esEnviado = estadoAuditoria === 'Enviado';
+  const esObservado = estadoAuditoria === 'Observado';
+  const esAprobado = estadoAuditoria === 'Aprobado';
+
+  const estadoVisual = errorCierre
     ? {
         label: 'Estado no disponible',
         helper: 'No se pudo consultar el avance del reporte en este momento.',
@@ -47,7 +56,27 @@ const EstadoReporteView = ({
         iconClass: 'bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-300',
         Icon: AlertTriangle,
       }
-    : trimestreCerrado
+    : esAprobado
+      ? {
+          label: 'Aprobado',
+          helper: fechaAuditoria
+            ? `Aprobado por la UGEL el ${fechaAuditoria}. El reporte queda disponible para consulta.`
+            : 'El reporte fue aprobado por la UGEL y queda disponible para consulta.',
+          badgeClass: 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-200',
+          iconClass: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-200',
+          Icon: CheckCircle2,
+        }
+      : esObservado
+        ? {
+            label: 'Observado',
+            helper: comentarioObservacion
+              ? `Observación UGEL: ${comentarioObservacion}`
+              : 'La UGEL observó el reporte. Revisa las indicaciones y vuelve a cerrar el trimestre cuando termines las correcciones.',
+            badgeClass: 'border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-200',
+            iconClass: 'bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-200',
+            Icon: AlertTriangle,
+          }
+        : esEnviado
       ? {
           label: 'Enviado a revisión',
           helper: cerradoEn
@@ -58,35 +87,49 @@ const EstadoReporteView = ({
           Icon: Send,
         }
       : {
-          label: 'Borrador',
-          helper: 'El reporte sigue editable hasta que se cierre el trimestre.',
+          label: 'Pendiente',
+          helper: 'El reporte está pendiente de cierre y todavía puede editarse.',
           badgeClass: 'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200',
           iconClass: 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-200',
           Icon: Clock3,
         };
 
-  const EstadoIcon = estadoReporte.Icon;
+  const EstadoIcon = estadoVisual.Icon;
 
   const trazabilidadPasos = [
     {
       label: 'Registro',
-      detail: 'Información económica registrada por el director.',
+      detail: esPendiente
+        ? 'Información económica editable por el director.'
+        : 'Información económica registrada por el director.',
       status: errorCierre ? 'pending' : 'done',
     },
     {
-      label: 'Cierre',
-      detail: trimestreCerrado ? 'Periodo cerrado para edición.' : 'Pendiente de cierre trimestral.',
-      status: errorCierre ? 'pending' : trimestreCerrado ? 'done' : 'active',
+      label: 'Cierre y envío',
+      detail: esPendiente
+        ? 'Pendiente de cierre trimestral.'
+        : esObservado
+          ? 'El reporte fue enviado y devuelto con observaciones.'
+          : 'Reporte cerrado y enviado para revisión.',
+      status: errorCierre ? 'pending' : esPendiente ? 'active' : 'done',
     },
     {
       label: 'Revisión UGEL',
-      detail: trimestreCerrado ? 'Reporte disponible para seguimiento.' : 'Se habilita cuando el periodo sea cerrado.',
-      status: errorCierre ? 'pending' : trimestreCerrado ? 'active' : 'pending',
+      detail: esPendiente
+        ? 'Se habilita cuando el periodo sea cerrado.'
+        : esEnviado
+          ? 'Reporte en revisión por la UGEL.'
+          : 'Revisión institucional registrada.',
+      status: errorCierre ? 'pending' : esAprobado || esObservado ? 'done' : esEnviado ? 'active' : 'pending',
     },
     {
       label: 'Resultado',
-      detail: 'Pendiente de aprobación u observación.',
-      status: 'pending',
+      detail: esAprobado
+        ? 'Reporte aprobado.'
+        : esObservado
+          ? 'Reporte observado. Requiere atención del director.'
+          : 'Pendiente de aprobación u observación.',
+      status: errorCierre ? 'pending' : esAprobado ? 'done' : esObservado ? 'active' : 'pending',
     },
   ];
 
@@ -109,13 +152,13 @@ const EstadoReporteView = ({
               </p>
             </div>
 
-            <div className={`flex items-center gap-3 rounded-2xl border px-4 py-3 ${estadoReporte.badgeClass}`}>
-              <span className={`flex h-10 w-10 items-center justify-center rounded-xl ${estadoReporte.iconClass}`}>
+            <div className={`flex items-center gap-3 rounded-2xl border px-4 py-3 ${estadoVisual.badgeClass}`}>
+              <span className={`flex h-10 w-10 items-center justify-center rounded-xl ${estadoVisual.iconClass}`}>
                 <EstadoIcon className="h-5 w-5" />
               </span>
               <div>
                 <p className="text-[11px] font-extrabold uppercase tracking-[0.14em] opacity-80">Estado actual</p>
-                <p className="text-sm font-black">{estadoReporte.label}</p>
+                <p className="text-sm font-black">{estadoVisual.label}</p>
               </div>
             </div>
           </div>
@@ -162,7 +205,7 @@ const EstadoReporteView = ({
             </div>
 
             <div className="mt-5 rounded-2xl border border-slate-200 bg-white px-5 py-4 text-sm font-semibold leading-relaxed text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
-              {errorCierre || mensajeCierre || estadoReporte.helper}
+              {errorCierre || (esObservado ? estadoVisual.helper : mensajeCierre) || estadoVisual.helper}
             </div>
           </div>
         </div>

@@ -265,12 +265,27 @@ const obtenerCierreTrimestral = async (req, res) => {
 
   try {
     const cierre = await obtenerEstadoCierre(pool, directorId, Number(anio), Number(trimestreId));
+    const [estadoRows] = await pool.execute(
+      `SELECT estado, comentario_observacion, fecha_envio, fecha_auditoria, fecha_actualizacion
+       FROM estados
+       WHERE director_id = ? AND anio = ? AND trimestre = ?
+       LIMIT 1`,
+      [directorId, anio, trimestreId]
+    );
+    const estadoReporte = estadoRows[0] || null;
 
     return res.status(200).json({
       success: true,
       data: {
         trimestreCerrado: Boolean(cierre),
         cerradoEn: cierre?.cerrado_en || null,
+        estadoReporte: estadoReporte ? {
+          estado: estadoReporte.estado,
+          comentarioObservacion: estadoReporte.comentario_observacion,
+          fechaEnvio: estadoReporte.fecha_envio,
+          fechaAuditoria: estadoReporte.fecha_auditoria,
+          fechaActualizacion: estadoReporte.fecha_actualizacion,
+        } : null,
       },
     });
   } catch (error) {
@@ -334,6 +349,13 @@ const cerrarTrimestre = async (req, res) => {
       data: {
         trimestreCerrado: true,
         cerradoEn: cierre?.cerrado_en || null,
+        estadoReporte: {
+          estado: 'Enviado',
+          comentarioObservacion: null,
+          fechaEnvio: new Date().toISOString(),
+          fechaAuditoria: null,
+          fechaActualizacion: new Date().toISOString(),
+        },
       },
     });
   } catch (error) {
