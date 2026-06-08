@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { AlertCircle, Building2, Loader2, Search, Grid3x3, List, LayoutDashboard } from 'lucide-react';
 import EspecialistaPeriodoFilters from './EspecialistaPeriodoFilters';
+import EspecialistaPageHeader from './EspecialistaPageHeader';
 
 const EspecialistaExploradorView = ({
   anioActual,
@@ -60,15 +61,23 @@ const EspecialistaExploradorView = ({
   }, [viewType, filteredColegios.length]); // Solo se ejecuta si cambia la vista o el número de items
   return (
     <>
-      <header className="bg-white dark:bg-slate-800 shadow-sm px-8 py-5 flex items-center justify-between z-10 border-b border-slate-200 dark:border-slate-700">
-        <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-3">
-          <LayoutDashboard className="text-blue-600" size={28} />
-          Colegios Asignados
-        </h1>
-      </header>
+      <EspecialistaPageHeader
+        icon={LayoutDashboard}
+        title="Colegios Asignados"
+        subtitle="Busca instituciones, filtra por estado y revisa el avance del periodo seleccionado."
+        actions={(
+          <EspecialistaPeriodoFilters
+            anioActual={anioActual}
+            aniosDisponibles={aniosDisponibles}
+            trimestreSeleccionado={trimestreSeleccionado}
+            onAnioChange={onAnioChange}
+            onTrimestreChange={onTrimestreChange}
+          />
+        )}
+      />
 
       {/* Barra de Filtros */}
-      <div className="bg-white dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700 px-8 py-4">
+      <div className="mx-8 mt-5 rounded-2xl border border-slate-200/80 bg-white/80 px-5 py-4 shadow-sm dark:border-slate-700 dark:bg-slate-800/80">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="relative w-full md:max-w-md">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
@@ -81,13 +90,6 @@ const EspecialistaExploradorView = ({
             />
           </div>
           <div className="flex items-center gap-3 w-full md:w-auto">
-            <EspecialistaPeriodoFilters
-              anioActual={anioActual}
-              aniosDisponibles={aniosDisponibles}
-              trimestreSeleccionado={trimestreSeleccionado}
-              onAnioChange={onAnioChange}
-              onTrimestreChange={onTrimestreChange}
-            />
             <select
               value={estadoFiltro}
               onChange={(e) => onEstadoFiltroChange(e.target.value)}

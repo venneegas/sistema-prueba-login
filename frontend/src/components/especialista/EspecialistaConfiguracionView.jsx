@@ -10,6 +10,7 @@ import {
   Sparkles,
   UserRound
 } from 'lucide-react';
+import EspecialistaPageHeader from './EspecialistaPageHeader';
 
 const getInitials = (name = '') => {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -24,22 +25,17 @@ const EspecialistaConfiguracionView = ({ user, onOpenChangePassword }) => {
 
   return (
     <>
-      <header className="bg-white dark:bg-slate-800 shadow-sm px-8 py-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between z-10 border-b border-slate-200 dark:border-slate-700">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-3">
-            <Settings className="text-blue-600" size={28} />
-            Configuración de Cuenta
-          </h1>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            Gestiona tu perfil, seguridad y preferencias del panel de especialista.
-          </p>
-        </div>
-
-        <div className="inline-flex items-center gap-2 rounded-xl border border-blue-100 dark:border-blue-900/60 bg-blue-50 dark:bg-blue-950/30 px-4 py-2.5 text-sm font-bold text-blue-700 dark:text-blue-300">
-          <ShieldCheck size={18} />
-          Cuenta activa
-        </div>
-      </header>
+      <EspecialistaPageHeader
+        icon={Settings}
+        title="Configuracion de Cuenta"
+        subtitle="Gestiona tu perfil, seguridad y preferencias del panel de especialista."
+        actions={(
+          <div className="inline-flex items-center gap-2 rounded-xl border border-blue-100 bg-blue-50 px-4 py-2.5 text-sm font-bold text-blue-700 dark:border-blue-900/60 dark:bg-blue-950/30 dark:text-blue-300">
+            <ShieldCheck size={18} />
+            Cuenta activa
+          </div>
+        )}
+      />
 
       <div className="flex-1 overflow-y-auto p-8 bg-slate-50/70 dark:bg-slate-900">
         <div className="max-w-6xl mx-auto space-y-6">
@@ -175,3 +171,4 @@ const EspecialistaConfiguracionView = ({ user, onOpenChangePassword }) => {
 };
 
 export default EspecialistaConfiguracionView;
+

@@ -36,6 +36,12 @@ const EspecialistaDashboard = ({ user, onLogout }) => {
   const [anioActual, setAnioActual] = useState(currentSysYear >= 2026 ? currentSysYear : 2026);
   const anioTope = Math.max(2026, currentSysYear) + 1;
   const aniosDisponibles = Array.from({ length: anioTope - 2026 + 1 }, (_, i) => 2026 + i);
+  const trimestreActualSistema = obtenerTrimestreActual();
+  const maxTrimestrePermitido = anioActual < currentSysYear
+    ? 4
+    : anioActual === currentSysYear
+      ? Number(trimestreActualSistema)
+      : 0;
 
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
@@ -60,6 +66,17 @@ const EspecialistaDashboard = ({ user, onLogout }) => {
   useEffect(() => {
     selectedColegioRef.current = selectedColegio;
   }, [selectedColegio]);
+
+  useEffect(() => {
+    if (anioActual > currentSysYear) {
+      setAnioActual(currentSysYear >= 2026 ? currentSysYear : 2026);
+      return;
+    }
+
+    if (Number(trimestreSeleccionado) > maxTrimestrePermitido) {
+      setTrimestreSeleccionado(String(maxTrimestrePermitido || 1));
+    }
+  }, [anioActual, currentSysYear, maxTrimestrePermitido, trimestreSeleccionado]);
 
   useEffect(() => {
     const handleBrowserBack = () => {

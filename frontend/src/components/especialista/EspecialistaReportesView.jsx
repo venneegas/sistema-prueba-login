@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { AlertCircle, Building2, CheckCircle2, Inbox, Clock, Loader2, PieChart, TrendingDown, TrendingUp } from 'lucide-react';
 import EspecialistaPeriodoFilters from './EspecialistaPeriodoFilters';
+import EspecialistaPageHeader from './EspecialistaPageHeader';
 
 const formatCurrency = (value) => Number(value || 0).toLocaleString('es-PE', {
   minimumFractionDigits: 2,
@@ -91,23 +92,20 @@ const EspecialistaReportesView = ({
 
   return (
     <>
-      <header className="bg-white dark:bg-slate-800 shadow-sm px-8 py-5 flex items-center justify-between z-10 border-b border-slate-200 dark:border-slate-700">
-        <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-3">
-          <PieChart className="text-blue-600" size={28} />
-          Estadísticas Financieras
-        </h1>
-      </header>
-
-      {/* Barra de Filtros */}
-      <div className="bg-white dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700 px-8 py-4 flex justify-end">
-        <EspecialistaPeriodoFilters
-          anioActual={anioActual}
-          aniosDisponibles={aniosDisponibles}
-          trimestreSeleccionado={trimestreSeleccionado}
-          onAnioChange={onAnioChange}
-          onTrimestreChange={onTrimestreChange}
-        />
-      </div>
+      <EspecialistaPageHeader
+        icon={PieChart}
+        title="Estadisticas Financieras"
+        subtitle="Indicadores de avance, aprobacion y ranking financiero por institucion educativa."
+        actions={(
+          <EspecialistaPeriodoFilters
+            anioActual={anioActual}
+            aniosDisponibles={aniosDisponibles}
+            trimestreSeleccionado={trimestreSeleccionado}
+            onAnioChange={onAnioChange}
+            onTrimestreChange={onTrimestreChange}
+          />
+        )}
+      />
 
       <div className="flex-1 overflow-y-auto p-8 bg-slate-50/50 dark:bg-slate-900">
         <div className="max-w-6xl mx-auto space-y-6">
@@ -276,3 +274,4 @@ const EspecialistaReportesView = ({
 };
 
 export default EspecialistaReportesView;
+

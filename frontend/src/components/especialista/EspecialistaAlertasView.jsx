@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import {
   AlertTriangle,
   Bell,
-  Calendar,
   Clock3,
   DatabaseZap,
   FileSearch,
@@ -14,6 +13,8 @@ import {
   TrendingDown,
   TrendingUp
 } from 'lucide-react';
+import EspecialistaPeriodoFilters from './EspecialistaPeriodoFilters';
+import EspecialistaPageHeader from './EspecialistaPageHeader';
 
 const trimestreLabels = {
   1: '1º Trimestre (Ene - Mar)',
@@ -94,36 +95,38 @@ const EspecialistaAlertasView = ({
 
   return (
     <>
-      <header className="bg-white dark:bg-slate-800 shadow-sm px-8 py-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between z-10 border-b border-slate-200 dark:border-slate-700">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-3">
-            <Bell className="text-blue-600" size={28} />
-            Alertas
-          </h1>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            Plantilla para la detección automática de anomalías financieras con Isolation Forest.
-          </p>
-        </div>
-
-        <div className="flex flex-col sm:flex-row gap-3">
-          <div className="flex items-center gap-3 rounded-xl border border-blue-100 dark:border-slate-700 bg-blue-50/60 dark:bg-slate-900 px-4 py-2.5 text-sm">
-            <Clock3 size={18} className="text-blue-600 dark:text-blue-400" />
-            <div>
-              <p className="font-bold text-slate-700 dark:text-slate-200">Última actualización</p>
-              <p className="text-slate-500 dark:text-slate-400">Pendiente de ejecución</p>
+      <EspecialistaPageHeader
+        icon={Bell}
+        title="Alertas"
+        subtitle="Plantilla para la deteccion automatica de anomalias financieras con Isolation Forest."
+        actions={(
+          <>
+            <EspecialistaPeriodoFilters
+              anioActual={anioActual}
+              aniosDisponibles={aniosDisponibles}
+              trimestreSeleccionado={trimestreSeleccionado}
+              onAnioChange={onAnioChange}
+              onTrimestreChange={onTrimestreChange}
+            />
+            <div className="flex items-center gap-3 rounded-xl border border-blue-100 bg-blue-50/60 px-4 py-2.5 text-sm dark:border-slate-700 dark:bg-slate-900">
+              <Clock3 size={18} className="text-blue-600 dark:text-blue-400" />
+              <div>
+                <p className="font-bold text-slate-700 dark:text-slate-200">Ultima actualizacion</p>
+                <p className="text-slate-500 dark:text-slate-400">Pendiente de ejecucion</p>
+              </div>
             </div>
-          </div>
-          <button
-            type="button"
-            disabled
-            className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-5 py-2.5 text-sm font-bold text-slate-400 dark:text-slate-500 cursor-not-allowed"
-            title="Disponible cuando el modelo de anomalias este integrado"
-          >
-            <RefreshCw size={18} />
-            Actualizar
-          </button>
-        </div>
-      </header>
+            <button
+              type="button"
+              disabled
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-bold text-slate-400 cursor-not-allowed dark:border-slate-700 dark:bg-slate-900 dark:text-slate-500"
+              title="Disponible cuando el modelo de anomalias este integrado"
+            >
+              <RefreshCw size={18} />
+              Actualizar
+            </button>
+          </>
+        )}
+      />
 
       <div className="flex-1 overflow-y-auto p-8 bg-slate-50/70 dark:bg-slate-900">
         <div className="max-w-7xl mx-auto space-y-6">
@@ -166,36 +169,6 @@ const EspecialistaAlertasView = ({
           <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-5">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
               <label className="lg:col-span-3">
-                <span className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Periodo</span>
-                <div className="flex items-center gap-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 px-4 py-2.5">
-                  <Calendar size={18} className="text-blue-500" />
-                  <select
-                    value={trimestreSeleccionado}
-                    onChange={(e) => onTrimestreChange(e.target.value)}
-                    className="w-full bg-transparent text-sm font-bold text-slate-700 dark:text-slate-200 outline-none"
-                  >
-                    <option value="1">1º Trimestre (Ene - Mar)</option>
-                    <option value="2">2º Trimestre (Abr - Jun)</option>
-                    <option value="3">3º Trimestre (Jul - Sep)</option>
-                    <option value="4">4º Trimestre (Oct - Dic)</option>
-                  </select>
-                </div>
-              </label>
-
-              <label className="lg:col-span-2">
-                <span className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Año</span>
-                <select
-                  value={anioActual}
-                  onChange={(e) => onAnioChange(Number(e.target.value))}
-                  className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 px-4 py-2.5 text-sm font-bold text-slate-700 dark:text-slate-200 outline-none"
-                >
-                  {aniosDisponibles.map((anio) => (
-                    <option key={anio} value={anio}>{anio}</option>
-                  ))}
-                </select>
-              </label>
-
-              <label className="lg:col-span-2">
                 <span className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Tipo de anomalía</span>
                 <select
                   value={filtros.tipo}
@@ -209,7 +182,7 @@ const EspecialistaAlertasView = ({
                 </select>
               </label>
 
-              <label className="lg:col-span-2">
+              <label className="lg:col-span-3">
                 <span className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Nivel de riesgo</span>
                 <select
                   value={filtros.riesgo}
@@ -223,7 +196,7 @@ const EspecialistaAlertasView = ({
                 </select>
               </label>
 
-              <label className="lg:col-span-3">
+              <label className="lg:col-span-6">
                 <span className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Buscar alerta</span>
                 <div className="relative">
                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
@@ -299,3 +272,5 @@ const EspecialistaAlertasView = ({
 };
 
 export default EspecialistaAlertasView;
+
+

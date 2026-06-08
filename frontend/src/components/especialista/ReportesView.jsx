@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import EspecialistaPeriodoFilters from './EspecialistaPeriodoFilters';
 import exportEspecialistaReporte from '../../utils/exportEspecialistaReporte';
+import EspecialistaPageHeader from './EspecialistaPageHeader';
 
 const ReportesView = ({
   anioActual,
@@ -144,26 +145,20 @@ const ReportesView = ({
 
   return (
     <>
-      <header className="bg-white dark:bg-slate-800 shadow-sm px-8 py-5 flex items-center justify-between z-10 border-b border-slate-200 dark:border-slate-700">
-        <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-3">
-          <FileSpreadsheet className="text-blue-600" size={28} />
-          Reportes y Exportación
-        </h1>
-      </header>
-
-      <div className="bg-white dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700 px-8 py-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <div>
-          <p className="text-sm font-bold text-slate-700 dark:text-slate-200">Periodo de reporte</p>
-          <p className="text-xs text-slate-500 dark:text-slate-400">Selecciona el trimestre antes de descargar los archivos.</p>
-        </div>
-        <EspecialistaPeriodoFilters
-          anioActual={anioActual}
-          aniosDisponibles={aniosDisponibles}
-          trimestreSeleccionado={trimestreSeleccionado}
-          onAnioChange={onAnioChange}
-          onTrimestreChange={onTrimestreChange}
-        />
-      </div>
+      <EspecialistaPageHeader
+        icon={FileSpreadsheet}
+        title="Reportes y Exportacion"
+        subtitle="Selecciona el periodo y descarga archivos Excel para seguimiento institucional."
+        actions={(
+          <EspecialistaPeriodoFilters
+            anioActual={anioActual}
+            aniosDisponibles={aniosDisponibles}
+            trimestreSeleccionado={trimestreSeleccionado}
+            onAnioChange={onAnioChange}
+            onTrimestreChange={onTrimestreChange}
+          />
+        )}
+      />
 
       <div className="flex-1 overflow-y-auto p-8 bg-slate-50 dark:bg-slate-900">
         <div className="max-w-6xl mx-auto space-y-6">
@@ -251,3 +246,4 @@ const ReportesView = ({
 };
 
 export default ReportesView;
+

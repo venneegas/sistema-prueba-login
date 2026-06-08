@@ -15,7 +15,6 @@ import {
   PieChart,
   Settings,
   User,
-  UserCheck,
   X
 } from 'lucide-react';
 
@@ -177,22 +176,9 @@ const EspecialistaSidebar = ({
           <img
             src="https://ugelsanta.gob.pe/wp-content/uploads/2026/02/Logo_US3.png"
             alt="Logo UGEL"
-            className={`${isCollapsed ? 'mt-1 h-10 w-12 object-contain' : 'h-14 w-auto object-contain'} drop-shadow-sm transition-all duration-300`}
+            className={`${isCollapsed ? 'mt-1 h-10 w-12 object-contain' : 'h-16 w-auto object-contain'} drop-shadow-sm transition-all duration-300`}
             onError={(event) => { event.currentTarget.src = 'https://via.placeholder.com/150?text=Logo+UGEL'; }}
           />
-          {!isCollapsed && (
-            <div className="mt-4 text-left">
-              <div className="flex items-center gap-2">
-                <UserCheck className="text-blue-600 dark:text-blue-300" size={19} />
-                <h2 className="text-lg font-extrabold uppercase tracking-tight text-slate-900 dark:text-slate-100">
-                  Especialista
-                </h2>
-              </div>
-              <p className="mt-1 text-xs font-bold uppercase tracking-[0.18em] text-blue-600 dark:text-blue-300">
-                Revision y auditoria
-              </p>
-            </div>
-          )}
         </div>
 
         <button
