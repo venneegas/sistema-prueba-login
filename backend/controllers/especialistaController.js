@@ -2,6 +2,33 @@ const { pool } = require('../config/db');
 const { logAuditoria } = require('../utils/auditLogger');
 const { getFrontendUrl, getMailFrom, sendMail } = require('../utils/mailer');
 
+const MANUAL_Q1_EXCEPTION = {
+  anio: 2026,
+  trimestre: 1,
+  cutoff: '2026-06-18',
+  movementDate: '2026-03-31',
+  conceptPrefix: '[CARGA MANUAL UGEL Q1 2026]',
+};
+
+const toMoney = (value) => {
+  const numberValue = Number(value);
+  return Number.isFinite(numberValue) && numberValue >= 0 ? Number(numberValue.toFixed(2)) : null;
+};
+
+const getCurrentUserId = (req) => {
+  let currentUserId = req.usuario?.id || req.user?.id;
+
+  if (!currentUserId && req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+    try {
+      const token = req.headers.authorization.split(' ')[1];
+      const decoded = require('jsonwebtoken').verify(token, process.env.JWT_SECRET || 'firma_secreta_ugel_2026');
+      currentUserId = decoded.id;
+    } catch (e) { /* Ignorar error de token aqui */ }
+  }
+
+  return currentUserId || 1;
+};
+
 const calcularSaldoInicialCaja = async (directorId, trimestreId, anio) => {
   if (anio < 2026) return 0;
   
@@ -141,6 +168,188 @@ const getPdfsPorColegio = async (req, res) => {
   } catch (error) {
     console.error('Error al obtener PDFs:', error);
     res.status(500).json({ success: false, message: 'Error interno al cargar los documentos' });
+  }
+};
+
+const guardarCargaManualConsolidado = async (req, res) => {
+  const connection = await pool.getConnection();
+
+  try {
+    const {
+      directorId,
+      trimestre,
+      anio,
+      totalIngresos,
+      totalEgresos,
+      saldoBancoFinal,
+      observacion,
+    } = req.body;
+
+    const periodoAnio = Number(anio);
+    const periodoTrimestre = Number(trimestre);
+    const ingresos = toMoney(totalIngresos);
+    const egresos = toMoney(totalEgresos);
+    const saldoBanco = toMoney(saldoBancoFinal);
+    const motivo = String(observacion || '').trim();
+    const hoy = new Date();
+    const limite = new Date(`${MANUAL_Q1_EXCEPTION.cutoff}T23:59:59-05:00`);
+
+    if (!directorId || !periodoAnio || !periodoTrimestre) {
+      return res.status(400).json({ success: false, message: 'directorId, anio y trimestre son obligatorios.' });
+    }
+
+    if (periodoAnio !== MANUAL_Q1_EXCEPTION.anio || periodoTrimestre !== MANUAL_Q1_EXCEPTION.trimestre) {
+      return res.status(400).json({
+        success: false,
+        message: 'La carga manual excepcional solo esta habilitada para el 1er trimestre 2026.',
+      });
+    }
+
+    if (hoy > limite) {
+      return res.status(423).json({
+        success: false,
+        message: 'La carga manual excepcional vencio el 18/06/2026.',
+      });
+    }
+
+    if (ingresos === null || egresos === null || saldoBanco === null) {
+      return res.status(400).json({
+        success: false,
+        message: 'Los montos deben ser numericos y no negativos.',
+      });
+    }
+
+    if (!motivo) {
+      return res.status(400).json({
+        success: false,
+        message: 'Registra un motivo para dejar trazabilidad de la excepcion.',
+      });
+    }
+
+    await connection.beginTransaction();
+
+    const [[directorInfo]] = await connection.execute(
+      `SELECT d.id, i.nombre AS institucion, i.numero AS numero_ie
+       FROM directores d
+       INNER JOIN instituciones i ON d.institucion_id = i.id
+       WHERE d.id = ?
+       LIMIT 1`,
+      [directorId]
+    );
+
+    if (!directorInfo) {
+      await connection.rollback();
+      return res.status(404).json({ success: false, message: 'No se encontro el colegio/director seleccionado.' });
+    }
+
+    await connection.execute(
+      'INSERT IGNORE INTO comprobantes (nombre, activo) VALUES (?, 1)',
+      ['Ajuste Manual UGEL']
+    );
+
+    const [[comprobante]] = await connection.execute(
+      'SELECT id FROM comprobantes WHERE nombre = ? LIMIT 1',
+      ['Ajuste Manual UGEL']
+    );
+
+    const conceptoIngreso = `${MANUAL_Q1_EXCEPTION.conceptPrefix} Total ingresos consolidados. Motivo: ${motivo}`;
+    const conceptoEgreso = `${MANUAL_Q1_EXCEPTION.conceptPrefix} Total egresos consolidados. Motivo: ${motivo}`;
+
+    await connection.execute(
+      `DELETE FROM movimientos
+       WHERE director_id = ?
+         AND fecha = ?
+         AND concepto LIKE ?`,
+      [directorId, MANUAL_Q1_EXCEPTION.movementDate, `${MANUAL_Q1_EXCEPTION.conceptPrefix}%`]
+    );
+
+    const movimientos = [];
+    if (ingresos > 0) {
+      movimientos.push([
+        directorId,
+        'INGRESO',
+        MANUAL_Q1_EXCEPTION.movementDate,
+        comprobante.id,
+        'UGEL',
+        `MAN-Q1-${directorId}-ING`,
+        conceptoIngreso.substring(0, 255),
+        ingresos,
+        '#2563eb',
+      ]);
+    }
+
+    if (egresos > 0) {
+      movimientos.push([
+        directorId,
+        'EGRESO',
+        MANUAL_Q1_EXCEPTION.movementDate,
+        comprobante.id,
+        'UGEL',
+        `MAN-Q1-${directorId}-EGR`,
+        conceptoEgreso.substring(0, 255),
+        egresos,
+        '#e11d48',
+      ]);
+    }
+
+    if (movimientos.length > 0) {
+      await connection.query(
+        `INSERT INTO movimientos
+         (director_id, tipo_movimiento, fecha, comprobante_id, serie, numero_comprobante, concepto, monto, color)
+         VALUES ?`,
+        [movimientos]
+      );
+    }
+
+    await connection.execute(
+      `INSERT INTO saldos (director_id, anio, trimestre, saldo_inicial, saldo_mes1, saldo_mes2, saldo_mes3)
+       VALUES (?, ?, ?, 0, 0, 0, ?)
+       ON DUPLICATE KEY UPDATE
+         saldo_mes3 = VALUES(saldo_mes3),
+         actualizado_en = CURRENT_TIMESTAMP`,
+      [directorId, periodoAnio, periodoTrimestre, saldoBanco]
+    );
+
+    await connection.execute(
+      `INSERT IGNORE INTO cierres (director_id, anio, trimestre)
+       VALUES (?, ?, ?)`,
+      [directorId, periodoAnio, periodoTrimestre]
+    );
+
+    await connection.execute(
+      `INSERT INTO estados (director_id, trimestre, anio, estado, fecha_envio)
+       VALUES (?, ?, ?, 'Enviado', NOW())
+       ON DUPLICATE KEY UPDATE
+         estado = IF(estado = 'Borrador', 'Enviado', estado),
+         fecha_envio = COALESCE(fecha_envio, NOW())`,
+      [directorId, periodoTrimestre, periodoAnio]
+    );
+
+    await connection.commit();
+
+    await logAuditoria({
+      usuario_id: getCurrentUserId(req),
+      modulo: 'Consolidado',
+      accion: 'ACTUALIZAR',
+      descripcion: `Carga manual excepcional Q1 2026 hasta 18/06 para ${directorInfo.numero_ie ? `IE ${directorInfo.numero_ie} - ` : ''}${directorInfo.institucion}. Ingresos: S/ ${ingresos.toFixed(2)}, Egresos: S/ ${egresos.toFixed(2)}, Banco: S/ ${saldoBanco.toFixed(2)}. Motivo: ${motivo}`.substring(0, 255),
+      ip_address: req.ip || req.connection?.remoteAddress
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Carga manual registrada en el consolidado y auditada correctamente.',
+      data: {
+        totalIngresos: ingresos,
+        totalEgresos: egresos,
+        dineroEnBanco: saldoBanco,
+      },
+    });
+  } catch (error) {
+    await connection.rollback();
+    console.error('Error en carga manual del consolidado:', error);
+    return res.status(500).json({ success: false, message: 'Error interno al registrar la carga manual.' });
+  } finally {
+    connection.release();
   }
 };
 
@@ -325,6 +534,7 @@ module.exports = {
   getColegiosPorTrimestre,
   getResumenFinanciero,
   getPdfsPorColegio,
+  guardarCargaManualConsolidado,
   auditarDeclaracion,
   getReporteGlobal
 };

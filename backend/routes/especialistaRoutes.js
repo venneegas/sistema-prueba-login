@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const especialistaController = require('../controllers/especialistaController');
+const { verificarToken } = require('../middlewares/authMiddleware');
 
 // Middleware de autenticación y roles (Opcional por ahora, pero recomendado)
 // const { verifyToken, checkRole } = require('../middlewares/authMiddleware');
@@ -20,6 +21,8 @@ router.get('/colegio/:directorId/pdfs', especialistaController.getPdfsPorColegio
 // Ruta POST: /api/especialista/auditar
 // Cambia el estado (Aprobar/Observar) y envía notificación
 router.post('/auditar', especialistaController.auditarDeclaracion);
+
+router.post('/consolidado/manual', verificarToken, especialistaController.guardarCargaManualConsolidado);
 
 // Ruta GET: /api/especialista/reporte-global
 // Trae la tabla cruzada con todos los colegios y sus sumatorias para el Excel

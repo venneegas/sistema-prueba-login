@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import {
   ArrowLeft,
   FileText,
@@ -13,18 +13,28 @@ import {
   Loader2,
   ClipboardCheck,
   Landmark,
+  Save,
   WalletCards
 } from 'lucide-react';
 import { getEstadoReporteBadgeClass, getEstadoReporteLabel, isEstadoPendiente } from '../../utils/estadoReporte';
+import API_BASE_URL, { buildApiUrl } from '../../config/api';
 
-const API_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
+const API_URL = API_BASE_URL;
 
 const ColegioDetalle = ({ colegio, onBack, trimestre, anio }) => {
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
   const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
+  const [isManualModalOpen, setIsManualModalOpen] = useState(false);
+  const [isSavingManual, setIsSavingManual] = useState(false);
   const [successModal, setSuccessModal] = useState(null);
   const [errorModal, setErrorModal] = useState(null);
   const [rejectComment, setRejectComment] = useState('');
+  const [manualForm, setManualForm] = useState({
+    totalIngresos: '',
+    totalEgresos: '',
+    saldoBancoFinal: '',
+    observacion: 'Extensión excepcional Q1 hasta 18/06/2026'
+  });
 
   const [finanzas, setFinanzas] = useState({ ingresos: 0, egresos: 0, dineroEnCaja: 0, dineroEnBanco: 0, saldoTotal: 0 });
   const [loadingFinanzas, setLoadingFinanzas] = useState(true);
@@ -32,44 +42,43 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio }) => {
   const [pdfs, setPdfs] = useState([]);
   const [loadingPdfs, setLoadingPdfs] = useState(true);
 
+  const fetchFinanzas = useCallback(async () => {
+    setLoadingFinanzas(true);
+    try {
+      const response = await fetch(buildApiUrl(`/api/especialista/colegio/${colegio.id}/finanzas?trimestre=${trimestre}&anio=${anio}`), {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      const data = await response.json();
+      
+      if (data.success) {
+        setFinanzas({
+          ingresos: data.totalIngresos,
+          egresos: data.totalEgresos,
+          dineroEnCaja: data.dineroEnCaja,
+          dineroEnBanco: data.dineroEnBanco,
+          saldoTotal: data.saldoTotal
+        });
+      }
+    } catch (error) {
+      console.error("Error al cargar finanzas:", error);
+    } finally {
+      setLoadingFinanzas(false);
+    }
+  }, [colegio.id, trimestre, anio]);
+
   // Efecto para traer los datos financieros cuando se abre el colegio
   useEffect(() => {
-    const fetchFinanzas = async () => {
-      setLoadingFinanzas(true);
-      try {
-        // Nota: colegio.id equivale al directorId en nuestra consulta SQL
-        const response = await fetch(`${API_URL}/api/especialista/colegio/${colegio.id}/finanzas?trimestre=${trimestre}&anio=${anio}`, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
-        });
-        const data = await response.json();
-        
-        if (data.success) {
-          setFinanzas({
-            ingresos: data.totalIngresos,
-            egresos: data.totalEgresos,
-            dineroEnCaja: data.dineroEnCaja,
-            dineroEnBanco: data.dineroEnBanco,
-            saldoTotal: data.saldoTotal
-          });
-        }
-      } catch (error) {
-        console.error("Error al cargar finanzas:", error);
-      } finally {
-        setLoadingFinanzas(false);
-      }
-    };
-
     if (colegio?.id) fetchFinanzas();
-  }, [colegio.id, trimestre, anio]);
+  }, [colegio?.id, fetchFinanzas]);
 
   // Efecto para traer los PDFs subidos
   useEffect(() => {
     const fetchPdfs = async () => {
       setLoadingPdfs(true);
       try {
-        const response = await fetch(`${API_URL}/api/especialista/colegio/${colegio.id}/pdfs?trimestre=${trimestre}&anio=${anio}`, {
+        const response = await fetch(buildApiUrl(`/api/especialista/colegio/${colegio.id}/pdfs?trimestre=${trimestre}&anio=${anio}`), {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
@@ -124,7 +133,7 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio }) => {
     }
     
     try {
-      const response = await fetch(`${API_URL}/api/especialista/auditar`, {
+      const response = await fetch(buildApiUrl('/api/especialista/auditar'), {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -153,7 +162,7 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio }) => {
 
   const handleApproveSubmit = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/especialista/auditar`, {
+      const response = await fetch(buildApiUrl('/api/especialista/auditar'), {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -178,9 +187,71 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio }) => {
     }
   };
 
+  const handleManualInputChange = (field, value) => {
+    setManualForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleOpenManualModal = () => {
+    setManualForm({
+      totalIngresos: finanzas.ingresos || '',
+      totalEgresos: finanzas.egresos || '',
+      saldoBancoFinal: finanzas.dineroEnBanco || '',
+      observacion: 'Extensión excepcional Q1 hasta 18/06/2026'
+    });
+    setIsManualModalOpen(true);
+  };
+
+  const handleManualSubmit = async () => {
+    if (!manualForm.observacion.trim()) {
+      setErrorModal({ isOpen: true, message: 'Ingresa un motivo para que la carga quede auditada.' });
+      return;
+    }
+
+    setIsSavingManual(true);
+
+    try {
+      const response = await fetch(buildApiUrl('/api/especialista/consolidado/manual'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          directorId: colegio.id,
+          trimestre,
+          anio,
+          totalIngresos: manualForm.totalIngresos,
+          totalEgresos: manualForm.totalEgresos,
+          saldoBancoFinal: manualForm.saldoBancoFinal,
+          observacion: manualForm.observacion
+        })
+      });
+      const data = await response.json();
+
+      if (!data.success) {
+        setErrorModal({ isOpen: true, message: data.message || 'No se pudo registrar la carga manual.' });
+        return;
+      }
+
+      setIsManualModalOpen(false);
+      await fetchFinanzas();
+      setSuccessModal({
+        isOpen: true,
+        type: 'manual',
+        message: 'La carga manual fue registrada en el consolidado y quedó visible en auditoría.'
+      });
+    } catch (error) {
+      console.error("Error en carga manual:", error);
+      setErrorModal({ isOpen: true, message: 'Error de conexión al registrar la carga manual.' });
+    } finally {
+      setIsSavingManual(false);
+    }
+  };
+
   const periodoLabel = `${trimestre}º Trimestre ${anio}`;
   const estadoLabel = getEstadoReporteLabel(colegio.estado);
   const pendiente = isEstadoPendiente(colegio.estado);
+  const puedeCargaManual = Number(trimestre) === 1 && Number(anio) === 2026;
   const resumenFinanciero = [
     {
       label: 'Total ingresos',
@@ -268,6 +339,16 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio }) => {
               </div>
 
               <div className="flex w-full flex-col gap-3 sm:flex-row lg:w-auto">
+                {puedeCargaManual && (
+                  <button
+                    type="button"
+                    onClick={handleOpenManualModal}
+                    className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-5 py-3 text-sm font-bold text-blue-700 transition-colors hover:bg-blue-100 dark:border-blue-800 dark:bg-blue-900/30 dark:text-blue-300 dark:hover:bg-blue-900/50 lg:flex-none"
+                  >
+                    <Save size={18} />
+                    Carga manual
+                  </button>
+                )}
                 {pendiente ? (
                   <div className="flex w-full items-center justify-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-bold text-amber-700 dark:border-amber-800 dark:bg-amber-900/30 dark:text-amber-300 lg:w-auto">
                     <AlertCircle size={18} />
@@ -403,6 +484,100 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio }) => {
         </div>
       </div>
       {/* --- MODAL DE RECHAZO / OBSERVACIÓN --- */}
+      {isManualModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden animate-in fade-in zoom-in duration-200 border border-slate-200 dark:border-slate-700">
+            <div className="flex items-center justify-between p-5 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+              <h3 className="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                <Save className="text-blue-600 dark:text-blue-300" size={20} />
+                Carga manual excepcional Q1
+              </h3>
+              <button 
+                type="button"
+                onClick={() => setIsManualModalOpen(false)}
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 p-1.5 rounded-lg transition-colors"
+                disabled={isSavingManual}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-5">
+              <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm font-medium leading-6 text-amber-800 dark:border-amber-800 dark:bg-amber-900/30 dark:text-amber-200">
+                Esta carga aplica solo para el 1er trimestre 2026 y queda bloqueada al 18/06/2026. Se registrara en auditoria como actualizacion manual del consolidado.
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <label className="space-y-2">
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Ingresos</span>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={manualForm.totalIngresos}
+                    onChange={(event) => handleManualInputChange('totalIngresos', event.target.value)}
+                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-bold text-slate-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:focus:ring-blue-900/40"
+                  />
+                </label>
+
+                <label className="space-y-2">
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Egresos</span>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={manualForm.totalEgresos}
+                    onChange={(event) => handleManualInputChange('totalEgresos', event.target.value)}
+                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-bold text-slate-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:focus:ring-blue-900/40"
+                  />
+                </label>
+
+                <label className="space-y-2">
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Banco final</span>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={manualForm.saldoBancoFinal}
+                    onChange={(event) => handleManualInputChange('saldoBancoFinal', event.target.value)}
+                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-bold text-slate-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:focus:ring-blue-900/40"
+                  />
+                </label>
+              </div>
+
+              <label className="block space-y-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Motivo de auditoria</span>
+                <textarea
+                  value={manualForm.observacion}
+                  onChange={(event) => handleManualInputChange('observacion', event.target.value)}
+                  className="h-24 w-full resize-none rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:focus:ring-blue-900/40"
+                />
+              </label>
+            </div>
+
+            <div className="p-5 border-t border-slate-100 dark:border-slate-700 flex justify-end gap-3 bg-slate-50 dark:bg-slate-800/50">
+              <button
+                type="button"
+                onClick={() => setIsManualModalOpen(false)}
+                className="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-slate-800 dark:hover:text-slate-100 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-colors"
+                disabled={isSavingManual}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={handleManualSubmit}
+                disabled={isSavingManual}
+                className="px-4 py-2 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 rounded-xl shadow-sm transition-colors flex items-center gap-2"
+              >
+                {isSavingManual ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                Guardar carga
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {isRejectModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
           <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-200 border border-slate-700">
@@ -506,11 +681,17 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio }) => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
           <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in duration-200 border border-slate-700">
             <div className="p-6 text-center">
-              <div className={`mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4 ${successModal.type === 'approve' ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400' : 'bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400'}`}>
-                {successModal.type === 'approve' ? <CheckCircle size={32} /> : <XCircle size={32} />}
+              <div className={`mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4 ${
+                successModal.type === 'approve'
+                  ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400'
+                  : successModal.type === 'manual'
+                    ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300'
+                    : 'bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400'
+              }`}>
+                {successModal.type === 'approve' ? <CheckCircle size={32} /> : successModal.type === 'manual' ? <Save size={32} /> : <XCircle size={32} />}
               </div>
               <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-2">
-                {successModal.type === 'approve' ? '¡Aprobado!' : '¡Observado!'}
+                {successModal.type === 'approve' ? '¡Aprobado!' : successModal.type === 'manual' ? 'Carga registrada' : '¡Observado!'}
               </h3>
               <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">
                 {successModal.message}
@@ -520,9 +701,17 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio }) => {
               <button 
                 onClick={() => {
                   setSuccessModal(null);
-                  onBack(); // Regresamos al explorador recién cuando el usuario cierra este modal
+                  if (successModal.type !== 'manual') {
+                    onBack();
+                  }
                 }}
-                className={`px-6 py-2.5 text-sm font-bold text-white rounded-xl shadow-sm transition-colors w-full ${successModal.type === 'approve' ? 'bg-emerald-500 hover:bg-emerald-600' : 'bg-rose-500 hover:bg-rose-600'}`}
+                className={`px-6 py-2.5 text-sm font-bold text-white rounded-xl shadow-sm transition-colors w-full ${
+                  successModal.type === 'approve'
+                    ? 'bg-emerald-500 hover:bg-emerald-600'
+                    : successModal.type === 'manual'
+                      ? 'bg-blue-600 hover:bg-blue-700'
+                      : 'bg-rose-500 hover:bg-rose-600'
+                }`}
               >
                 Entendido
               </button>
