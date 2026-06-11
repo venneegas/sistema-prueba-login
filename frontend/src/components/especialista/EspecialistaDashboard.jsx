@@ -8,6 +8,7 @@ import EspecialistaConfiguracionView from './EspecialistaConfiguracionView';
 import EspecialistaExploradorView from './EspecialistaExploradorView';
 import EspecialistaSolicitudesPage from './EspecialistaSolicitudesPage';
 import EspecialistaAlertasView from './EspecialistaAlertasView';
+import EspecialistaDatasetMLView from './EspecialistaDatasetMLView';
 import ReportesView from './ReportesView';
 import useEspecialistaColegios from '../../hooks/useEspecialistaColegios';
 import useEspecialistaReporteGlobal from '../../hooks/useEspecialistaReporteGlobal';
@@ -190,6 +191,15 @@ const EspecialistaDashboard = ({ user, onLogout }) => {
             trimestreSeleccionado={trimestreSeleccionado}
             onAnioChange={setAnioActual}
             onTrimestreChange={setTrimestreSeleccionado}
+          />
+        ) : activeView === 'dataset-ml' ? (
+          <EspecialistaDatasetMLView
+            anioActual={anioActual}
+            aniosDisponibles={aniosDisponibles}
+            trimestreSeleccionado={trimestreSeleccionado}
+            onAnioChange={setAnioActual}
+            onTrimestreChange={setTrimestreSeleccionado}
+            showToast={showToast}
           />
         ) : activeView === 'reportes' ? (
           <ReportesView

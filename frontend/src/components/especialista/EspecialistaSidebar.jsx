@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import {
   Bell,
   Clock,
+  Database,
   FileSpreadsheet,
   HelpCircle,
   Key,
@@ -36,6 +37,12 @@ const monitoringItems = [
     label: 'ALERTAS',
     description: 'Visualiza alertas o anomalías detectadas en los reportes.',
     icon: Bell
+  },
+  {
+    id: 'dataset-ml',
+    label: 'DATASET ML',
+    description: 'Revisa y exporta los datos preparados para Isolation Forest.',
+    icon: Database
   }
 ];
 
