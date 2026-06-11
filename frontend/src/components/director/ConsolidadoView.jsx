@@ -16,6 +16,8 @@ const formatearFechaCierre = (fecha) => {
 };
 
 const SALDOS_API_URL = buildApiUrl('/api/movimientos/saldos-banco');
+const MANUAL_CONSOLIDADO_API_URL = buildApiUrl('/api/especialista/consolidado/manual');
+const MANUAL_Q1_CUTOFF = new Date('2026-06-18T23:59:59-05:00');
 
 const ConsolidadoView = ({
   trimestreId,
@@ -48,6 +50,7 @@ const ConsolidadoView = ({
     mes2: '',
   });
   const [savingSaldos, setSavingSaldos] = useState(false);
+  const [savingManualConsolidado, setSavingManualConsolidado] = useState(false);
   const [mensajeSaldos, setMensajeSaldos] = useState('');
   const [errorSaldos, setErrorSaldos] = useState('');
   const [saldoInicialCaja, setSaldoInicialCaja] = useState(0);
@@ -58,6 +61,18 @@ const ConsolidadoView = ({
 
   const handleSaldoChange = (campo, valor) => {
     setSaldosBanco((prev) => ({ ...prev, [campo]: valor }));
+  };
+
+  const cargaManualConsolidadoHabilitada = Number(trimestreId) === 1
+    && Number(anio) === 2026
+    && new Date() <= MANUAL_Q1_CUTOFF;
+
+  const handleMovimientoManualChange = (tipo, index, valor) => {
+    setMovimientos((prev) => {
+      const nextValues = [...prev[tipo]];
+      nextValues[index] = valor === '' ? 0 : Number(valor);
+      return { ...prev, [tipo]: nextValues };
+    });
   };
 
   // Calculos automaticos
@@ -276,6 +291,50 @@ const ConsolidadoView = ({
       setErrorSaldos(err.message);
     } finally {
       setSavingSaldos(false);
+    }
+  };
+
+  const guardarConsolidadoManual = async () => {
+    if (!directorId || !cargaManualConsolidadoHabilitada) return;
+
+    setSavingManualConsolidado(true);
+    setMensajeSaldos('');
+    setErrorSaldos('');
+
+    try {
+      const res = await fetch(MANUAL_CONSOLIDADO_API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          directorId,
+          trimestre: Number(trimestreId),
+          anio: Number(anio),
+          ingresosMensuales: movimientos.ingresos,
+          egresosMensuales: movimientos.egresos,
+          saldosBancoMensuales: [
+            saldosBanco.mes0 || 0,
+            saldosBanco.mes1 || 0,
+            saldosBanco.mes2 || 0
+          ],
+          observacion: 'Extensión excepcional Q1 hasta 18/06/2026: carga directa desde consolidado'
+        })
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || 'No se pudo guardar la carga manual del consolidado.');
+      }
+
+      setMensajeSaldos('Consolidado manual guardado y registrado en auditoria.');
+      setTimeout(() => setMensajeSaldos(''), 3500);
+    } catch (err) {
+      console.error('Error guardando consolidado manual', err);
+      setErrorSaldos(err.message);
+    } finally {
+      setSavingManualConsolidado(false);
     }
   };
 
@@ -615,13 +674,42 @@ const ConsolidadoView = ({
   const finalLabelClass = 'px-5 py-3.5 text-right text-xs font-extrabold uppercase tracking-wide text-white';
   const finalValueClass = 'px-5 py-3.5 text-right font-mono text-sm font-extrabold text-white';
 
-  const trEditableClass = trimestreCerrado
-    ? 'hover:bg-slate-50/80 transition-colors'
-    : 'bg-amber-50/30 hover:bg-amber-100/40 transition-colors';
+  const saldosEditables = !trimestreCerrado || cargaManualConsolidadoHabilitada;
+  const movimientosManualesEditables = cargaManualConsolidadoHabilitada;
 
-  const tdInputContainerClass = trimestreCerrado
-    ? 'border-b border-slate-200 p-0 text-sm text-right font-mono text-slate-900 focus-within:ring-2 focus-within:ring-inset focus-within:ring-sky-500'
-    : 'border-b border-slate-200 p-0 text-sm text-right font-mono text-slate-900 focus-within:ring-2 focus-within:ring-inset focus-within:ring-amber-500';
+  const trEditableClass = saldosEditables
+    ? 'bg-amber-50/30 hover:bg-amber-100/40 transition-colors'
+    : 'hover:bg-slate-50/80 transition-colors';
+
+  const tdInputContainerClass = saldosEditables
+    ? 'border-b border-slate-200 p-0 text-sm text-right font-mono text-slate-900 focus-within:ring-2 focus-within:ring-inset focus-within:ring-amber-500'
+    : 'border-b border-slate-200 p-0 text-sm text-right font-mono text-slate-900 focus-within:ring-2 focus-within:ring-inset focus-within:ring-sky-500';
+
+  const movimientoInputClass = movimientosManualesEditables
+    ? 'border-b border-slate-200 p-0 text-sm text-right font-mono text-slate-900 focus-within:ring-2 focus-within:ring-inset focus-within:ring-amber-500 bg-amber-50/30'
+    : tdValueClass;
+
+  const renderMoneyInput = ({ value, onChange, disabled }) => (
+    <input
+      type="number"
+      min="0"
+      step="0.01"
+      onKeyDown={(e) => { if (e.key === '-' || e.key === 'e') e.preventDefault(); }}
+      value={value}
+      onChange={(e) => {
+        if (e.target.value === '' || Number(e.target.value) >= 0) {
+          onChange(e.target.value);
+        }
+      }}
+      disabled={disabled}
+      className="w-full h-full px-4 py-3 bg-transparent text-right outline-none disabled:cursor-not-allowed disabled:bg-slate-50 disabled:opacity-70"
+      placeholder="0.00"
+    />
+  );
+
+  const estadoEdicionConsolidadoClass = cargaManualConsolidadoHabilitada
+    ? 'border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200'
+    : 'border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-700 dark:bg-slate-900/50 dark:text-slate-300';
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
@@ -668,6 +756,12 @@ const ConsolidadoView = ({
           </div>
         )}
 
+        {cargaManualConsolidadoHabilitada && (
+          <div className={`mb-6 rounded-2xl border px-5 py-4 text-sm font-semibold shadow-sm ${estadoEdicionConsolidadoClass}`}>
+            Carga manual excepcional habilitada para el 1er trimestre 2026 hasta el 18/06/2026. Los cambios se guardan directamente en el consolidado y quedan registrados en auditoria.
+          </div>
+        )}
+
         <div className="overflow-hidden rounded-[22px] border border-slate-200 shadow-sm dark:border-slate-600 dark:shadow-[0_18px_50px_-28px_rgba(0,0,0,0.9)]">
           <table className="w-full border-collapse bg-white">
             <colgroup>
@@ -688,7 +782,15 @@ const ConsolidadoView = ({
               {actual.meses.map((mes, index) => (
                 <tr key={mes} className="hover:bg-sky-50/80 transition-colors">
                   <td className={tdLabelClass}>+ Correspondiente a {mes}</td>
-                  <td className={tdValueClass}>{formatCurrency(movimientos.ingresos[index])}</td>
+                  <td className={movimientoInputClass}>
+                    {movimientosManualesEditables
+                      ? renderMoneyInput({
+                          value: movimientos.ingresos[index],
+                          onChange: (value) => handleMovimientoManualChange('ingresos', index, value),
+                          disabled: savingManualConsolidado
+                        })
+                      : formatCurrency(movimientos.ingresos[index])}
+                  </td>
                 </tr>
               ))}
               <tr className="bg-sky-50/40 font-bold">
@@ -700,7 +802,15 @@ const ConsolidadoView = ({
               {actual.meses.map((mes, index) => (
                 <tr key={mes} className="hover:bg-rose-50/80 transition-colors">
                   <td className={tdLabelClass}>- Correspondiente a {mes}</td>
-                  <td className={tdValueClass}>{formatCurrency(movimientos.egresos[index])}</td>
+                  <td className={movimientoInputClass}>
+                    {movimientosManualesEditables
+                      ? renderMoneyInput({
+                          value: movimientos.egresos[index],
+                          onChange: (value) => handleMovimientoManualChange('egresos', index, value),
+                          disabled: savingManualConsolidado
+                        })
+                      : formatCurrency(movimientos.egresos[index])}
+                  </td>
                 </tr>
               ))}
               <tr className="bg-rose-50/45 font-bold">
@@ -718,7 +828,7 @@ const ConsolidadoView = ({
                 <td colSpan="2" className="border-b border-slate-200 p-0">
                   <div className="flex justify-between items-center text-[11px] px-5 py-2.5 bg-slate-50 text-slate-600">
                     <span>Segun el Estado de Cuenta mensual emitido por el Banco de la Nación:</span>
-                    {!trimestreCerrado && (
+                    {saldosEditables && (
                       <span className="flex items-center gap-1.5 font-bold text-amber-700 bg-amber-100/80 px-2.5 py-0.5 rounded-md border border-amber-200">
                         <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
                         Completar manualmente
@@ -743,7 +853,7 @@ const ConsolidadoView = ({
                           handleSaldoChange(`mes${index}`, e.target.value);
                         }
                       }}
-                      disabled={trimestreCerrado}
+                      disabled={!saldosEditables || savingManualConsolidado}
                       className="w-full h-full px-4 py-3 bg-transparent text-right outline-none disabled:cursor-not-allowed disabled:bg-slate-50 disabled:opacity-70"
                       placeholder="0.00"
                     />
@@ -759,11 +869,21 @@ const ConsolidadoView = ({
                     <button
                       type="button"
                       onClick={guardarSaldos}
-                      disabled={trimestreCerrado || savingSaldos}
+                      disabled={trimestreCerrado || savingSaldos || savingManualConsolidado}
                       className="inline-flex items-center gap-2 rounded-xl border border-sky-200 bg-white px-4 py-2.5 text-sm font-extrabold text-sky-700 shadow-sm transition-all hover:-translate-y-0.5 hover:border-sky-300 hover:bg-sky-50 hover:shadow-md disabled:translate-y-0 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400 disabled:shadow-none dark:border-sky-500/30 dark:bg-sky-500/10 dark:text-sky-200 dark:hover:bg-sky-500/20 dark:disabled:border-slate-700 dark:disabled:bg-slate-800 dark:disabled:text-slate-500"
                     >
                       <Save size={17} /> {savingSaldos ? 'Guardando...' : 'Guardar saldos'}
                     </button>
+                    {cargaManualConsolidadoHabilitada && (
+                      <button
+                        type="button"
+                        onClick={guardarConsolidadoManual}
+                        disabled={savingManualConsolidado || savingSaldos}
+                        className="inline-flex items-center gap-2 rounded-xl border border-amber-300 bg-amber-500 px-4 py-2.5 text-sm font-extrabold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:bg-amber-600 hover:shadow-md disabled:translate-y-0 disabled:cursor-wait disabled:border-slate-200 disabled:bg-slate-300 disabled:text-white disabled:shadow-none"
+                      >
+                        <Save size={17} /> {savingManualConsolidado ? 'Guardando...' : 'Guardar consolidado manual'}
+                      </button>
+                    )}
                   </div>
                 </td>
               </tr>

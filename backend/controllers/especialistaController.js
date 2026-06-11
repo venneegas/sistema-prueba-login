@@ -6,13 +6,24 @@ const MANUAL_Q1_EXCEPTION = {
   anio: 2026,
   trimestre: 1,
   cutoff: '2026-06-18',
-  movementDate: '2026-03-31',
+  movementDates: ['2026-01-31', '2026-02-28', '2026-03-31'],
   conceptPrefix: '[CARGA MANUAL UGEL Q1 2026]',
 };
 
 const toMoney = (value) => {
   const numberValue = Number(value);
   return Number.isFinite(numberValue) && numberValue >= 0 ? Number(numberValue.toFixed(2)) : null;
+};
+
+const toMonthlyMoney = (values, fallbackTotal = null) => {
+  if (Array.isArray(values)) {
+    const monthly = values.slice(0, 3).map((value) => toMoney(value ?? 0));
+    if (monthly.length !== 3 || monthly.some((value) => value === null)) return null;
+    return monthly;
+  }
+
+  const fallback = toMoney(fallbackTotal ?? 0);
+  return fallback === null ? null : [0, 0, fallback];
 };
 
 const getCurrentUserId = (req) => {
@@ -182,14 +193,20 @@ const guardarCargaManualConsolidado = async (req, res) => {
       totalIngresos,
       totalEgresos,
       saldoBancoFinal,
+      ingresosMensuales,
+      egresosMensuales,
+      saldosBancoMensuales,
       observacion,
     } = req.body;
 
     const periodoAnio = Number(anio);
     const periodoTrimestre = Number(trimestre);
-    const ingresos = toMoney(totalIngresos);
-    const egresos = toMoney(totalEgresos);
-    const saldoBanco = toMoney(saldoBancoFinal);
+    const ingresos = toMonthlyMoney(ingresosMensuales, totalIngresos);
+    const egresos = toMonthlyMoney(egresosMensuales, totalEgresos);
+    const saldosBanco = toMonthlyMoney(saldosBancoMensuales, saldoBancoFinal);
+    const totalIngresosCalculado = ingresos?.reduce((sum, value) => sum + value, 0) || 0;
+    const totalEgresosCalculado = egresos?.reduce((sum, value) => sum + value, 0) || 0;
+    const saldoBancoFinalCalculado = saldosBanco?.[2] || 0;
     const motivo = String(observacion || '').trim();
     const hoy = new Date();
     const limite = new Date(`${MANUAL_Q1_EXCEPTION.cutoff}T23:59:59-05:00`);
@@ -212,10 +229,10 @@ const guardarCargaManualConsolidado = async (req, res) => {
       });
     }
 
-    if (ingresos === null || egresos === null || saldoBanco === null) {
+    if (!ingresos || !egresos || !saldosBanco) {
       return res.status(400).json({
         success: false,
-        message: 'Los montos deben ser numericos y no negativos.',
+        message: 'Los montos mensuales deben ser numericos y no negativos.',
       });
     }
 
@@ -252,45 +269,44 @@ const guardarCargaManualConsolidado = async (req, res) => {
       ['Ajuste Manual UGEL']
     );
 
-    const conceptoIngreso = `${MANUAL_Q1_EXCEPTION.conceptPrefix} Total ingresos consolidados. Motivo: ${motivo}`;
-    const conceptoEgreso = `${MANUAL_Q1_EXCEPTION.conceptPrefix} Total egresos consolidados. Motivo: ${motivo}`;
-
     await connection.execute(
       `DELETE FROM movimientos
        WHERE director_id = ?
-         AND fecha = ?
+         AND fecha BETWEEN '2026-01-01' AND '2026-03-31'
          AND concepto LIKE ?`,
-      [directorId, MANUAL_Q1_EXCEPTION.movementDate, `${MANUAL_Q1_EXCEPTION.conceptPrefix}%`]
+      [directorId, `${MANUAL_Q1_EXCEPTION.conceptPrefix}%`]
     );
 
     const movimientos = [];
-    if (ingresos > 0) {
+    ingresos.forEach((monto, index) => {
+      if (monto <= 0) return;
       movimientos.push([
         directorId,
         'INGRESO',
-        MANUAL_Q1_EXCEPTION.movementDate,
+        MANUAL_Q1_EXCEPTION.movementDates[index],
         comprobante.id,
         'UGEL',
-        `MAN-Q1-${directorId}-ING`,
-        conceptoIngreso.substring(0, 255),
-        ingresos,
+        `MAN-Q1-${directorId}-ING-${index + 1}`,
+        `${MANUAL_Q1_EXCEPTION.conceptPrefix} Ingresos mes ${index + 1}. Motivo: ${motivo}`.substring(0, 255),
+        monto,
         '#2563eb',
       ]);
-    }
+    });
 
-    if (egresos > 0) {
+    egresos.forEach((monto, index) => {
+      if (monto <= 0) return;
       movimientos.push([
         directorId,
         'EGRESO',
-        MANUAL_Q1_EXCEPTION.movementDate,
+        MANUAL_Q1_EXCEPTION.movementDates[index],
         comprobante.id,
         'UGEL',
-        `MAN-Q1-${directorId}-EGR`,
-        conceptoEgreso.substring(0, 255),
-        egresos,
+        `MAN-Q1-${directorId}-EGR-${index + 1}`,
+        `${MANUAL_Q1_EXCEPTION.conceptPrefix} Egresos mes ${index + 1}. Motivo: ${motivo}`.substring(0, 255),
+        monto,
         '#e11d48',
       ]);
-    }
+    });
 
     if (movimientos.length > 0) {
       await connection.query(
@@ -303,11 +319,13 @@ const guardarCargaManualConsolidado = async (req, res) => {
 
     await connection.execute(
       `INSERT INTO saldos (director_id, anio, trimestre, saldo_inicial, saldo_mes1, saldo_mes2, saldo_mes3)
-       VALUES (?, ?, ?, 0, 0, 0, ?)
+       VALUES (?, ?, ?, 0, ?, ?, ?)
        ON DUPLICATE KEY UPDATE
+         saldo_mes1 = VALUES(saldo_mes1),
+         saldo_mes2 = VALUES(saldo_mes2),
          saldo_mes3 = VALUES(saldo_mes3),
          actualizado_en = CURRENT_TIMESTAMP`,
-      [directorId, periodoAnio, periodoTrimestre, saldoBanco]
+      [directorId, periodoAnio, periodoTrimestre, saldosBanco[0], saldosBanco[1], saldosBanco[2]]
     );
 
     await connection.execute(
@@ -331,7 +349,7 @@ const guardarCargaManualConsolidado = async (req, res) => {
       usuario_id: getCurrentUserId(req),
       modulo: 'Consolidado',
       accion: 'ACTUALIZAR',
-      descripcion: `Carga manual excepcional Q1 2026 hasta 18/06 para ${directorInfo.numero_ie ? `IE ${directorInfo.numero_ie} - ` : ''}${directorInfo.institucion}. Ingresos: S/ ${ingresos.toFixed(2)}, Egresos: S/ ${egresos.toFixed(2)}, Banco: S/ ${saldoBanco.toFixed(2)}. Motivo: ${motivo}`.substring(0, 255),
+      descripcion: `Carga manual mensual Q1 2026 hasta 18/06 para ${directorInfo.numero_ie ? `IE ${directorInfo.numero_ie} - ` : ''}${directorInfo.institucion}. Ing: S/ ${totalIngresosCalculado.toFixed(2)}, Egr: S/ ${totalEgresosCalculado.toFixed(2)}, Banco final: S/ ${saldoBancoFinalCalculado.toFixed(2)}. Motivo: ${motivo}`.substring(0, 255),
       ip_address: req.ip || req.connection?.remoteAddress
     });
 
@@ -339,9 +357,12 @@ const guardarCargaManualConsolidado = async (req, res) => {
       success: true,
       message: 'Carga manual registrada en el consolidado y auditada correctamente.',
       data: {
-        totalIngresos: ingresos,
-        totalEgresos: egresos,
-        dineroEnBanco: saldoBanco,
+        ingresosMensuales: ingresos,
+        egresosMensuales: egresos,
+        saldosBancoMensuales: saldosBanco,
+        totalIngresos: totalIngresosCalculado,
+        totalEgresos: totalEgresosCalculado,
+        dineroEnBanco: saldoBancoFinalCalculado,
       },
     });
   } catch (error) {
