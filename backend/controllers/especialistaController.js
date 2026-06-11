@@ -1,6 +1,8 @@
 const { pool } = require('../config/db'); 
 const { logAuditoria } = require('../utils/auditLogger');
 const { getFrontendUrl, getMailFrom, sendMail } = require('../utils/mailer');
+const { spawn } = require('child_process');
+const path = require('path');
 
 const MANUAL_Q1_EXCEPTION = {
   anio: 2026,
@@ -567,136 +569,218 @@ const getReporteGlobal = async (req, res) => {
   }
 };
 
+const construirDatasetIsolationForest = async (anio, trimestre) => {
+  if (!Number.isInteger(trimestre) || trimestre < 1 || trimestre > 4 || !Number.isInteger(anio)) {
+    const error = new Error('anio y trimestre deben ser valores validos.');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const mesInicio = (trimestre - 1) * 3 + 1;
+  const meses = [mesInicio, mesInicio + 1, mesInicio + 2];
+
+  const sql = `
+    SELECT
+      d.id AS director_id,
+      i.codigo_modular,
+      i.numero AS numero_ie,
+      i.nombre AS institucion,
+      COALESCE(e.estado, 'Borrador') AS estado,
+      COALESCE(s.saldo_inicial, 0) AS saldo_inicial,
+      COALESCE(s.saldo_mes1, 0) AS saldo_banco_mes1,
+      COALESCE(s.saldo_mes2, 0) AS saldo_banco_mes2,
+      COALESCE(s.saldo_mes3, 0) AS saldo_banco_mes3,
+      SUM(CASE WHEN m.tipo_movimiento = 'INGRESO' AND MONTH(m.fecha) = ? THEN m.monto ELSE 0 END) AS ingresos_mes1,
+      SUM(CASE WHEN m.tipo_movimiento = 'INGRESO' AND MONTH(m.fecha) = ? THEN m.monto ELSE 0 END) AS ingresos_mes2,
+      SUM(CASE WHEN m.tipo_movimiento = 'INGRESO' AND MONTH(m.fecha) = ? THEN m.monto ELSE 0 END) AS ingresos_mes3,
+      SUM(CASE WHEN m.tipo_movimiento = 'EGRESO' AND MONTH(m.fecha) = ? THEN m.monto ELSE 0 END) AS egresos_mes1,
+      SUM(CASE WHEN m.tipo_movimiento = 'EGRESO' AND MONTH(m.fecha) = ? THEN m.monto ELSE 0 END) AS egresos_mes2,
+      SUM(CASE WHEN m.tipo_movimiento = 'EGRESO' AND MONTH(m.fecha) = ? THEN m.monto ELSE 0 END) AS egresos_mes3,
+      COUNT(CASE WHEN m.concepto LIKE ? THEN 1 END) AS registros_manual,
+      COUNT(m.id) AS total_movimientos
+    FROM directores d
+    INNER JOIN instituciones i ON d.institucion_id = i.id
+    LEFT JOIN estados e ON e.director_id = d.id AND e.anio = ? AND e.trimestre = ?
+    LEFT JOIN saldos s ON s.director_id = d.id AND s.anio = ? AND s.trimestre = ?
+    LEFT JOIN movimientos m
+      ON m.director_id = d.id
+     AND YEAR(m.fecha) = ?
+     AND MONTH(m.fecha) BETWEEN ? AND ?
+    GROUP BY
+      d.id,
+      i.codigo_modular,
+      i.numero,
+      i.nombre,
+      e.estado,
+      s.saldo_inicial,
+      s.saldo_mes1,
+      s.saldo_mes2,
+      s.saldo_mes3
+    ORDER BY i.nombre ASC
+  `;
+
+  const [rows] = await pool.execute(sql, [
+    meses[0], meses[1], meses[2],
+    meses[0], meses[1], meses[2],
+    `${MANUAL_Q1_EXCEPTION.conceptPrefix}%`,
+    anio, trimestre,
+    anio, trimestre,
+    anio, mesInicio, mesInicio + 2,
+  ]);
+
+  const dataset = await Promise.all(rows.map(async (row) => {
+    const saldoInicialCaja = await calcularSaldoInicialCaja(row.director_id, trimestre, anio);
+    const ingresosMes1 = Number(row.ingresos_mes1 || 0);
+    const ingresosMes2 = Number(row.ingresos_mes2 || 0);
+    const ingresosMes3 = Number(row.ingresos_mes3 || 0);
+    const egresosMes1 = Number(row.egresos_mes1 || 0);
+    const egresosMes2 = Number(row.egresos_mes2 || 0);
+    const egresosMes3 = Number(row.egresos_mes3 || 0);
+    const totalIngresos = ingresosMes1 + ingresosMes2 + ingresosMes3;
+    const totalEgresos = egresosMes1 + egresosMes2 + egresosMes3;
+    const dineroEnCaja = saldoInicialCaja + totalIngresos - totalEgresos;
+    const saldoBancoMes1 = Number(row.saldo_banco_mes1 || 0);
+    const saldoBancoMes2 = Number(row.saldo_banco_mes2 || 0);
+    const saldoBancoMes3 = Number(row.saldo_banco_mes3 || 0);
+    const saldoFinal = dineroEnCaja + saldoBancoMes3;
+    const tieneMovimientos = Number(row.total_movimientos || 0) > 0;
+    const tieneSaldosBanco = saldoBancoMes1 > 0 || saldoBancoMes2 > 0 || saldoBancoMes3 > 0;
+    const estadoValido = ['Enviado', 'Aprobado', 'Observado'].includes(row.estado);
+
+    return {
+      director_id: row.director_id,
+      codigo_modular: row.codigo_modular,
+      numero_ie: row.numero_ie,
+      institucion: row.institucion,
+      anio,
+      trimestre,
+      saldo_inicial: Number(saldoInicialCaja.toFixed(2)),
+      ingresos_mes1: Number(ingresosMes1.toFixed(2)),
+      ingresos_mes2: Number(ingresosMes2.toFixed(2)),
+      ingresos_mes3: Number(ingresosMes3.toFixed(2)),
+      total_ingresos: Number(totalIngresos.toFixed(2)),
+      egresos_mes1: Number(egresosMes1.toFixed(2)),
+      egresos_mes2: Number(egresosMes2.toFixed(2)),
+      egresos_mes3: Number(egresosMes3.toFixed(2)),
+      total_egresos: Number(totalEgresos.toFixed(2)),
+      dinero_en_caja: Number(dineroEnCaja.toFixed(2)),
+      saldo_banco_mes1: Number(saldoBancoMes1.toFixed(2)),
+      saldo_banco_mes2: Number(saldoBancoMes2.toFixed(2)),
+      saldo_banco_mes3: Number(saldoBancoMes3.toFixed(2)),
+      dinero_en_banco: Number(saldoBancoMes3.toFixed(2)),
+      saldo_final: Number(saldoFinal.toFixed(2)),
+      ratio_egresos_ingresos: totalIngresos > 0 ? Number((totalEgresos / totalIngresos).toFixed(4)) : 0,
+      ratio_banco_saldo_final: saldoFinal > 0 ? Number((saldoBancoMes3 / saldoFinal).toFixed(4)) : 0,
+      estado: row.estado,
+      carga_manual: Number(row.registros_manual || 0) > 0,
+      dataset_completo: tieneMovimientos && tieneSaldosBanco && estadoValido,
+    };
+  }));
+
+  const completos = dataset.filter((row) => row.dataset_completo).length;
+
+  return {
+    meta: {
+      anio,
+      trimestre,
+      total_filas: dataset.length,
+      filas_completas: completos,
+      filas_incompletas: dataset.length - completos,
+      listo_para_entrenamiento: completos >= 10 && completos === dataset.length,
+    },
+    dataset,
+  };
+};
+
 const getDatasetIsolationForest = async (req, res) => {
   try {
     const trimestre = Number(req.query.trimestre || 1);
     const anio = Number(req.query.anio || new Date().getFullYear());
+    const { meta, dataset } = await construirDatasetIsolationForest(anio, trimestre);
 
-    if (!Number.isInteger(trimestre) || trimestre < 1 || trimestre > 4 || !Number.isInteger(anio)) {
+    return res.status(200).json({ success: true, meta, dataset });
+  } catch (error) {
+    console.error('Error generando dataset para Isolation Forest:', error);
+    return res.status(error.statusCode || 500).json({
+      success: false,
+      message: error.statusCode ? error.message : 'Error interno al generar el dataset.',
+    });
+  }
+};
+
+const ejecutarPythonIsolationForest = (rows) => new Promise((resolve, reject) => {
+  const pythonBin = process.env.PYTHON_BIN || 'python';
+  const scriptPath = path.join(__dirname, '..', 'ml', 'isolation_forest.py');
+  const child = spawn(pythonBin, [scriptPath], {
+    stdio: ['pipe', 'pipe', 'pipe'],
+  });
+
+  let stdout = '';
+  let stderr = '';
+  const timeout = setTimeout(() => {
+    child.kill();
+    reject(new Error('Tiempo de ejecucion del modelo agotado.'));
+  }, 30000);
+
+  child.stdout.on('data', (data) => { stdout += data.toString(); });
+  child.stderr.on('data', (data) => { stderr += data.toString(); });
+  child.on('error', (error) => {
+    clearTimeout(timeout);
+    reject(error);
+  });
+  child.on('close', (code) => {
+    clearTimeout(timeout);
+    let parsed = null;
+    try {
+      parsed = JSON.parse(stdout || '{}');
+    } catch (error) {
+      return reject(new Error(stderr || stdout || 'Python no devolvio JSON valido.'));
+    }
+
+    if (code !== 0 || parsed.success === false) {
+      const error = new Error(parsed.message || stderr || 'Error ejecutando Isolation Forest.');
+      error.code = parsed.code;
+      return reject(error);
+    }
+
+    return resolve(parsed);
+  });
+
+  child.stdin.write(JSON.stringify({ rows }));
+  child.stdin.end();
+});
+
+const ejecutarAlertasIsolationForest = async (req, res) => {
+  try {
+    const trimestre = Number(req.query.trimestre || 1);
+    const anio = Number(req.query.anio || new Date().getFullYear());
+    const { meta, dataset } = await construirDatasetIsolationForest(anio, trimestre);
+    const filasCompletas = dataset.filter((row) => row.dataset_completo);
+
+    if (filasCompletas.length < 5) {
       return res.status(400).json({
         success: false,
-        message: 'anio y trimestre deben ser valores validos.',
+        message: 'Se necesitan al menos 5 colegios completos para ejecutar Isolation Forest.',
+        meta,
       });
     }
 
-    const mesInicio = (trimestre - 1) * 3 + 1;
-    const meses = [mesInicio, mesInicio + 1, mesInicio + 2];
-
-    const sql = `
-      SELECT
-        d.id AS director_id,
-        i.codigo_modular,
-        i.numero AS numero_ie,
-        i.nombre AS institucion,
-        COALESCE(e.estado, 'Borrador') AS estado,
-        COALESCE(s.saldo_inicial, 0) AS saldo_inicial,
-        COALESCE(s.saldo_mes1, 0) AS saldo_banco_mes1,
-        COALESCE(s.saldo_mes2, 0) AS saldo_banco_mes2,
-        COALESCE(s.saldo_mes3, 0) AS saldo_banco_mes3,
-        SUM(CASE WHEN m.tipo_movimiento = 'INGRESO' AND MONTH(m.fecha) = ? THEN m.monto ELSE 0 END) AS ingresos_mes1,
-        SUM(CASE WHEN m.tipo_movimiento = 'INGRESO' AND MONTH(m.fecha) = ? THEN m.monto ELSE 0 END) AS ingresos_mes2,
-        SUM(CASE WHEN m.tipo_movimiento = 'INGRESO' AND MONTH(m.fecha) = ? THEN m.monto ELSE 0 END) AS ingresos_mes3,
-        SUM(CASE WHEN m.tipo_movimiento = 'EGRESO' AND MONTH(m.fecha) = ? THEN m.monto ELSE 0 END) AS egresos_mes1,
-        SUM(CASE WHEN m.tipo_movimiento = 'EGRESO' AND MONTH(m.fecha) = ? THEN m.monto ELSE 0 END) AS egresos_mes2,
-        SUM(CASE WHEN m.tipo_movimiento = 'EGRESO' AND MONTH(m.fecha) = ? THEN m.monto ELSE 0 END) AS egresos_mes3,
-        COUNT(CASE WHEN m.concepto LIKE ? THEN 1 END) AS registros_manual,
-        COUNT(m.id) AS total_movimientos
-      FROM directores d
-      INNER JOIN instituciones i ON d.institucion_id = i.id
-      LEFT JOIN estados e ON e.director_id = d.id AND e.anio = ? AND e.trimestre = ?
-      LEFT JOIN saldos s ON s.director_id = d.id AND s.anio = ? AND s.trimestre = ?
-      LEFT JOIN movimientos m
-        ON m.director_id = d.id
-       AND YEAR(m.fecha) = ?
-       AND MONTH(m.fecha) BETWEEN ? AND ?
-      GROUP BY
-        d.id,
-        i.codigo_modular,
-        i.numero,
-        i.nombre,
-        e.estado,
-        s.saldo_inicial,
-        s.saldo_mes1,
-        s.saldo_mes2,
-        s.saldo_mes3
-      ORDER BY i.nombre ASC
-    `;
-
-    const [rows] = await pool.execute(sql, [
-      meses[0], meses[1], meses[2],
-      meses[0], meses[1], meses[2],
-      `${MANUAL_Q1_EXCEPTION.conceptPrefix}%`,
-      anio, trimestre,
-      anio, trimestre,
-      anio, mesInicio, mesInicio + 2,
-    ]);
-
-    const dataset = await Promise.all(rows.map(async (row) => {
-      const saldoInicialCaja = await calcularSaldoInicialCaja(row.director_id, trimestre, anio);
-      const ingresosMes1 = Number(row.ingresos_mes1 || 0);
-      const ingresosMes2 = Number(row.ingresos_mes2 || 0);
-      const ingresosMes3 = Number(row.ingresos_mes3 || 0);
-      const egresosMes1 = Number(row.egresos_mes1 || 0);
-      const egresosMes2 = Number(row.egresos_mes2 || 0);
-      const egresosMes3 = Number(row.egresos_mes3 || 0);
-      const totalIngresos = ingresosMes1 + ingresosMes2 + ingresosMes3;
-      const totalEgresos = egresosMes1 + egresosMes2 + egresosMes3;
-      const dineroEnCaja = saldoInicialCaja + totalIngresos - totalEgresos;
-      const saldoBancoMes1 = Number(row.saldo_banco_mes1 || 0);
-      const saldoBancoMes2 = Number(row.saldo_banco_mes2 || 0);
-      const saldoBancoMes3 = Number(row.saldo_banco_mes3 || 0);
-      const saldoFinal = dineroEnCaja + saldoBancoMes3;
-      const tieneMovimientos = Number(row.total_movimientos || 0) > 0;
-      const tieneSaldosBanco = saldoBancoMes1 > 0 || saldoBancoMes2 > 0 || saldoBancoMes3 > 0;
-      const estadoValido = ['Enviado', 'Aprobado', 'Observado'].includes(row.estado);
-
-      return {
-        director_id: row.director_id,
-        codigo_modular: row.codigo_modular,
-        numero_ie: row.numero_ie,
-        institucion: row.institucion,
-        anio,
-        trimestre,
-        saldo_inicial: Number(saldoInicialCaja.toFixed(2)),
-        ingresos_mes1: Number(ingresosMes1.toFixed(2)),
-        ingresos_mes2: Number(ingresosMes2.toFixed(2)),
-        ingresos_mes3: Number(ingresosMes3.toFixed(2)),
-        total_ingresos: Number(totalIngresos.toFixed(2)),
-        egresos_mes1: Number(egresosMes1.toFixed(2)),
-        egresos_mes2: Number(egresosMes2.toFixed(2)),
-        egresos_mes3: Number(egresosMes3.toFixed(2)),
-        total_egresos: Number(totalEgresos.toFixed(2)),
-        dinero_en_caja: Number(dineroEnCaja.toFixed(2)),
-        saldo_banco_mes1: Number(saldoBancoMes1.toFixed(2)),
-        saldo_banco_mes2: Number(saldoBancoMes2.toFixed(2)),
-        saldo_banco_mes3: Number(saldoBancoMes3.toFixed(2)),
-        dinero_en_banco: Number(saldoBancoMes3.toFixed(2)),
-        saldo_final: Number(saldoFinal.toFixed(2)),
-        ratio_egresos_ingresos: totalIngresos > 0 ? Number((totalEgresos / totalIngresos).toFixed(4)) : 0,
-        ratio_banco_saldo_final: saldoFinal > 0 ? Number((saldoBancoMes3 / saldoFinal).toFixed(4)) : 0,
-        estado: row.estado,
-        carga_manual: Number(row.registros_manual || 0) > 0,
-        dataset_completo: tieneMovimientos && tieneSaldosBanco && estadoValido,
-      };
-    }));
-
-    const completos = dataset.filter((row) => row.dataset_completo).length;
+    const resultado = await ejecutarPythonIsolationForest(filasCompletas);
 
     return res.status(200).json({
       success: true,
       meta: {
-        anio,
-        trimestre,
-        total_filas: dataset.length,
-        filas_completas: completos,
-        filas_incompletas: dataset.length - completos,
-        listo_para_entrenamiento: completos >= 10 && completos === dataset.length,
+        ...meta,
+        filas_usadas_modelo: filasCompletas.length,
       },
-      dataset,
+      ...resultado,
     });
   } catch (error) {
-    console.error('Error generando dataset para Isolation Forest:', error);
-    return res.status(500).json({ success: false, message: 'Error interno al generar el dataset.' });
+    console.error('Error ejecutando alertas Isolation Forest:', error);
+    return res.status(error.code === 'MISSING_PYTHON_DEPS' ? 424 : 500).json({
+      success: false,
+      message: error.message || 'Error interno al ejecutar Isolation Forest.',
+    });
   }
 };
 
@@ -707,5 +791,6 @@ module.exports = {
   guardarCargaManualConsolidado,
   auditarDeclaracion,
   getReporteGlobal,
-  getDatasetIsolationForest
+  getDatasetIsolationForest,
+  ejecutarAlertasIsolationForest
 };

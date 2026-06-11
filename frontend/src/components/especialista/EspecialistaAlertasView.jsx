@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   AlertTriangle,
   Bell,
@@ -13,46 +13,16 @@ import {
   TrendingDown,
   TrendingUp
 } from 'lucide-react';
+import { buildApiUrl } from '../../config/api';
 import EspecialistaPeriodoFilters from './EspecialistaPeriodoFilters';
 import EspecialistaPageHeader from './EspecialistaPageHeader';
 
 const trimestreLabels = {
-  1: '1º Trimestre (Ene - Mar)',
-  2: '2º Trimestre (Abr - Jun)',
-  3: '3º Trimestre (Jul - Sep)',
-  4: '4º Trimestre (Oct - Dic)'
+  1: '1er Trimestre (Ene - Mar)',
+  2: '2do Trimestre (Abr - Jun)',
+  3: '3er Trimestre (Jul - Sep)',
+  4: '4to Trimestre (Oct - Dic)'
 };
-
-const resumenAlertas = [
-  {
-    label: 'Alertas Totales',
-    value: 0,
-    icon: AlertTriangle,
-    tone: 'rose',
-    description: 'Anomalias detectadas'
-  },
-  {
-    label: 'Ingresos',
-    value: 0,
-    icon: TrendingUp,
-    tone: 'pink',
-    description: 'Anomalias detectadas'
-  },
-  {
-    label: 'Egresos',
-    value: 0,
-    icon: TrendingDown,
-    tone: 'orange',
-    description: 'Anomalias detectadas'
-  },
-  {
-    label: 'Saldos',
-    value: 0,
-    icon: Landmark,
-    tone: 'amber',
-    description: 'Anomalias detectadas'
-  }
-];
 
 const toneClasses = {
   rose: {
@@ -77,6 +47,11 @@ const toneClasses = {
   }
 };
 
+const formatMoney = (value) => `S/ ${Number(value || 0).toLocaleString('es-PE', {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2
+})}`;
+
 const EspecialistaAlertasView = ({
   anioActual,
   aniosDisponibles,
@@ -89,16 +64,98 @@ const EspecialistaAlertasView = ({
     riesgo: 'todos',
     busqueda: ''
   });
+  const [alertas, setAlertas] = useState([]);
+  const [modeloMeta, setModeloMeta] = useState(null);
+  const [loadingModelo, setLoadingModelo] = useState(false);
+  const [errorModelo, setErrorModelo] = useState('');
+  const [ultimaActualizacion, setUltimaActualizacion] = useState(null);
 
-  const alertas = [];
   const periodoLabel = `${trimestreLabels[trimestreSeleccionado] || trimestreLabels[1]} ${anioActual}`;
+
+  const contarPorFeature = (matcher) => alertas.filter((alerta) => (
+    alerta.top_features || []
+  ).some((feature) => matcher(feature.feature))).length;
+
+  const resumenAlertas = [
+    {
+      label: 'Alertas Totales',
+      value: alertas.length,
+      icon: AlertTriangle,
+      tone: 'rose',
+      description: 'Anomalias detectadas'
+    },
+    {
+      label: 'Ingresos',
+      value: contarPorFeature((feature) => feature.includes('ingresos')),
+      icon: TrendingUp,
+      tone: 'pink',
+      description: 'Variables de ingresos'
+    },
+    {
+      label: 'Egresos',
+      value: contarPorFeature((feature) => feature.includes('egresos')),
+      icon: TrendingDown,
+      tone: 'orange',
+      description: 'Variables de egresos'
+    },
+    {
+      label: 'Saldos',
+      value: contarPorFeature((feature) => feature.includes('saldo') || feature.includes('banco') || feature.includes('caja')),
+      icon: Landmark,
+      tone: 'amber',
+      description: 'Variables de saldos'
+    }
+  ];
+
+  const alertasFiltradas = useMemo(() => {
+    const term = filtros.busqueda.trim().toLowerCase();
+
+    return alertas.filter((alerta) => {
+      const matchesSearch = !term
+        || String(alerta.institucion || '').toLowerCase().includes(term)
+        || String(alerta.codigo_modular || '').toLowerCase().includes(term)
+        || String(alerta.numero_ie || '').toLowerCase().includes(term);
+      const matchesRisk = filtros.riesgo === 'todos' || alerta.risk_level === filtros.riesgo;
+      const matchesType = filtros.tipo === 'todos'
+        || (alerta.top_features || []).some((feature) => feature.feature.includes(filtros.tipo));
+
+      return matchesSearch && matchesRisk && matchesType;
+    });
+  }, [alertas, filtros]);
+
+  const ejecutarModelo = async () => {
+    setLoadingModelo(true);
+    setErrorModelo('');
+
+    try {
+      const response = await fetch(
+        buildApiUrl(`/api/especialista/ml/isolation-forest?anio=${anioActual}&trimestre=${trimestreSeleccionado}`),
+        { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
+      );
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || 'No se pudo ejecutar el modelo.');
+      }
+
+      setAlertas(data.alerts || []);
+      setModeloMeta(data.meta || null);
+      setUltimaActualizacion(new Date());
+    } catch (error) {
+      setErrorModelo(error.message);
+      setAlertas([]);
+      setModeloMeta(null);
+    } finally {
+      setLoadingModelo(false);
+    }
+  };
 
   return (
     <>
       <EspecialistaPageHeader
         icon={Bell}
         title="Alertas"
-        subtitle="Plantilla para la deteccion automatica de anomalias financieras con Isolation Forest."
+        subtitle="Deteccion automatica de anomalias financieras con Isolation Forest."
         actions={(
           <>
             <EspecialistaPeriodoFilters
@@ -112,17 +169,19 @@ const EspecialistaAlertasView = ({
               <Clock3 size={18} className="text-blue-600 dark:text-blue-400" />
               <div>
                 <p className="font-bold text-slate-700 dark:text-slate-200">Ultima actualizacion</p>
-                <p className="text-slate-500 dark:text-slate-400">Pendiente de ejecucion</p>
+                <p className="text-slate-500 dark:text-slate-400">
+                  {ultimaActualizacion ? ultimaActualizacion.toLocaleString('es-PE') : 'Pendiente de ejecucion'}
+                </p>
               </div>
             </div>
             <button
               type="button"
-              disabled
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-bold text-slate-400 cursor-not-allowed dark:border-slate-700 dark:bg-slate-900 dark:text-slate-500"
-              title="Disponible cuando el modelo de anomalias este integrado"
+              onClick={ejecutarModelo}
+              disabled={loadingModelo}
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-bold text-slate-700 transition-colors hover:bg-slate-50 disabled:cursor-wait disabled:text-slate-400 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
             >
-              <RefreshCw size={18} />
-              Actualizar
+              <RefreshCw size={18} className={loadingModelo ? 'animate-spin' : ''} />
+              Ejecutar modelo
             </button>
           </>
         )}
@@ -136,17 +195,22 @@ const EspecialistaAlertasView = ({
                 <DatabaseZap size={20} />
               </div>
               <div>
-                <h2 className="font-bold text-slate-800 dark:text-slate-100">Módulo preparado para el modelo</h2>
+                <h2 className="font-bold text-slate-800 dark:text-slate-100">Modelo Isolation Forest</h2>
                 <p className="text-sm text-slate-600 dark:text-slate-300 mt-1 max-w-3xl">
-                  Aún no se muestran resultados porque el modelo Isolation Forest y el volumen de datos históricos
-                  todavía no están disponibles para producir alertas confiables.
+                  Ejecuta el modelo con las filas completas del dataset del periodo seleccionado. Los resultados se muestran como alertas de anomalias financieras.
                 </p>
               </div>
             </div>
             <span className="inline-flex items-center justify-center rounded-lg border border-blue-200 dark:border-blue-800 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-blue-700 dark:text-blue-300">
-              Sin ejecuciones
+              {modeloMeta ? `${modeloMeta.filas_usadas_modelo || 0} filas usadas` : 'Sin ejecuciones'}
             </span>
           </div>
+
+          {errorModelo && (
+            <div className="rounded-2xl border border-rose-200 bg-rose-50 p-5 text-sm font-semibold text-rose-700 dark:border-rose-900/60 dark:bg-rose-950/30 dark:text-rose-200">
+              {errorModelo}
+            </div>
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
             {resumenAlertas.map(({ label, value, icon: Icon, tone, description }) => {
@@ -169,7 +233,7 @@ const EspecialistaAlertasView = ({
           <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-5">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
               <label className="lg:col-span-3">
-                <span className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Tipo de anomalía</span>
+                <span className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Tipo de anomalia</span>
                 <select
                   value={filtros.tipo}
                   onChange={(e) => setFiltros({ ...filtros, tipo: e.target.value })}
@@ -178,7 +242,7 @@ const EspecialistaAlertasView = ({
                   <option value="todos">Todos</option>
                   <option value="ingresos">Ingresos</option>
                   <option value="egresos">Egresos</option>
-                  <option value="saldos">Saldos</option>
+                  <option value="saldo">Saldos</option>
                 </select>
               </label>
 
@@ -204,7 +268,7 @@ const EspecialistaAlertasView = ({
                     type="text"
                     value={filtros.busqueda}
                     onChange={(e) => setFiltros({ ...filtros, busqueda: e.target.value })}
-                    placeholder="Buscar por I.E., modulo o detalle..."
+                    placeholder="Buscar por I.E., codigo modular o numero..."
                     className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 pl-11 pr-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 outline-none"
                   />
                 </div>
@@ -218,31 +282,61 @@ const EspecialistaAlertasView = ({
                 <thead>
                   <tr className="bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider">
                     <th className="p-4 font-bold">Fecha y hora</th>
-                    <th className="p-4 font-bold">Tipo de anomalía</th>
-                    <th className="p-4 font-bold">Descripción</th>
-                    <th className="p-4 font-bold">Entidad / módulo</th>
-                    <th className="p-4 font-bold text-right">Monto involucrado</th>
-                    <th className="p-4 font-bold text-center">Nivel de riesgo</th>
+                    <th className="p-4 font-bold">Variables atipicas</th>
+                    <th className="p-4 font-bold">Institucion</th>
+                    <th className="p-4 font-bold">Codigo</th>
+                    <th className="p-4 font-bold text-right">Saldo final</th>
+                    <th className="p-4 font-bold text-center">Nivel</th>
                     <th className="p-4 font-bold text-center">Puntaje</th>
-                    <th className="p-4 font-bold text-center">Acción</th>
+                    <th className="p-4 font-bold text-center">Accion</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {alertas.length === 0 && (
+                  {alertasFiltradas.length === 0 ? (
                     <tr>
                       <td colSpan="8" className="px-6 py-14">
                         <div className="flex flex-col items-center text-center max-w-xl mx-auto">
                           <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-300 mb-4">
                             <FileSearch size={30} />
                           </div>
-                          <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">No hay alertas de anomalías para mostrar</h3>
+                          <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">No hay alertas de anomalias para mostrar</h3>
                           <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-                            La tabla quedará lista para listar resultados cuando el modelo procese datos suficientes del periodo {periodoLabel}.
+                            Ejecuta el modelo o ajusta los filtros para el periodo {periodoLabel}.
                           </p>
                         </div>
                       </td>
                     </tr>
-                  )}
+                  ) : alertasFiltradas.map((alerta) => (
+                    <tr key={alerta.director_id} className="border-b border-slate-100 text-sm hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-900/50">
+                      <td className="p-4">{ultimaActualizacion?.toLocaleString('es-PE') || '-'}</td>
+                      <td className="p-4 font-bold text-slate-700 dark:text-slate-200">
+                        {(alerta.top_features || []).slice(0, 2).map((feature) => feature.feature).join(', ') || 'Patron financiero'}
+                      </td>
+                      <td className="p-4 text-slate-600 dark:text-slate-300">
+                        {alerta.institucion}
+                        <p className="mt-1 text-xs text-slate-400">Score: {alerta.anomaly_score}</p>
+                      </td>
+                      <td className="p-4 text-slate-600 dark:text-slate-300">IE {alerta.numero_ie || '-'} | {alerta.codigo_modular || '-'}</td>
+                      <td className="p-4 text-right font-mono">{formatMoney(alerta.saldo_final)}</td>
+                      <td className="p-4 text-center">
+                        <span className={`rounded-full px-3 py-1 text-xs font-bold uppercase ${
+                          alerta.risk_level === 'alta'
+                            ? 'bg-rose-100 text-rose-700'
+                            : alerta.risk_level === 'media'
+                              ? 'bg-amber-100 text-amber-700'
+                              : 'bg-blue-100 text-blue-700'
+                        }`}>
+                          {alerta.risk_level}
+                        </span>
+                      </td>
+                      <td className="p-4 text-center font-mono font-bold">{alerta.risk_score}</td>
+                      <td className="p-4 text-center">
+                        <span className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-bold text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
+                          Revisar
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
@@ -254,9 +348,9 @@ const EspecialistaAlertasView = ({
                 <Info size={18} />
               </div>
               <div>
-                <h3 className="font-bold text-slate-800 dark:text-slate-100">Sobre las alertas de anomalías</h3>
+                <h3 className="font-bold text-slate-800 dark:text-slate-100">Sobre las alertas de anomalias</h3>
                 <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                  Este apartado está preparado para mostrar patrones inusuales en ingresos, egresos y saldos comparados con el comportamiento histórico.
+                  El modelo compara colegios del mismo periodo y marca patrones inusuales. Una alerta no es error confirmado; es una senal para revision.
                 </p>
               </div>
             </div>
@@ -272,5 +366,3 @@ const EspecialistaAlertasView = ({
 };
 
 export default EspecialistaAlertasView;
-
-

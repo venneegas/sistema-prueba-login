@@ -25,6 +25,7 @@ router.post('/auditar', especialistaController.auditarDeclaracion);
 router.post('/consolidado/manual', verificarToken, especialistaController.guardarCargaManualConsolidado);
 
 router.get('/ml/dataset', verificarToken, especialistaController.getDatasetIsolationForest);
+router.get('/ml/isolation-forest', verificarToken, especialistaController.ejecutarAlertasIsolationForest);
 
 // Ruta GET: /api/especialista/reporte-global
 // Trae la tabla cruzada con todos los colegios y sus sumatorias para el Excel

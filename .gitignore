@@ -3,3 +3,7 @@ node_modules/
 
 # Archivos de entorno (Credenciales)
 .env
+
+# Python
+__pycache__/
+*.pyc
