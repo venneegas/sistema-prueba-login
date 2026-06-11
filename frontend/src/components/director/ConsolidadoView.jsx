@@ -75,6 +75,10 @@ const ConsolidadoView = ({
     });
   };
 
+  const handleSaldoInicialCajaManualChange = (valor) => {
+    setSaldoInicialCaja(valor === '' ? 0 : Number(valor));
+  };
+
   // Calculos automaticos
   const totalIngresosMeses = movimientos.ingresos.reduce((sum, val) => sum + val, 0);
   const totalIngresos = saldoInicialCaja + totalIngresosMeses;
@@ -156,6 +160,24 @@ const ConsolidadoView = ({
       if (!directorId || !trimestreId) return;
 
       const headers = { Authorization: `Bearer ${localStorage.getItem('token')}` };
+      const obtenerSaldoInicialManualCaja = async (quarterId, targetYear) => {
+        if (Number(quarterId) !== 1 || Number(targetYear) !== 2026) {
+          return 0;
+        }
+
+        const query = new URLSearchParams({
+          directorId: String(directorId),
+          trimestreId: String(quarterId),
+          anio: String(targetYear)
+        });
+        const res = await fetch(`${SALDOS_API_URL}?${query.toString()}`, { headers });
+        const data = await res.json();
+
+        return res.ok && data.success && data.data
+          ? Number(data.data.saldo_inicial || 0)
+          : 0;
+      };
+
       const calcularSaldoFinalTrimestre = async (quarterId, targetYear) => {
         if (Number(targetYear) < 2026) {
           return 0;
@@ -186,11 +208,19 @@ const ConsolidadoView = ({
           ? dataEgresos.data.reduce((sum, item) => sum + Number(item.monto || 0), 0)
           : 0;
 
-        return saldoInicialAnterior + totalIngresos - totalEgresos;
+        const saldoInicialManual = await obtenerSaldoInicialManualCaja(quarterId, targetYear);
+
+        return saldoInicialAnterior + saldoInicialManual + totalIngresos - totalEgresos;
       };
 
       try {
         const periodoAnterior = obtenerPeriodoAnterior();
+
+        if (cargaManualConsolidadoHabilitada) {
+          const saldoInicialManual = await obtenerSaldoInicialManualCaja(trimestreId, anio);
+          setSaldoInicialCaja(saldoInicialManual);
+          return;
+        }
 
         if (periodoAnterior.anio < 2026) {
           setSaldoInicialCaja(0);
@@ -206,7 +236,7 @@ const ConsolidadoView = ({
     };
 
     cargarSaldoInicialCaja();
-  }, [directorId, trimestreId, anio, obtenerPeriodoAnterior, obtenerRangoTrimestrePorAnio]);
+  }, [directorId, trimestreId, anio, obtenerPeriodoAnterior, obtenerRangoTrimestrePorAnio, cargaManualConsolidadoHabilitada]);
 
   // Cargar los saldos de la base de datos al abrir o cambiar trimestre
   useEffect(() => {
@@ -312,6 +342,7 @@ const ConsolidadoView = ({
           directorId,
           trimestre: Number(trimestreId),
           anio: Number(anio),
+          saldoInicialCaja,
           ingresosMensuales: movimientos.ingresos,
           egresosMensuales: movimientos.egresos,
           saldosBancoMensuales: [
@@ -777,7 +808,15 @@ const ConsolidadoView = ({
               <tr><td colSpan="2" className="border-b border-sky-100 bg-sky-50/70 px-5 py-2.5 text-xs font-extrabold uppercase tracking-wide text-sky-800">INGRESOS</td></tr>
               <tr>
                 <td className={tdLabelClass}>+ Saldo inicial del trimestre</td>
-                <td className={tdValueClass}>{formatCurrency(saldoInicialCaja)}</td>
+                <td className={movimientoInputClass}>
+                  {movimientosManualesEditables
+                    ? renderMoneyInput({
+                        value: saldoInicialCaja,
+                        onChange: handleSaldoInicialCajaManualChange,
+                        disabled: savingManualConsolidado
+                      })
+                    : formatCurrency(saldoInicialCaja)}
+                </td>
               </tr>
               {actual.meses.map((mes, index) => (
                 <tr key={mes} className="hover:bg-sky-50/80 transition-colors">

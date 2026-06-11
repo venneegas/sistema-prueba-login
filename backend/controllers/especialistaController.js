@@ -42,6 +42,18 @@ const getCurrentUserId = (req) => {
 
 const calcularSaldoInicialCaja = async (directorId, trimestreId, anio) => {
   if (anio < 2026) return 0;
+
+  if (anio === 2026 && trimestreId === 1) {
+    const [[saldoInicialManual]] = await pool.execute(
+      `SELECT COALESCE(saldo_inicial, 0) AS saldo_inicial
+       FROM saldos
+       WHERE director_id = ? AND anio = ? AND trimestre = ?
+       LIMIT 1`,
+      [directorId, anio, trimestreId]
+    );
+
+    return Number(saldoInicialManual?.saldo_inicial || 0);
+  }
   
   const trimestreAnterior = trimestreId === 1 ? 4 : trimestreId - 1;
   const anioAnterior = trimestreId === 1 ? anio - 1 : anio;
@@ -196,6 +208,7 @@ const guardarCargaManualConsolidado = async (req, res) => {
       ingresosMensuales,
       egresosMensuales,
       saldosBancoMensuales,
+      saldoInicialCaja,
       observacion,
     } = req.body;
 
@@ -204,6 +217,7 @@ const guardarCargaManualConsolidado = async (req, res) => {
     const ingresos = toMonthlyMoney(ingresosMensuales, totalIngresos);
     const egresos = toMonthlyMoney(egresosMensuales, totalEgresos);
     const saldosBanco = toMonthlyMoney(saldosBancoMensuales, saldoBancoFinal);
+    const saldoInicialManual = toMoney(saldoInicialCaja ?? 0);
     const totalIngresosCalculado = ingresos?.reduce((sum, value) => sum + value, 0) || 0;
     const totalEgresosCalculado = egresos?.reduce((sum, value) => sum + value, 0) || 0;
     const saldoBancoFinalCalculado = saldosBanco?.[2] || 0;
@@ -229,7 +243,7 @@ const guardarCargaManualConsolidado = async (req, res) => {
       });
     }
 
-    if (!ingresos || !egresos || !saldosBanco) {
+    if (!ingresos || !egresos || !saldosBanco || saldoInicialManual === null) {
       return res.status(400).json({
         success: false,
         message: 'Los montos mensuales deben ser numericos y no negativos.',
@@ -319,13 +333,14 @@ const guardarCargaManualConsolidado = async (req, res) => {
 
     await connection.execute(
       `INSERT INTO saldos (director_id, anio, trimestre, saldo_inicial, saldo_mes1, saldo_mes2, saldo_mes3)
-       VALUES (?, ?, ?, 0, ?, ?, ?)
+       VALUES (?, ?, ?, ?, ?, ?, ?)
        ON DUPLICATE KEY UPDATE
+         saldo_inicial = VALUES(saldo_inicial),
          saldo_mes1 = VALUES(saldo_mes1),
          saldo_mes2 = VALUES(saldo_mes2),
          saldo_mes3 = VALUES(saldo_mes3),
          actualizado_en = CURRENT_TIMESTAMP`,
-      [directorId, periodoAnio, periodoTrimestre, saldosBanco[0], saldosBanco[1], saldosBanco[2]]
+      [directorId, periodoAnio, periodoTrimestre, saldoInicialManual, saldosBanco[0], saldosBanco[1], saldosBanco[2]]
     );
 
     await connection.execute(
@@ -349,7 +364,7 @@ const guardarCargaManualConsolidado = async (req, res) => {
       usuario_id: getCurrentUserId(req),
       modulo: 'Consolidado',
       accion: 'ACTUALIZAR',
-      descripcion: `Carga manual mensual Q1 2026 hasta 18/06 para ${directorInfo.numero_ie ? `IE ${directorInfo.numero_ie} - ` : ''}${directorInfo.institucion}. Ing: S/ ${totalIngresosCalculado.toFixed(2)}, Egr: S/ ${totalEgresosCalculado.toFixed(2)}, Banco final: S/ ${saldoBancoFinalCalculado.toFixed(2)}. Motivo: ${motivo}`.substring(0, 255),
+      descripcion: `Carga manual mensual Q1 2026 hasta 18/06 para ${directorInfo.numero_ie ? `IE ${directorInfo.numero_ie} - ` : ''}${directorInfo.institucion}. Inicial caja: S/ ${saldoInicialManual.toFixed(2)}, Ing: S/ ${totalIngresosCalculado.toFixed(2)}, Egr: S/ ${totalEgresosCalculado.toFixed(2)}, Banco final: S/ ${saldoBancoFinalCalculado.toFixed(2)}.`.substring(0, 255),
       ip_address: req.ip || req.connection?.remoteAddress
     });
 
@@ -360,6 +375,7 @@ const guardarCargaManualConsolidado = async (req, res) => {
         ingresosMensuales: ingresos,
         egresosMensuales: egresos,
         saldosBancoMensuales: saldosBanco,
+        saldoInicialCaja: saldoInicialManual,
         totalIngresos: totalIngresosCalculado,
         totalEgresos: totalEgresosCalculado,
         dineroEnBanco: saldoBancoFinalCalculado,
