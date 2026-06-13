@@ -1078,7 +1078,7 @@ const ConsolidadoView = ({
                 onClick={declararTrimestreEnCero}
                 disabled={trimestreCeroBloqueado}
                 title={consolidadoTieneMontos ? 'No disponible porque ya existen montos registrados.' : 'Declarar todo el trimestre en cero'}
-                className="mx-auto inline-flex items-center justify-center gap-2 rounded-xl border border-sky-200 bg-sky-50 px-4 py-2.5 text-xs font-extrabold uppercase tracking-wide text-sky-700 shadow-sm transition-all hover:-translate-y-0.5 hover:border-sky-300 hover:bg-white hover:shadow-md disabled:translate-y-0 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400 disabled:shadow-none dark:border-sky-500/40 dark:bg-sky-500/10 dark:text-sky-200 dark:hover:bg-sky-500/20"
+                className="mx-auto inline-flex w-full max-w-md items-center justify-center gap-2 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-xs font-extrabold uppercase tracking-wide text-sky-700 shadow-sm transition-all hover:-translate-y-0.5 hover:border-sky-300 hover:bg-white hover:shadow-md disabled:translate-y-0 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400 disabled:shadow-none dark:border-sky-500/40 dark:bg-sky-500/10 dark:text-sky-200 dark:hover:bg-sky-500/20"
               >
                 <span className="rounded-lg bg-white px-2 py-0.5 font-mono text-[12px] shadow-sm dark:bg-slate-800">
                   S/. 0
