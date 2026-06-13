@@ -838,6 +838,17 @@ const ConsolidadoView = ({
     ? 'border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200'
     : 'border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-700 dark:bg-slate-900/50 dark:text-slate-300';
 
+  const consolidadoTieneMontos = [
+    saldoInicialCaja,
+    ...movimientos.ingresos,
+    ...movimientos.egresos,
+    saldosBanco.mes0,
+    saldosBanco.mes1,
+    saldosBanco.mes2
+  ].some((value) => Number(value || 0) > 0);
+
+  const trimestreCeroBloqueado = savingTrimestreCero || cerrandoTrimestre || consolidadoTieneMontos;
+
   return (
     <div className="mx-auto max-w-6xl space-y-6">
       <div className="bg-white/95 p-7 rounded-[28px] shadow-[0_24px_60px_-34px_rgba(15,23,42,0.55)] border border-slate-200/90 dark:border-slate-700 dark:bg-slate-800/95">
@@ -1052,20 +1063,7 @@ const ConsolidadoView = ({
               Este trimestre ya no admite modificaciones. Puedes descargar el consolidado en PDF o Excel.
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-[220px_1fr]">
-              <button
-                type="button"
-                onClick={declararTrimestreEnCero}
-                disabled={savingTrimestreCero || cerrandoTrimestre}
-                title="Declarar todo el trimestre en cero"
-                className="inline-flex items-center justify-center gap-2 rounded-2xl border-2 border-sky-200 bg-sky-50 py-4 text-sm font-extrabold uppercase tracking-wide text-sky-700 shadow-sm transition-all hover:-translate-y-0.5 hover:border-sky-300 hover:bg-white hover:shadow-md disabled:translate-y-0 disabled:cursor-wait disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400 disabled:shadow-none dark:border-sky-500/40 dark:bg-sky-500/10 dark:text-sky-200 dark:hover:bg-sky-500/20"
-              >
-                <span className="rounded-lg bg-white px-2.5 py-1 font-mono text-[13px] shadow-sm dark:bg-slate-800">
-                  S/. 0
-                </span>
-                {savingTrimestreCero ? 'Declarando' : 'En cero'}
-              </button>
-
+            <div className="space-y-3">
               <button
                 type="button"
                 onClick={onCerrarTrimestre}
@@ -1073,6 +1071,19 @@ const ConsolidadoView = ({
                 className="w-full rounded-2xl bg-red-700 py-4 text-lg font-bold uppercase tracking-wide text-white shadow-lg transition-all hover:bg-red-800 disabled:cursor-wait disabled:bg-slate-400"
               >
                 {cerrandoTrimestre ? 'Cerrando...' : 'Cerrar Trimestre'}
+              </button>
+
+              <button
+                type="button"
+                onClick={declararTrimestreEnCero}
+                disabled={trimestreCeroBloqueado}
+                title={consolidadoTieneMontos ? 'No disponible porque ya existen montos registrados.' : 'Declarar todo el trimestre en cero'}
+                className="mx-auto inline-flex items-center justify-center gap-2 rounded-xl border border-sky-200 bg-sky-50 px-4 py-2.5 text-xs font-extrabold uppercase tracking-wide text-sky-700 shadow-sm transition-all hover:-translate-y-0.5 hover:border-sky-300 hover:bg-white hover:shadow-md disabled:translate-y-0 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400 disabled:shadow-none dark:border-sky-500/40 dark:bg-sky-500/10 dark:text-sky-200 dark:hover:bg-sky-500/20"
+              >
+                <span className="rounded-lg bg-white px-2 py-0.5 font-mono text-[12px] shadow-sm dark:bg-slate-800">
+                  S/. 0
+                </span>
+                {savingTrimestreCero ? 'Declarando' : 'En cero'}
               </button>
             </div>
           )}
