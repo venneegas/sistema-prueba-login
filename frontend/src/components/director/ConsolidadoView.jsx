@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Save, FileText, Download } from 'lucide-react';
+import { Save, FileText, Download, CircleSlash2 } from 'lucide-react';
 import { buildApiUrl } from '../../config/api';
 import Toast from '../Toast';
+import ConfirmModal from './ConfirmModal';
 import { jsPDF } from 'jspdf';
 import { autoTable } from 'jspdf-autotable';
 import ExcelJS from 'exceljs';
@@ -16,6 +17,8 @@ const formatearFechaCierre = (fecha) => {
 };
 
 const SALDOS_API_URL = buildApiUrl('/api/movimientos/saldos-banco');
+const INGRESOS_API_URL = buildApiUrl('/api/movimientos/ingresos');
+const EGRESOS_API_URL = buildApiUrl('/api/movimientos/egresos');
 const MANUAL_CONSOLIDADO_API_URL = buildApiUrl('/api/especialista/consolidado/manual');
 const MANUAL_Q1_CUTOFF = new Date('2026-06-18T23:59:59-05:00');
 
@@ -57,6 +60,15 @@ const ConsolidadoView = ({
   const [movimientos, setMovimientos] = useState({
     ingresos: [0, 0, 0],
     egresos: [0, 0, 0]
+  });
+  const [savingTrimestreCero, setSavingTrimestreCero] = useState(false);
+  const [confirmAction, setConfirmAction] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    confirmText: 'Confirmar',
+    isDestructive: false,
+    onConfirm: null,
   });
 
   const handleSaldoChange = (campo, valor) => {
@@ -367,6 +379,90 @@ const ConsolidadoView = ({
     } finally {
       setSavingManualConsolidado(false);
     }
+  };
+
+  const declararTrimestreEnCero = () => {
+    if (!directorId || trimestreCerrado || savingTrimestreCero) return;
+
+    setConfirmAction({
+      isOpen: true,
+      title: 'Declarar Trimestre en Cero',
+      message: `Esta acción dejará en S/. 0.00 los ingresos, egresos y saldos de cuenta corriente del ${actual.label}. Úsala solo si la institución reporta el trimestre sin movimientos.`,
+      confirmText: 'Sí, declarar en cero',
+      isDestructive: true,
+      onConfirm: async () => {
+        setSavingTrimestreCero(true);
+        setMensajeSaldos('');
+        setErrorSaldos('');
+
+        try {
+          const { startDate, endDate } = obtenerRangoTrimestre(trimestreId);
+          const headers = {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          };
+          const limpiarMovimientos = async (apiUrl) => {
+            const response = await fetch(`${apiUrl}/replace-range`, {
+              method: 'POST',
+              headers,
+              body: JSON.stringify({
+                directorId,
+                startDate,
+                endDate,
+                registros: [],
+              }),
+            });
+            const data = await response.json();
+            if (!response.ok || !data.success) {
+              throw new Error(data.message || 'No se pudo declarar el trimestre en cero.');
+            }
+          };
+
+          await Promise.all([
+            limpiarMovimientos(INGRESOS_API_URL),
+            limpiarMovimientos(EGRESOS_API_URL),
+            fetch(SALDOS_API_URL, {
+              method: 'POST',
+              headers,
+              body: JSON.stringify({
+                directorId,
+                trimestreId,
+                anio: Number(anio),
+                saldos: {
+                  saldo_inicial: 0,
+                  saldo_mes1: 0,
+                  saldo_mes2: 0,
+                  saldo_mes3: 0
+                }
+              })
+            }).then(async (response) => {
+              const data = await response.json();
+              if (!response.ok || !data.success) {
+                throw new Error(data.message || 'No se pudieron guardar los saldos en cero.');
+              }
+            })
+          ]);
+
+          [0, 1, 2].forEach((monthIndex) => {
+            localStorage.removeItem(`draft_ingresos_${directorId}_${trimestreId}_${monthIndex}`);
+            localStorage.removeItem(`draft_egresos_${directorId}_${trimestreId}_${monthIndex}`);
+          });
+
+          setMovimientos({ ingresos: [0, 0, 0], egresos: [0, 0, 0] });
+          setSaldosBanco({ mes0: 0, mes1: 0, mes2: 0 });
+          if (cargaManualConsolidadoHabilitada) {
+            setSaldoInicialCaja(0);
+          }
+          setMensajeSaldos('Trimestre declarado en cero. Revisa el consolidado y cierra el trimestre para enviarlo.');
+          setTimeout(() => setMensajeSaldos(''), 4500);
+        } catch (err) {
+          console.error('Error declarando trimestre en cero', err);
+          setErrorSaldos(err.message || 'No se pudo declarar el trimestre en cero.');
+        } finally {
+          setSavingTrimestreCero(false);
+        }
+      }
+    });
   };
 
   const handleDownloadPDF = () => {
@@ -744,6 +840,23 @@ const ConsolidadoView = ({
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
+      {!trimestreCerrado && (
+        <button
+          type="button"
+          onClick={declararTrimestreEnCero}
+          disabled={savingTrimestreCero || cerrandoTrimestre}
+          className="fixed bottom-6 right-6 z-30 inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-extrabold text-slate-700 shadow-[0_18px_45px_-18px_rgba(15,23,42,0.45)] transition-all hover:-translate-y-0.5 hover:border-sky-200 hover:bg-sky-50 hover:text-sky-700 disabled:translate-y-0 disabled:cursor-wait disabled:opacity-70 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:border-sky-500/40 dark:hover:bg-sky-500/10"
+          title="Declarar todo el trimestre en cero"
+        >
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-sky-100 text-sky-700 dark:bg-sky-500/15 dark:text-sky-200">
+            <CircleSlash2 size={20} />
+          </span>
+          <span className="hidden sm:inline">
+            {savingTrimestreCero ? 'Declarando...' : 'Trimestre en cero'}
+          </span>
+        </button>
+      )}
+
       <div className="bg-white/95 p-7 rounded-[28px] shadow-[0_24px_60px_-34px_rgba(15,23,42,0.55)] border border-slate-200/90 dark:border-slate-700 dark:bg-slate-800/95">
         <div className="mb-6 rounded-3xl border border-slate-300 bg-slate-50/80 p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900/45">
           <div className="grid grid-cols-12 gap-2 text-sm">
@@ -985,6 +1098,16 @@ const ConsolidadoView = ({
           </div>
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={confirmAction.isOpen}
+        onClose={() => setConfirmAction((prev) => ({ ...prev, isOpen: false }))}
+        onConfirm={confirmAction.onConfirm}
+        title={confirmAction.title}
+        message={confirmAction.message}
+        confirmText={confirmAction.confirmText}
+        isDestructive={confirmAction.isDestructive}
+      />
     </div>
   );
 };
