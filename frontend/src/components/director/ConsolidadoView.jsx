@@ -71,10 +71,6 @@ const ConsolidadoView = ({
     onConfirm: null,
   });
 
-  const handleSaldoChange = (campo, valor) => {
-    setSaldosBanco((prev) => ({ ...prev, [campo]: valor }));
-  };
-
   const cargaManualConsolidadoHabilitada = Number(trimestreId) === 1
     && Number(anio) === 2026
     && new Date() <= MANUAL_Q1_CUTOFF;
@@ -97,10 +93,40 @@ const ConsolidadoView = ({
   const totalEgresos = movimientos.egresos.reduce((sum, val) => sum + val, 0);
 
   const dineroEnCaja = totalIngresos - totalEgresos;
-  const dineroEnBanco = parseFloat(saldosBanco.mes2 || 0);
+  const formatCurrency = (val) => new Intl.NumberFormat('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val || 0);
+  const limpiarMontoInput = (value) => {
+    const raw = String(value ?? '').replace(/,/g, '').replace(/[^\d.]/g, '');
+    const hasDecimal = raw.includes('.');
+    const [integerPart = '', ...decimalParts] = raw.split('.');
+    const integer = integerPart.replace(/^0+(?=\d)/, '');
+    const decimal = decimalParts.join('').slice(0, 2);
+
+    if (hasDecimal) return `${integer || '0'}.${decimal}`;
+    return integer;
+  };
+  const formatMoneyInput = (value) => {
+    const normalized = String(value ?? '');
+    if (!normalized) return '';
+
+    const hasDecimal = normalized.includes('.');
+    const [integerPart = '0', decimalPart = ''] = normalized.split('.');
+    const integer = (integerPart || '0').replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+    return hasDecimal ? `${integer}.${decimalPart}` : integer;
+  };
+  const toMoneyNumber = (value) => Number(String(value ?? 0).replace(/,/g, '')) || 0;
+  const dineroEnBanco = toMoneyNumber(saldosBanco.mes2);
   const saldoDineroTotal = dineroEnCaja + dineroEnBanco;
 
-  const formatCurrency = (val) => new Intl.NumberFormat('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val || 0);
+  const handleSaldoChange = (campo, valor) => {
+    setSaldosBanco((prev) => ({ ...prev, [campo]: limpiarMontoInput(valor) }));
+  };
+  const handleSaldoBlur = (campo) => {
+    setSaldosBanco((prev) => ({
+      ...prev,
+      [campo]: prev[campo] === '' ? '' : toMoneyNumber(prev[campo]).toFixed(2),
+    }));
+  };
 
   const obtenerRangoTrimestre = useCallback((quarterId) => {
     const currentYear = Number(anio);
@@ -306,9 +332,9 @@ const ConsolidadoView = ({
           // Convertimos al formato que probablemente espera tu base de datos
           saldos: {
             saldo_inicial: 0,
-            saldo_mes1: saldosBanco.mes0 || 0,
-            saldo_mes2: saldosBanco.mes1 || 0,
-            saldo_mes3: saldosBanco.mes2 || 0
+            saldo_mes1: toMoneyNumber(saldosBanco.mes0),
+            saldo_mes2: toMoneyNumber(saldosBanco.mes1),
+            saldo_mes3: toMoneyNumber(saldosBanco.mes2)
           }
         })
       });
@@ -358,9 +384,9 @@ const ConsolidadoView = ({
           ingresosMensuales: movimientos.ingresos,
           egresosMensuales: movimientos.egresos,
           saldosBancoMensuales: [
-            saldosBanco.mes0 || 0,
-            saldosBanco.mes1 || 0,
-            saldosBanco.mes2 || 0
+            toMoneyNumber(saldosBanco.mes0),
+            toMoneyNumber(saldosBanco.mes1),
+            toMoneyNumber(saldosBanco.mes2)
           ],
           observacion: 'Extensión excepcional Q1 hasta 18/06/2026: carga directa desde consolidado'
         })
@@ -737,7 +763,7 @@ const ConsolidadoView = ({
     
     ws.addRow([]);
     addSectionHeader('2. DETALLE DE LOS MOVIMIENTOS DE LA CUENTA CORRIENTE');
-    actual.meses.forEach((mes, index) => ws.addRow([`Saldo al terminar ${mes}`, Number(saldosBanco[`mes${index}`] || 0)]));
+    actual.meses.forEach((mes, index) => ws.addRow([`Saldo al terminar ${mes}`, toMoneyNumber(saldosBanco[`mes${index}`])]));
     
     ws.addRow([]);
     addSectionHeader('3. CONSOLIDADO');
@@ -845,7 +871,7 @@ const ConsolidadoView = ({
     saldosBanco.mes0,
     saldosBanco.mes1,
     saldosBanco.mes2
-  ].some((value) => Number(value || 0) > 0);
+  ].some((value) => toMoneyNumber(value) > 0);
 
   const trimestreCeroBloqueado = savingTrimestreCero || cerrandoTrimestre || consolidadoTieneMontos;
 
@@ -989,16 +1015,11 @@ const ConsolidadoView = ({
                   <td className={tdLabelClass}>Saldo al terminar {mes}</td>
                   <td className={tdInputContainerClass}>
                     <input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      onKeyDown={(e) => { if (e.key === '-' || e.key === 'e') e.preventDefault(); }}
-                      value={saldosBanco[`mes${index}`]}
-                      onChange={(e) => {
-                        if (Number(e.target.value) >= 0) {
-                          handleSaldoChange(`mes${index}`, e.target.value);
-                        }
-                      }}
+                      type="text"
+                      inputMode="decimal"
+                      value={formatMoneyInput(saldosBanco[`mes${index}`])}
+                      onChange={(e) => handleSaldoChange(`mes${index}`, e.target.value)}
+                      onBlur={() => handleSaldoBlur(`mes${index}`)}
                       disabled={!saldosEditables || savingManualConsolidado}
                       className="w-full h-full px-4 py-3 bg-transparent text-right outline-none disabled:cursor-not-allowed disabled:bg-slate-50 disabled:opacity-70"
                       placeholder="0.00"

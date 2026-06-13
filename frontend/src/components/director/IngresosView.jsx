@@ -15,8 +15,19 @@ const crearFilaVacia = () => ({
   comprobante_id: '',
   numero: '',
   concepto: '',
-  importe: 0,
+  importe: '',
 });
+
+const normalizarImporte = (value) => {
+  const raw = String(value ?? '').replace(/[^\d.]/g, '');
+  const hasDecimal = raw.includes('.');
+  const [integerPart = '', ...decimalParts] = raw.split('.');
+  const integer = integerPart.replace(/^0+(?=\d)/, '');
+  const decimal = decimalParts.join('').slice(0, 2);
+
+  if (hasDecimal) return `${integer || '0'}.${decimal}`;
+  return integer;
+};
 
 const formatearFechaApi = (fecha) => {
   if (!fecha) return '';
@@ -307,7 +318,7 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
         comprobante_id: fila.comprobante_id,
         numero_comprobante: fila.numero,
         concepto: fila.concepto,
-        monto: fila.importe,
+        monto: Number(fila.importe || 0),
       }));
 
     const filasSinTipo = datosMeses[mesActivo]
@@ -791,12 +802,11 @@ const IngresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
                       min="0"
                       step="0.01"
                       onKeyDown={(e) => { if (e.key === '-' || e.key === 'e') e.preventDefault(); }}
-                      value={fila.importe}
-                      onChange={(e) => {
-                        if (Number(e.target.value) >= 0) {
-                          handleInputChange(mesActivo, fila.id, 'importe', e.target.value);
-                        }
+                      value={fila.importe ?? ''}
+                      onFocus={(e) => {
+                        if (String(fila.importe) === '0') e.target.select();
                       }}
+                      onChange={(e) => handleInputChange(mesActivo, fila.id, 'importe', normalizarImporte(e.target.value))}
                       disabled={trimestreCerrado}
                       className={`${inputClass} text-right font-mono text-base`}
                     />
