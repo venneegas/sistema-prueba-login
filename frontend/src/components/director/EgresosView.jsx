@@ -383,57 +383,6 @@ const EgresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestreC
     }
   };
 
-  const declararSinMovimientos = () => {
-    if (trimestreCerrado) return;
-
-    setConfirmAction({
-      isOpen: true,
-      title: 'Declarar Mes en Cero',
-      message: `¿Estás seguro de declarar S/. 0.00 de egresos para el mes de ${trimestreMeses[mesActivo]}? Se borrarán las filas actuales si las hubiera.`,
-      confirmText: 'Sí, declarar en cero',
-      isDestructive: true,
-      onConfirm: async () => {
-        setSaving(true);
-        setError('');
-        setMensaje('');
-
-        try {
-          const { startDate, endDate } = obtenerRangoMes(trimestreId, mesActivo);
-          const response = await fetch(`${API_URL}/replace-range`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${localStorage.getItem('token')}`
-            },
-            body: JSON.stringify({
-              directorId,
-              startDate,
-              endDate,
-              registros: [],
-            }),
-          });
-
-          const data = await leerRespuestaJson(response);
-
-          if (!response.ok || !data.success) {
-            throw new Error(data.message || 'No se pudo declarar en cero.');
-          }
-
-          setMensaje(`Se declaró sin movimientos el mes de ${trimestreMeses[mesActivo]}.`);
-          const key = `draft_egresos_${directorId}_${trimestreId}_${mesActivo}`;
-          localStorage.removeItem(key);
-          setHayBorradores((prev) => ({ ...prev, [mesActivo]: false }));
-          setReloadTrigger(prev => prev + 1);
-        } catch (saveError) {
-          console.error(saveError);
-          setError(saveError.message || 'Error al declarar en cero.');
-        } finally {
-          setSaving(false);
-        }
-      }
-    });
-  };
-
   const obtenerNombreComprobante = (id) => {
     const comp = listaComprobantes.find(c => String(c.id) === String(id));
     return comp ? comp.nombre : '';
@@ -704,25 +653,13 @@ const EgresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestreC
         ))}
       </div>
 
-        <div className="flex justify-between items-center mb-6 rounded-3xl border border-slate-300 bg-slate-50/80 p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900/45">
+        <div className="flex items-center mb-6 rounded-3xl border border-slate-300 bg-slate-50/80 p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900/45">
           <h2 className="text-[15px] font-black uppercase tracking-[0.14em] text-slate-900 dark:text-slate-100">
             <span className="text-rose-700 dark:text-rose-300">Relación de egresos</span>
             <span className="mx-2 text-slate-300 dark:text-slate-600">/</span>
             <span>{trimestreMeses[mesActivo]} {anio}</span>
           </h2>
 
-          <div className="flex items-center gap-3">
-            {!trimestreCerrado && (
-              <button
-                type="button"
-                onClick={declararSinMovimientos}
-                disabled={saving || loading}
-                className="flex items-center gap-2 bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl text-sm hover:bg-slate-300 transition-all font-bold shadow-sm disabled:opacity-50 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
-              >
-                Declarar Mes en Cero
-              </button>
-            )}
-          </div>
         </div>
 
         {trimestreCerrado && (

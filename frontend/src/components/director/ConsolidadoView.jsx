@@ -845,10 +845,10 @@ const ConsolidadoView = ({
           type="button"
           onClick={declararTrimestreEnCero}
           disabled={savingTrimestreCero || cerrandoTrimestre}
-          className="fixed bottom-6 right-6 z-30 inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-extrabold text-slate-700 shadow-[0_18px_45px_-18px_rgba(15,23,42,0.45)] transition-all hover:-translate-y-0.5 hover:border-sky-200 hover:bg-sky-50 hover:text-sky-700 disabled:translate-y-0 disabled:cursor-wait disabled:opacity-70 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:border-sky-500/40 dark:hover:bg-sky-500/10"
+          className="fixed bottom-24 right-6 z-[70] inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white p-2.5 text-sm font-extrabold text-slate-700 shadow-[0_18px_45px_-18px_rgba(15,23,42,0.45)] transition-all hover:-translate-y-0.5 hover:border-sky-200 hover:bg-sky-50 hover:text-sky-700 disabled:translate-y-0 disabled:cursor-wait disabled:opacity-70 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:border-sky-500/40 dark:hover:bg-sky-500/10 sm:pr-4"
           title="Declarar todo el trimestre en cero"
         >
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-sky-100 text-sky-700 dark:bg-sky-500/15 dark:text-sky-200">
+          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-sky-100 text-sky-700 dark:bg-sky-500/15 dark:text-sky-200">
             <CircleSlash2 size={20} />
           </span>
           <span className="hidden sm:inline">
