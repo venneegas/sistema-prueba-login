@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Save, FileText, Download, CircleSlash2 } from 'lucide-react';
+import { Save, FileText, Download } from 'lucide-react';
 import { buildApiUrl } from '../../config/api';
 import Toast from '../Toast';
 import ConfirmModal from './ConfirmModal';
@@ -840,19 +840,6 @@ const ConsolidadoView = ({
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
-      {!trimestreCerrado && (
-        <button
-          type="button"
-          onClick={declararTrimestreEnCero}
-          disabled={savingTrimestreCero || cerrandoTrimestre}
-          aria-label="Declarar todo el trimestre en cero"
-          className="fixed bottom-24 right-6 z-[70] flex h-12 w-12 items-center justify-center rounded-full border border-white/70 bg-white/95 text-sky-700 shadow-[0_18px_40px_-18px_rgba(15,23,42,0.75)] backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-sky-50 hover:text-sky-800 focus:outline-none focus:ring-4 focus:ring-sky-500/20 disabled:translate-y-0 disabled:cursor-wait disabled:opacity-70 dark:border-slate-700 dark:bg-slate-800/95 dark:text-sky-200 dark:hover:bg-slate-700"
-          title={savingTrimestreCero ? 'Declarando trimestre en cero...' : 'Declarar trimestre en cero'}
-        >
-          <CircleSlash2 size={22} />
-        </button>
-      )}
-
       <div className="bg-white/95 p-7 rounded-[28px] shadow-[0_24px_60px_-34px_rgba(15,23,42,0.55)] border border-slate-200/90 dark:border-slate-700 dark:bg-slate-800/95">
         <div className="mb-6 rounded-3xl border border-slate-300 bg-slate-50/80 p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900/45">
           <div className="grid grid-cols-12 gap-2 text-sm">
@@ -1065,14 +1052,29 @@ const ConsolidadoView = ({
               Este trimestre ya no admite modificaciones. Puedes descargar el consolidado en PDF o Excel.
             </div>
           ) : (
-            <button
-              type="button"
-              onClick={onCerrarTrimestre}
-              disabled={cerrandoTrimestre}
-              className="w-full rounded-2xl bg-red-700 py-4 text-lg font-bold uppercase tracking-wide text-white shadow-lg transition-all hover:bg-red-800 disabled:cursor-wait disabled:bg-slate-400"
-            >
-              {cerrandoTrimestre ? 'Cerrando...' : 'Cerrar Trimestre'}
-            </button>
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-[220px_1fr]">
+              <button
+                type="button"
+                onClick={declararTrimestreEnCero}
+                disabled={savingTrimestreCero || cerrandoTrimestre}
+                title="Declarar todo el trimestre en cero"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border-2 border-sky-200 bg-sky-50 py-4 text-sm font-extrabold uppercase tracking-wide text-sky-700 shadow-sm transition-all hover:-translate-y-0.5 hover:border-sky-300 hover:bg-white hover:shadow-md disabled:translate-y-0 disabled:cursor-wait disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400 disabled:shadow-none dark:border-sky-500/40 dark:bg-sky-500/10 dark:text-sky-200 dark:hover:bg-sky-500/20"
+              >
+                <span className="rounded-lg bg-white px-2.5 py-1 font-mono text-[13px] shadow-sm dark:bg-slate-800">
+                  S/. 0
+                </span>
+                {savingTrimestreCero ? 'Declarando' : 'En cero'}
+              </button>
+
+              <button
+                type="button"
+                onClick={onCerrarTrimestre}
+                disabled={cerrandoTrimestre || savingTrimestreCero}
+                className="w-full rounded-2xl bg-red-700 py-4 text-lg font-bold uppercase tracking-wide text-white shadow-lg transition-all hover:bg-red-800 disabled:cursor-wait disabled:bg-slate-400"
+              >
+                {cerrandoTrimestre ? 'Cerrando...' : 'Cerrar Trimestre'}
+              </button>
+            </div>
           )}
 
           <div className="flex gap-4 pt-4 border-t border-slate-200 mt-6 dark:border-slate-700">
