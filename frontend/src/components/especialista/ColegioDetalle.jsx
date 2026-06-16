@@ -21,7 +21,7 @@ import API_BASE_URL, { buildApiUrl } from '../../config/api';
 
 const API_URL = API_BASE_URL;
 
-const ColegioDetalle = ({ colegio, onBack, trimestre, anio }) => {
+const ColegioDetalle = ({ colegio, onBack, trimestre, anio, onEstadoChange }) => {
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
   const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
   const [isManualModalOpen, setIsManualModalOpen] = useState(false);
@@ -38,9 +38,14 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio }) => {
 
   const [finanzas, setFinanzas] = useState({ ingresos: 0, egresos: 0, dineroEnCaja: 0, dineroEnBanco: 0, saldoTotal: 0 });
   const [loadingFinanzas, setLoadingFinanzas] = useState(true);
+  const [estadoActual, setEstadoActual] = useState(colegio.estado || 'Borrador');
   
   const [pdfs, setPdfs] = useState([]);
   const [loadingPdfs, setLoadingPdfs] = useState(true);
+
+  useEffect(() => {
+    setEstadoActual(colegio.estado || 'Borrador');
+  }, [colegio.id, colegio.estado]);
 
   const fetchFinanzas = useCallback(async () => {
     setLoadingFinanzas(true);
@@ -149,11 +154,16 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio }) => {
       });
       const data = await response.json();
       
-      if (data.success) {
-        setIsRejectModalOpen(false);
-        setRejectComment('');
-        setSuccessModal({ isOpen: true, type: 'reject', message: "El informe ha sido OBSERVADO. El director ha sido notificado." });
+      if (!data.success) {
+        setErrorModal({ isOpen: true, message: data.message || 'No se pudo observar el informe.' });
+        return;
       }
+
+      setEstadoActual('Observado');
+      onEstadoChange?.(colegio.id, 'Observado');
+      setIsRejectModalOpen(false);
+      setRejectComment('');
+      setSuccessModal({ isOpen: true, type: 'reject', message: "El informe ha sido OBSERVADO. El director ha sido notificado." });
     } catch (error) {
       console.error("Error al rechazar:", error);
       setErrorModal({ isOpen: true, message: "Error de conexión al guardar la auditoría." });
@@ -177,10 +187,15 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio }) => {
       });
       const data = await response.json();
       
-      if (data.success) {
-        setIsApproveModalOpen(false);
-        setSuccessModal({ isOpen: true, type: 'approve', message: "El informe ha sido APROBADO exitosamente." });
+      if (!data.success) {
+        setErrorModal({ isOpen: true, message: data.message || 'No se pudo aprobar el informe.' });
+        return;
       }
+
+      setEstadoActual('Aprobado');
+      onEstadoChange?.(colegio.id, 'Aprobado');
+      setIsApproveModalOpen(false);
+      setSuccessModal({ isOpen: true, type: 'approve', message: "El informe ha sido APROBADO exitosamente." });
     } catch (error) {
       console.error("Error al aprobar:", error);
       setErrorModal({ isOpen: true, message: "Error de conexión al guardar la auditoría." });
@@ -249,8 +264,9 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio }) => {
   };
 
   const periodoLabel = `${trimestre}º Trimestre ${anio}`;
-  const estadoLabel = getEstadoReporteLabel(colegio.estado);
-  const pendiente = isEstadoPendiente(colegio.estado);
+  const estadoLabel = getEstadoReporteLabel(estadoActual);
+  const pendiente = isEstadoPendiente(estadoActual);
+  const aprobado = estadoActual === 'Aprobado';
   const puedeCargaManual = Number(trimestre) === 1 && Number(anio) === 2026;
   const resumenFinanciero = [
     {
@@ -311,7 +327,7 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio }) => {
           </div>
         </div>
 
-        <div className={`inline-flex w-fit items-center gap-2 rounded-xl border px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] shadow-sm ${getEstadoReporteBadgeClass(colegio.estado)}`}>
+        <div className={`inline-flex w-fit items-center gap-2 rounded-xl border px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] shadow-sm ${getEstadoReporteBadgeClass(estadoActual)}`}>
           <ClipboardCheck size={16} />
           {estadoLabel}
         </div>
@@ -338,8 +354,8 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio }) => {
                 </div>
               </div>
 
-              <div className="flex w-full flex-col gap-3 sm:flex-row lg:w-auto">
-                {puedeCargaManual && (
+              <div className="flex w-full flex-col flex-wrap gap-3 sm:flex-row sm:justify-end lg:w-auto">
+                {puedeCargaManual && !aprobado && (
                   <button
                     type="button"
                     onClick={handleOpenManualModal}
@@ -354,18 +370,23 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio }) => {
                     <AlertCircle size={18} />
                     Pendiente de envio
                   </div>
+                ) : aprobado ? (
+                  <div className="flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300 lg:w-auto">
+                    <CheckCircle size={18} />
+                    Informe aprobado
+                  </div>
                 ) : (
                   <>
                     <button
                       onClick={() => setIsRejectModalOpen(true)}
-                      className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-5 py-3 text-sm font-bold text-rose-600 transition-colors hover:bg-rose-100 dark:border-rose-800 dark:bg-rose-900/30 dark:text-rose-300 dark:hover:bg-rose-900/50 lg:flex-none"
+                      className="flex min-w-fit flex-1 items-center justify-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-5 py-3 text-sm font-bold text-rose-600 transition-colors hover:bg-rose-100 dark:border-rose-800 dark:bg-rose-900/30 dark:text-rose-300 dark:hover:bg-rose-900/50 lg:flex-none"
                     >
                       <XCircle size={19} />
                       Observar
                     </button>
                     <button
                       onClick={() => setIsApproveModalOpen(true)}
-                      className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-3 text-sm font-bold text-white shadow-sm transition-all hover:bg-emerald-700 hover:shadow lg:flex-none"
+                      className="flex min-w-fit flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-3 text-sm font-bold text-white shadow-sm transition-all hover:bg-emerald-700 hover:shadow lg:flex-none"
                     >
                       <CheckCircle size={19} />
                       Aprobar informe
@@ -386,7 +407,7 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio }) => {
               </div>
               <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900/40">
                 <p className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Accion disponible</p>
-                <p className="mt-2 text-lg font-black text-slate-900 dark:text-slate-100">{pendiente ? 'Solo consulta' : 'Auditable'}</p>
+                <p className="mt-2 text-lg font-black text-slate-900 dark:text-slate-100">{pendiente ? 'Solo consulta' : aprobado ? 'Aprobado' : 'Auditable'}</p>
               </div>
             </div>
           </section>

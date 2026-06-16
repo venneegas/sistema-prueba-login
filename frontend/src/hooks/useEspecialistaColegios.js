@@ -40,6 +40,7 @@ const useEspecialistaColegios = ({ trimestreSeleccionado, anioActual }) => {
 
   return {
     colegios,
+    setColegios,
     loading,
     error
   };

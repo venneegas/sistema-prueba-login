@@ -92,7 +92,7 @@ const EspecialistaDashboard = ({ user, onLogout }) => {
     return () => window.removeEventListener('popstate', handleBrowserBack);
   }, []);
 
-  const { colegios, loading, error } = useEspecialistaColegios({
+  const { colegios, setColegios, loading, error } = useEspecialistaColegios({
     trimestreSeleccionado,
     anioActual
   });
@@ -144,6 +144,15 @@ const EspecialistaDashboard = ({ user, onLogout }) => {
 
     setActiveView('explorador');
     setSelectedColegio(colegio);
+  };
+
+  const handleColegioEstadoChange = (directorId, estado) => {
+    setSelectedColegio((prev) => (
+      prev && prev.id === directorId ? { ...prev, estado } : prev
+    ));
+    setColegios((prev) => prev.map((colegio) => (
+      colegio.id === directorId ? { ...colegio, estado } : colegio
+    )));
   };
 
   const handleBackToExplorador = () => {
@@ -223,6 +232,7 @@ const EspecialistaDashboard = ({ user, onLogout }) => {
             onBack={handleBackToExplorador}
             trimestre={trimestreSeleccionado}
             anio={anioActual}
+            onEstadoChange={handleColegioEstadoChange}
           />
         ) : (
           <EspecialistaExploradorView
