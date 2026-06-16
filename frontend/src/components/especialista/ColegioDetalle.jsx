@@ -292,32 +292,6 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio, onEstadoChange }) =>
   const pendiente = isEstadoPendiente(estadoActual);
   const aprobado = estadoActual === 'Aprobado';
   const puedeCargaManual = Number(trimestre) === 1 && Number(anio) === 2026;
-  const resumenFinanciero = [
-    {
-      label: 'Total ingresos',
-      value: finanzas.ingresos,
-      icon: DollarSign,
-      tone: 'text-blue-600 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/30 border-blue-100 dark:border-blue-800'
-    },
-    {
-      label: 'Total egresos',
-      value: finanzas.egresos,
-      icon: DollarSign,
-      tone: 'text-rose-600 dark:text-rose-300 bg-rose-50 dark:bg-rose-900/30 border-rose-100 dark:border-rose-800'
-    },
-    {
-      label: 'Saldo en caja',
-      value: finanzas.dineroEnCaja,
-      icon: WalletCards,
-      tone: 'text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-900/30 border-sky-100 dark:border-sky-800'
-    },
-    {
-      label: 'Cuenta corriente',
-      value: finanzas.dineroEnBanco,
-      icon: Landmark,
-      tone: 'text-teal-700 dark:text-teal-300 bg-teal-50 dark:bg-teal-900/30 border-teal-100 dark:border-teal-800'
-    }
-  ];
 
   return (
     <div className="flex-1 flex flex-col h-full bg-slate-50 dark:bg-slate-900 overflow-hidden">
@@ -436,36 +410,66 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio, onEstadoChange }) =>
             </div>
           </section>
 
-          <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
-            <div className="border-b border-slate-100 bg-slate-50/70 p-5 dark:border-slate-700 dark:bg-slate-900/40">
-              <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-blue-600 dark:text-blue-300">Resumen financiero</p>
-              <h2 className="mt-1 text-xl font-black text-slate-900 dark:text-slate-100">Montos declarados</h2>
+          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+            <div className="mb-4 flex items-center gap-3">
+              <h2 className="shrink-0 text-sm font-black text-slate-800 dark:text-slate-100">Dinero en caja de la I.E</h2>
+              <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
             </div>
 
-            <div className="grid grid-cols-1 gap-4 p-6 md:grid-cols-2 xl:grid-cols-4">
-              {resumenFinanciero.map(({ label, value, icon: Icon, tone }) => (
-                <div key={label} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900/40">
-                  <div className={`mb-4 flex h-11 w-11 items-center justify-center rounded-xl border ${tone}`}>
-                    <Icon size={22} />
-                  </div>
-                  <p className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">{label}</p>
-                  {loadingFinanzas ? (
-                    <Loader2 size={22} className="mt-3 animate-spin text-blue-500" />
-                  ) : (
-                    <p className="mt-2 text-2xl font-black text-slate-900 dark:text-slate-100">{formatearMoneda(value)}</p>
-                  )}
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+              <div className="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900/40">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-emerald-100 bg-emerald-50 text-emerald-600 dark:border-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300">
+                  <DollarSign size={22} />
                 </div>
-              ))}
+                <div>
+                  <p className="text-xs font-bold text-slate-500 dark:text-slate-400">Total ingresos</p>
+                  {loadingFinanzas ? <Loader2 size={20} className="mt-2 animate-spin text-blue-500" /> : <p className="mt-1 text-2xl font-black text-slate-900 dark:text-slate-100">{formatearMoneda(finanzas.ingresos)}</p>}
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900/40">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-rose-100 bg-rose-50 text-rose-600 dark:border-rose-800 dark:bg-rose-900/30 dark:text-rose-300">
+                  <DollarSign size={22} />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-slate-500 dark:text-slate-400">Total egresos</p>
+                  {loadingFinanzas ? <Loader2 size={20} className="mt-2 animate-spin text-blue-500" /> : <p className="mt-1 text-2xl font-black text-slate-900 dark:text-slate-100">{formatearMoneda(finanzas.egresos)}</p>}
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900/40">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-blue-100 bg-blue-50 text-blue-600 dark:border-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                  <WalletCards size={22} />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-slate-500 dark:text-slate-400">Saldo trimestral</p>
+                  {loadingFinanzas ? <Loader2 size={20} className="mt-2 animate-spin text-blue-500" /> : <p className="mt-1 text-2xl font-black text-slate-900 dark:text-slate-100">{formatearMoneda(finanzas.dineroEnCaja)}</p>}
+                </div>
+              </div>
             </div>
 
-            <div className="border-t border-slate-100 bg-slate-950 px-6 py-4 text-white dark:border-slate-700">
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-sm font-black uppercase tracking-wide">Saldo total al cierre del trimestre</p>
-                {loadingFinanzas ? (
-                  <Loader2 size={20} className="animate-spin text-blue-300" />
-                ) : (
-                  <p className="text-xl font-black text-blue-200">{formatearMoneda(finanzas.saldoTotal)}</p>
-                )}
+            <div className="my-4 flex items-center gap-3">
+              <h2 className="shrink-0 text-sm font-black text-slate-800 dark:text-slate-100">Dinero en Cuenta Corriente</h2>
+              <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
+            </div>
+
+            <div className="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900/40">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-teal-100 bg-teal-50 text-teal-700 dark:border-teal-800 dark:bg-teal-900/30 dark:text-teal-300">
+                <Landmark size={22} />
+              </div>
+              <div>
+                <p className="text-xs font-bold text-slate-500 dark:text-slate-400">Dinero en Cuenta Corriente</p>
+                {loadingFinanzas ? <Loader2 size={20} className="mt-2 animate-spin text-blue-500" /> : <p className="mt-1 text-2xl font-black text-slate-900 dark:text-slate-100">{formatearMoneda(finanzas.dineroEnBanco)}</p>}
+              </div>
+            </div>
+
+            <div className="mt-4 flex items-center gap-4 rounded-xl border border-blue-200 bg-blue-50/40 p-5 shadow-sm ring-1 ring-blue-100 dark:border-blue-800 dark:bg-blue-900/20 dark:ring-blue-900/30">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-blue-100 bg-blue-50 text-blue-600 dark:border-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                <DollarSign size={22} />
+              </div>
+              <div>
+                <p className="text-xs font-black text-blue-600 dark:text-blue-300">Saldo Total al cierre del Trimestre</p>
+                {loadingFinanzas ? <Loader2 size={20} className="mt-2 animate-spin text-blue-500" /> : <p className="mt-1 text-2xl font-black text-slate-900 dark:text-slate-100">{formatearMoneda(finanzas.saldoTotal)}</p>}
               </div>
             </div>
           </section>
