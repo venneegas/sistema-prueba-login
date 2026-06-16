@@ -78,13 +78,13 @@ const ConsolidadoView = ({
   const handleMovimientoManualChange = (tipo, index, valor) => {
     setMovimientos((prev) => {
       const nextValues = [...prev[tipo]];
-      nextValues[index] = valor === '' ? 0 : Number(valor);
+      nextValues[index] = valor === '' ? 0 : toMoneyNumber(valor);
       return { ...prev, [tipo]: nextValues };
     });
   };
 
   const handleSaldoInicialCajaManualChange = (valor) => {
-    setSaldoInicialCaja(valor === '' ? 0 : Number(valor));
+    setSaldoInicialCaja(valor === '' ? 0 : toMoneyNumber(valor));
   };
 
   // Calculos automaticos
@@ -380,9 +380,9 @@ const ConsolidadoView = ({
           directorId,
           trimestre: Number(trimestreId),
           anio: Number(anio),
-          saldoInicialCaja,
-          ingresosMensuales: movimientos.ingresos,
-          egresosMensuales: movimientos.egresos,
+          saldoInicialCaja: toMoneyNumber(saldoInicialCaja),
+          ingresosMensuales: movimientos.ingresos.map(toMoneyNumber),
+          egresosMensuales: movimientos.egresos.map(toMoneyNumber),
           saldosBancoMensuales: [
             toMoneyNumber(saldosBanco.mes0),
             toMoneyNumber(saldosBanco.mes1),
@@ -395,6 +395,25 @@ const ConsolidadoView = ({
 
       if (!res.ok || !data.success) {
         throw new Error(data.message || 'No se pudo guardar la carga manual del consolidado.');
+      }
+
+      if (data.data) {
+        setSaldoInicialCaja(toMoneyNumber(data.data.saldoInicialCaja));
+        setMovimientos({
+          ingresos: Array.isArray(data.data.ingresosMensuales)
+            ? data.data.ingresosMensuales.map(toMoneyNumber)
+            : movimientos.ingresos,
+          egresos: Array.isArray(data.data.egresosMensuales)
+            ? data.data.egresosMensuales.map(toMoneyNumber)
+            : movimientos.egresos
+        });
+        if (Array.isArray(data.data.saldosBancoMensuales)) {
+          setSaldosBanco({
+            mes0: String(toMoneyNumber(data.data.saldosBancoMensuales[0]).toFixed(2)),
+            mes1: String(toMoneyNumber(data.data.saldosBancoMensuales[1]).toFixed(2)),
+            mes2: String(toMoneyNumber(data.data.saldosBancoMensuales[2]).toFixed(2))
+          });
+        }
       }
 
       setMensajeSaldos('Consolidado manual guardado y registrado en auditoria.');

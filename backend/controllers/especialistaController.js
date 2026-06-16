@@ -13,7 +13,10 @@ const MANUAL_Q1_EXCEPTION = {
 };
 
 const toMoney = (value) => {
-  const numberValue = Number(value);
+  const normalizedValue = typeof value === 'string'
+    ? value.replace(/,/g, '').trim()
+    : value;
+  const numberValue = Number(normalizedValue);
   return Number.isFinite(numberValue) && numberValue >= 0 ? Number(numberValue.toFixed(2)) : null;
 };
 
