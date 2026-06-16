@@ -17,9 +17,7 @@ import {
   WalletCards
 } from 'lucide-react';
 import { getEstadoReporteBadgeClass, getEstadoReporteLabel, isEstadoPendiente } from '../../utils/estadoReporte';
-import API_BASE_URL, { buildApiUrl } from '../../config/api';
-
-const API_URL = API_BASE_URL;
+import { buildApiUrl } from '../../config/api';
 
 const ColegioDetalle = ({ colegio, onBack, trimestre, anio, onEstadoChange }) => {
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
@@ -121,14 +119,40 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio, onEstadoChange }) =>
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
-  // Limpia y normaliza la URL para evitar errores de doble slash (//) o diagonales invertidas (\)
-  const getPdfUrl = (ruta) => {
-    if (!ruta) return '#';
-    let rutaNormalizada = ruta.replace(/\\/g, '/');
-    if (rutaNormalizada.startsWith('/')) {
-      rutaNormalizada = rutaNormalizada.substring(1);
+  const abrirPdf = async (pdf, descargar = false) => {
+    if (!pdf?.id) return;
+
+    try {
+      const response = await fetch(buildApiUrl(`/api/sustentos/${pdf.id}/ver`), {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      if (!response.ok) {
+        const message = await response.text();
+        throw new Error(message || 'No se pudo abrir el PDF.');
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+
+      if (descargar) {
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = pdf.nombre_original || `sustento-${pdf.id}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        return;
+      }
+
+      window.open(url, '_blank', 'noopener,noreferrer');
+      setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    } catch (error) {
+      setErrorModal({ isOpen: true, message: error.message || 'No se pudo abrir el PDF.' });
     }
-    return `${API_URL}/${rutaNormalizada}`;
   };
 
   const handleRejectSubmit = async () => {
@@ -490,12 +514,12 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio, onEstadoChange }) =>
                         <CheckCircle size={14} />
                         Recibido
                       </span>
-                      <a href={getPdfUrl(pdf.ruta_archivo)} target="_blank" rel="noopener noreferrer" className="rounded-xl border border-slate-200 p-2.5 text-slate-500 shadow-sm transition-all hover:border-sky-500 hover:bg-sky-500 hover:text-white dark:border-slate-700 dark:text-slate-300" title="Ver PDF">
+                      <button type="button" onClick={() => abrirPdf(pdf)} className="rounded-xl border border-slate-200 p-2.5 text-slate-500 shadow-sm transition-all hover:border-sky-500 hover:bg-sky-500 hover:text-white dark:border-slate-700 dark:text-slate-300" title="Ver PDF">
                         <Eye size={18} />
-                      </a>
-                      <a href={getPdfUrl(pdf.ruta_archivo)} download target="_blank" rel="noopener noreferrer" className="rounded-xl border border-slate-200 p-2.5 text-slate-500 shadow-sm transition-all hover:border-blue-600 hover:bg-blue-600 hover:text-white dark:border-slate-700 dark:text-slate-300" title="Descargar">
+                      </button>
+                      <button type="button" onClick={() => abrirPdf(pdf, true)} className="rounded-xl border border-slate-200 p-2.5 text-slate-500 shadow-sm transition-all hover:border-blue-600 hover:bg-blue-600 hover:text-white dark:border-slate-700 dark:text-slate-300" title="Descargar">
                         <Download size={18} />
-                      </a>
+                      </button>
                     </div>
                   </div>
                 ))

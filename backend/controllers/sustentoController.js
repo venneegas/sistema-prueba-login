@@ -141,6 +141,38 @@ const obtenerSustentos = async (req, res) => {
   }
 };
 
+const verSustento = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({ success: false, message: 'Falta el id del sustento.' });
+    }
+
+    const [rows] = await pool.execute(
+      'SELECT nombre_original, ruta_archivo FROM sustentos WHERE id = ? LIMIT 1',
+      [Number(id)]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Sustento no encontrado.' });
+    }
+
+    const rutaFisica = path.join(__dirname, '..', 'uploads', 'pdfs', path.basename(rows[0].ruta_archivo));
+
+    if (!fs.existsSync(rutaFisica)) {
+      return res.status(404).send('El archivo PDF no existe en el servidor. Si el sistema fue redesplegado, Render pudo haber limpiado el almacenamiento temporal.');
+    }
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename="${path.basename(rows[0].nombre_original || rows[0].ruta_archivo)}"`);
+    return res.sendFile(rutaFisica);
+  } catch (error) {
+    console.error('Error al servir PDF:', error);
+    return res.status(500).json({ success: false, message: 'Error en el servidor al abrir el archivo.' });
+  }
+};
+
 const eliminarSustento = async (req, res) => {
   try {
     const { id } = req.params;
@@ -202,4 +234,4 @@ const eliminarSustento = async (req, res) => {
   }
 };
 
-module.exports = { subirSustentoPDF, obtenerSustentos, eliminarSustento };
+module.exports = { subirSustentoPDF, obtenerSustentos, verSustento, eliminarSustento };

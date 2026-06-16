@@ -283,7 +283,7 @@ const SubirPDFView = ({ trimestreMeses, trimestreId, anio, directorId, trimestre
                       <CheckCircle size={14} /> Listo
                     </span>
                     <a 
-                      href={buildApiUrl(archivo.ruta)}
+                      href={buildApiUrl(`/api/sustentos/${archivo.id}/ver`)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="rounded-xl border border-slate-200 p-2.5 text-slate-500 shadow-sm transition-all hover:border-sky-500 hover:bg-sky-500 hover:text-white focus:border-sky-500 focus:bg-sky-500 focus:text-white dark:border-slate-700 dark:text-slate-300 dark:hover:border-sky-500"
