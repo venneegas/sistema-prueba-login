@@ -161,10 +161,13 @@ const getResumenFinanciero = async (req, res) => {
     const egresosTrimestre = Number(egresosResult[0][0].total);
     const saldoBanco = saldosResult[0].length > 0 ? Number(saldosResult[0][0].saldo_final) : 0;
     const dineroEnCaja = saldoInicialCaja + ingresosTrimestre - egresosTrimestre;
+    const totalIngresosConSaldoInicial = saldoInicialCaja + ingresosTrimestre;
 
     res.status(200).json({
       success: true,
-      totalIngresos: ingresosTrimestre,
+      saldoInicialCaja,
+      ingresosPeriodo: ingresosTrimestre,
+      totalIngresos: totalIngresosConSaldoInicial,
       totalEgresos: egresosTrimestre,
       dineroEnCaja: dineroEnCaja,
       dineroEnBanco: saldoBanco,
@@ -580,10 +583,13 @@ const getReporteGlobal = async (req, res) => {
       const egresos = Number(row.totalEgresos);
       const dineroEnBanco = Number(row.saldoFinal);
       const dineroEnCaja = saldoInicialCaja + ingresos - egresos;
+      const totalIngresosConSaldoInicial = saldoInicialCaja + ingresos;
 
       return {
         ...row,
-        totalIngresos: ingresos,
+        saldoInicialCaja,
+        ingresosPeriodo: ingresos,
+        totalIngresos: totalIngresosConSaldoInicial,
         totalEgresos: egresos,
         dineroEnCaja: dineroEnCaja,
         dineroEnBanco: dineroEnBanco,

@@ -34,7 +34,15 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio, onEstadoChange }) =>
     observacion: 'Extensión excepcional Q1 hasta 18/06/2026'
   });
 
-  const [finanzas, setFinanzas] = useState({ ingresos: 0, egresos: 0, dineroEnCaja: 0, dineroEnBanco: 0, saldoTotal: 0 });
+  const [finanzas, setFinanzas] = useState({
+    saldoInicialCaja: 0,
+    ingresos: 0,
+    ingresosPeriodo: 0,
+    egresos: 0,
+    dineroEnCaja: 0,
+    dineroEnBanco: 0,
+    saldoTotal: 0
+  });
   const [loadingFinanzas, setLoadingFinanzas] = useState(true);
   const [estadoActual, setEstadoActual] = useState(colegio.estado || 'Borrador');
   
@@ -57,7 +65,9 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio, onEstadoChange }) =>
       
       if (data.success) {
         setFinanzas({
+          saldoInicialCaja: data.saldoInicialCaja,
           ingresos: data.totalIngresos,
+          ingresosPeriodo: data.ingresosPeriodo,
           egresos: data.totalEgresos,
           dineroEnCaja: data.dineroEnCaja,
           dineroEnBanco: data.dineroEnBanco,
@@ -232,7 +242,7 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio, onEstadoChange }) =>
 
   const handleOpenManualModal = () => {
     setManualForm({
-      totalIngresos: finanzas.ingresos || '',
+      totalIngresos: finanzas.ingresosPeriodo || '',
       totalEgresos: finanzas.egresos || '',
       saldoBancoFinal: finanzas.dineroEnBanco || '',
       observacion: 'Extensión excepcional Q1 hasta 18/06/2026'
