@@ -358,8 +358,8 @@ const guardarCargaManualConsolidado = async (req, res) => {
       `INSERT INTO estados (director_id, trimestre, anio, estado, fecha_envio)
        VALUES (?, ?, ?, 'Enviado', NOW())
        ON DUPLICATE KEY UPDATE
-         estado = IF(estado = 'Borrador', 'Enviado', estado),
-         fecha_envio = COALESCE(fecha_envio, NOW())`,
+         fecha_envio = IF(estado = 'Aprobado', fecha_envio, NOW()),
+         estado = IF(estado = 'Aprobado', estado, 'Enviado')`,
       [directorId, periodoTrimestre, periodoAnio]
     );
 
@@ -405,7 +405,33 @@ const auditarDeclaracion = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Faltan datos obligatorios para auditar.' });
     }
 
+    if (!['Aprobado', 'Observado'].includes(estado)) {
+      return res.status(400).json({ success: false, message: 'El estado de auditoria no es valido.' });
+    }
+
+    if (estado === 'Observado' && !String(comentario || '').trim()) {
+      return res.status(400).json({ success: false, message: 'El comentario es obligatorio para observar un informe.' });
+    }
+
     await connection.beginTransaction();
+
+    const [[estadoActual]] = await connection.execute(
+      `SELECT estado
+       FROM estados
+       WHERE director_id = ? AND trimestre = ? AND anio = ?
+       LIMIT 1`,
+      [directorId, trimestre, anio]
+    );
+
+    if (!estadoActual || estadoActual.estado !== 'Enviado') {
+      await connection.rollback();
+      return res.status(409).json({
+        success: false,
+        message: estadoActual?.estado === 'Aprobado'
+          ? 'Este informe ya fue aprobado.'
+          : 'Solo se pueden aprobar u observar informes enviados.',
+      });
+    }
 
     // 1. Actualizar o Insertar el estado del trimestre
     const queryEstado = `

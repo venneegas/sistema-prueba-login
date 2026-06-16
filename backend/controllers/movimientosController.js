@@ -318,7 +318,9 @@ const cerrarTrimestre = async (req, res) => {
     await pool.execute(`
       INSERT INTO estados (director_id, trimestre, anio, estado, fecha_envio)
       VALUES (?, ?, ?, 'Enviado', NOW())
-      ON DUPLICATE KEY UPDATE estado = 'Enviado', fecha_envio = NOW()
+      ON DUPLICATE KEY UPDATE
+        fecha_envio = IF(estado = 'Aprobado', fecha_envio, NOW()),
+        estado = IF(estado = 'Aprobado', estado, 'Enviado')
     `, [directorId, trimestreId, anio]);
 
   // Registrar auditoría del cierre de trimestre
@@ -441,6 +443,14 @@ const guardarSaldosBanco = async (req, res) => {
 
     if (!directorId || !trimestreId || !anio || !saldos) {
       return res.status(400).json({ success: false, message: 'Faltan datos requeridos.' });
+    }
+
+    const cierre = await obtenerEstadoCierre(pool, directorId, Number(anio), Number(trimestreId));
+    if (cierre) {
+      return res.status(ESTADO_BLOQUEO_TRIMESTRE).json({
+        success: false,
+        message: `El trimestre ${trimestreId} del ${anio} ya fue cerrado y no admite cambios en saldos.`,
+      });
     }
 
     // Usamos INSERT ... ON DUPLICATE KEY UPDATE aprovechando tu índice único "uk_saldos_trimestre"

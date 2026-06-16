@@ -8,19 +8,19 @@ const { verificarToken } = require('../middlewares/authMiddleware');
 
 // Ruta GET: /api/especialista/colegios
 // Ejemplo de uso: /api/especialista/colegios?trimestre=1&anio=2026
-router.get('/colegios', especialistaController.getColegiosPorTrimestre);
+router.get('/colegios', verificarToken, especialistaController.getColegiosPorTrimestre);
 
 // Ruta GET: /api/especialista/colegio/:directorId/finanzas
 // Obtiene los totales de ingresos, egresos y saldo bancario
-router.get('/colegio/:directorId/finanzas', especialistaController.getResumenFinanciero);
+router.get('/colegio/:directorId/finanzas', verificarToken, especialistaController.getResumenFinanciero);
 
 // Ruta GET: /api/especialista/colegio/:directorId/pdfs
 // Obtiene la lista de documentos PDF subidos como sustento
-router.get('/colegio/:directorId/pdfs', especialistaController.getPdfsPorColegio);
+router.get('/colegio/:directorId/pdfs', verificarToken, especialistaController.getPdfsPorColegio);
 
 // Ruta POST: /api/especialista/auditar
 // Cambia el estado (Aprobar/Observar) y envía notificación
-router.post('/auditar', especialistaController.auditarDeclaracion);
+router.post('/auditar', verificarToken, especialistaController.auditarDeclaracion);
 
 router.post('/consolidado/manual', verificarToken, especialistaController.guardarCargaManualConsolidado);
 
@@ -29,6 +29,6 @@ router.get('/ml/isolation-forest', verificarToken, especialistaController.ejecut
 
 // Ruta GET: /api/especialista/reporte-global
 // Trae la tabla cruzada con todos los colegios y sus sumatorias para el Excel
-router.get('/reporte-global', especialistaController.getReporteGlobal);
+router.get('/reporte-global', verificarToken, especialistaController.getReporteGlobal);
 
 module.exports = router;

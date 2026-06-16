@@ -3,6 +3,53 @@ const path = require('path');
 const { pool } = require('../config/db');
 const { logAuditoria } = require('../utils/auditLogger');
 
+const ESTADO_BLOQUEO_TRIMESTRE = 423;
+let cierreTableReadyPromise = null;
+
+const asegurarTablaCierres = async () => {
+  if (!cierreTableReadyPromise) {
+    cierreTableReadyPromise = pool.execute(
+      `CREATE TABLE IF NOT EXISTS cierres (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        director_id INT NOT NULL,
+        anio INT NOT NULL,
+        trimestre TINYINT NOT NULL,
+        cerrado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY uk_cierres_trimestre (director_id, anio, trimestre),
+        INDEX idx_cierres_director (director_id, anio, trimestre)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`
+    ).catch((error) => {
+      cierreTableReadyPromise = null;
+      throw error;
+    });
+  }
+
+  await cierreTableReadyPromise;
+};
+
+const eliminarArchivoSubido = (file) => {
+  if (!file?.path) return;
+  try {
+    if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
+  } catch (error) {
+    console.error('No se pudo eliminar el archivo temporal:', error);
+  }
+};
+
+const trimestreEstaCerrado = async (directorId, anio, trimestre) => {
+  await asegurarTablaCierres();
+
+  const [rows] = await pool.execute(
+    `SELECT id
+     FROM cierres
+     WHERE director_id = ? AND anio = ? AND trimestre = ?
+     LIMIT 1`,
+    [Number(directorId), Number(anio), Number(trimestre)]
+  );
+
+  return rows.length > 0;
+};
+
 const subirSustentoPDF = async (req, res) => {
   try {
     // Multer ya procesó el archivo físico y lo dejó en req.file
@@ -14,7 +61,16 @@ const subirSustentoPDF = async (req, res) => {
     const { director_id, anio, trimestre } = req.body;
 
     if (!director_id || !anio || !trimestre) {
+      eliminarArchivoSubido(req.file);
       return res.status(400).json({ success: false, message: 'Faltan datos requeridos (director_id, anio, trimestre).' });
+    }
+
+    if (await trimestreEstaCerrado(director_id, anio, trimestre)) {
+      eliminarArchivoSubido(req.file);
+      return res.status(ESTADO_BLOQUEO_TRIMESTRE).json({
+        success: false,
+        message: `El trimestre ${trimestre} del ${anio} ya fue cerrado y no admite nuevos sustentos.`,
+      });
     }
 
     const nombre_original = req.file.originalname;
@@ -95,10 +151,20 @@ const eliminarSustento = async (req, res) => {
     }
 
     // 1. Obtener la ruta del archivo y verificar permisos
-    const [rows] = await pool.execute('SELECT ruta_archivo FROM sustentos WHERE id = ? AND director_id = ?', [Number(id), Number(directorId)]);
+    const [rows] = await pool.execute(
+      'SELECT ruta_archivo, anio, trimestre FROM sustentos WHERE id = ? AND director_id = ?',
+      [Number(id), Number(directorId)]
+    );
     
     if (rows.length === 0) {
       return res.status(404).json({ success: false, message: 'Archivo no encontrado o acceso denegado.' });
+    }
+
+    if (await trimestreEstaCerrado(directorId, rows[0].anio, rows[0].trimestre)) {
+      return res.status(ESTADO_BLOQUEO_TRIMESTRE).json({
+        success: false,
+        message: `El trimestre ${rows[0].trimestre} del ${rows[0].anio} ya fue cerrado y no admite eliminar sustentos.`,
+      });
     }
 
     // 2. Eliminar de la base de datos
