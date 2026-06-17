@@ -1,53 +1,123 @@
-const { exec } = require('child_process');
 const path = require('path');
 const fs = require('fs');
+const mysql = require('mysql2');
 const { logAuditoria } = require('../utils/auditLogger');
 const { pool } = require('../config/db');
 const bcrypt = require('bcryptjs');
 
+const escapeIdentifier = (identifier) => `\`${String(identifier).replace(/`/g, '``')}\``;
 
-const downloadBackup = (req, res) => {
-  // Extraemos las credenciales desde las variables de entorno (.env)
-  const { DB_HOST, DB_USER, DB_PASSWORD, DB_NAME } = process.env;
-  
-  // Generamos un nombre dinámico con la fecha y hora actual
+const formatSqlValue = (value) => {
+  if (value instanceof Date) {
+    return mysql.escape(value.toISOString().slice(0, 19).replace('T', ' '));
+  }
+
+  if (Buffer.isBuffer(value)) {
+    return `X'${value.toString('hex')}'`;
+  }
+
+  return mysql.escape(value);
+};
+
+const generarBackupSql = async (dbName) => {
+  const [tableRows] = await pool.query('SHOW FULL TABLES WHERE Table_type = ?', ['BASE TABLE']);
+  const tableNameKey = `Tables_in_${dbName}`;
+  const tableNames = tableRows
+    .map((row) => row[tableNameKey] || row[Object.keys(row)[0]])
+    .filter(Boolean);
+
+  const lines = [
+    '-- Backup generado por el sistema UGEL Santa',
+    `-- Base de datos: ${dbName}`,
+    `-- Fecha: ${new Date().toISOString()}`,
+    '',
+    'SET FOREIGN_KEY_CHECKS=0;',
+    'SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";',
+    'START TRANSACTION;',
+    ''
+  ];
+
+  for (const tableName of tableNames) {
+    const tableIdentifier = escapeIdentifier(tableName);
+    const [createRows] = await pool.query(`SHOW CREATE TABLE ${tableIdentifier}`);
+    const createStatement = createRows[0]?.['Create Table'];
+
+    lines.push('-- --------------------------------------------------------');
+    lines.push(`-- Estructura de tabla para ${tableIdentifier}`);
+    lines.push(`DROP TABLE IF EXISTS ${tableIdentifier};`);
+    lines.push(`${createStatement};`);
+    lines.push('');
+
+    const [rows] = await pool.query(`SELECT * FROM ${tableIdentifier}`);
+
+    if (rows.length === 0) {
+      lines.push(`-- La tabla ${tableIdentifier} no contiene registros.`);
+      lines.push('');
+      continue;
+    }
+
+    const columns = Object.keys(rows[0]);
+    const columnList = columns.map(escapeIdentifier).join(', ');
+
+    lines.push(`-- Datos de la tabla ${tableIdentifier}`);
+
+    for (let index = 0; index < rows.length; index += 100) {
+      const chunk = rows.slice(index, index + 100);
+      const values = chunk
+        .map((row) => `(${columns.map((column) => formatSqlValue(row[column])).join(', ')})`)
+        .join(',\n');
+
+      lines.push(`INSERT INTO ${tableIdentifier} (${columnList}) VALUES\n${values};`);
+    }
+
+    lines.push('');
+  }
+
+  lines.push('COMMIT;');
+  lines.push('SET FOREIGN_KEY_CHECKS=1;');
+  lines.push('');
+
+  return lines.join('\n');
+};
+
+
+const downloadBackup = async (req, res) => {
+  const { DB_NAME = 'ugel_db' } = process.env;
   const date = new Date();
   const timestamp = date.toISOString().replace(/[:.]/g, '-').substring(0, 19);
   const filename = `backup_${DB_NAME}_${timestamp}.sql`;
-  
-  // Lo guardaremos temporalmente en la carpeta uploads
-  const backupPath = path.join(__dirname, '..', 'uploads', filename);
+  const uploadsDir = path.join(__dirname, '..', 'uploads');
+  const backupPath = path.join(uploadsDir, filename);
 
-  // Construimos el comando mysqldump
-  const passwordFlag = DB_PASSWORD ? `-p${DB_PASSWORD}` : '';
-  const dumpCommand = `mysqldump -h ${DB_HOST} -u ${DB_USER} ${passwordFlag} ${DB_NAME} > "${backupPath}"`;
+  try {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+    const sql = await generarBackupSql(DB_NAME);
+    fs.writeFileSync(backupPath, sql, 'utf8');
 
-  // Ejecutamos el comando en la terminal del servidor
-  exec(dumpCommand, (error, stdout, stderr) => {
-    if (error) {
-      console.error(`Error generando backup: ${error.message}`);
-      return res.status(500).json({ success: false, message: 'Error interno al generar el archivo .sql' });
-    }
-
-    // Si el comando fue exitoso, forzamos la descarga en el navegador
     res.download(backupPath, filename, async (err) => {
       if (err) {
         console.error('Error enviando el archivo al cliente:', err);
       } else {
-        // ¡AQUÍ REGISTRAMOS LA AUDITORÍA!
         await logAuditoria({
-          usuario_id: req.usuario?.id || 1, // Toma el ID del token JWT
+          usuario_id: req.usuario?.id || 1,
           modulo: 'Administración',
           accion: 'DESCARGAR',
-          descripcion: `El administrador generó y descargó un Backup de la BD (${filename})`,
+          descripcion: `El administrador generó y descargó un backup de la BD (${filename})`,
           ip_address: req.ip
         });
       }
 
-      // Limpieza: Eliminamos el archivo temporal del servidor después de enviarlo
-      fs.unlink(backupPath, (unlinkErr) => { if (unlinkErr) console.error('Error eliminando temporal:', unlinkErr); });
+      fs.unlink(backupPath, (unlinkErr) => {
+        if (unlinkErr) console.error('Error eliminando temporal:', unlinkErr);
+      });
     });
-  });
+  } catch (error) {
+    console.error('Error generando backup:', error.message);
+    fs.unlink(backupPath, (unlinkErr) => {
+      if (unlinkErr && unlinkErr.code !== 'ENOENT') console.error('Error eliminando temporal:', unlinkErr);
+    });
+    res.status(500).json({ success: false, message: 'Error interno al generar el archivo .sql' });
+  }
 };
 
 const getAuditoriaLogs = async (req, res) => {
