@@ -351,10 +351,10 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio, onEstadoChange }) =>
                 </div>
                 <div>
                   <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-blue-600 dark:text-blue-300">
-                    Auditoria del reporte
+                    Auditoría del reporte
                   </p>
                   <h2 className="mt-1 text-xl font-black text-slate-900 dark:text-slate-100">
-                    Resolucion de auditoria
+                    Resolución de auditoría
                   </h2>
                   <p className="mt-1 max-w-2xl text-sm font-medium leading-6 text-slate-500 dark:text-slate-400">
                     Contrasta los montos declarados con los sustentos adjuntos antes de aprobar u observar el informe.
@@ -376,7 +376,7 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio, onEstadoChange }) =>
                 {pendiente ? (
                   <div className="flex w-full items-center justify-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-bold text-amber-700 dark:border-amber-800 dark:bg-amber-900/30 dark:text-amber-300 lg:w-auto">
                     <AlertCircle size={18} />
-                    Pendiente de envio
+                    Pendiente de envío
                   </div>
                 ) : aprobado ? (
                   <div className="flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300 lg:w-auto">
@@ -414,7 +414,7 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio, onEstadoChange }) =>
                 <p className="mt-2 text-lg font-black text-slate-900 dark:text-slate-100">{pdfs.length}</p>
               </div>
               <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900/40">
-                <p className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Accion disponible</p>
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Acción disponible</p>
                 <p className="mt-2 text-lg font-black text-slate-900 dark:text-slate-100">{pendiente ? 'Solo consulta' : aprobado ? 'Aprobado' : 'Auditable'}</p>
               </div>
             </div>
@@ -488,7 +488,7 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio, onEstadoChange }) =>
             <div className="flex flex-col gap-3 border-b border-slate-100 bg-slate-50/70 p-5 dark:border-slate-700 dark:bg-slate-900/40 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-blue-600 dark:text-blue-300">Sustento documental</p>
-                <h2 className="mt-1 text-xl font-black text-slate-900 dark:text-slate-100">PDF enviados por la institucion</h2>
+                <h2 className="mt-1 text-xl font-black text-slate-900 dark:text-slate-100">PDF enviados por la institución</h2>
               </div>
               <span className="w-fit rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-black text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
                 {pdfs.length} archivo(s)
@@ -505,7 +505,7 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio, onEstadoChange }) =>
                 <div className="p-10 text-center text-slate-500 dark:text-slate-400">
                   <FileText size={38} className="mx-auto mb-3 text-slate-300 dark:text-slate-600" />
                   <p className="font-bold text-slate-700 dark:text-slate-200">No hay sustentos subidos</p>
-                  <p className="mt-1 text-sm">Aun no se encontraron documentos para este periodo.</p>
+                  <p className="mt-1 text-sm">Aún no se encontraron documentos para este periodo.</p>
                 </div>
               ) : (
                 pdfs.map((pdf) => (
@@ -563,7 +563,7 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio, onEstadoChange }) =>
 
             <div className="p-6 space-y-5">
               <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm font-medium leading-6 text-amber-800 dark:border-amber-800 dark:bg-amber-900/30 dark:text-amber-200">
-                Esta carga aplica solo para el 1er trimestre 2026 y queda bloqueada al 18/06/2026. Se registrara en auditoria como actualizacion manual del consolidado.
+                Esta carga aplica solo para el 1er trimestre 2026 y queda bloqueada al 18/06/2026. Se registrará en auditoría como actualización manual del consolidado.
               </div>
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -605,7 +605,7 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio, onEstadoChange }) =>
               </div>
 
               <label className="block space-y-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Motivo de auditoria</span>
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Motivo de auditoría</span>
                 <textarea
                   value={manualForm.observacion}
                   onChange={(event) => handleManualInputChange('observacion', event.target.value)}

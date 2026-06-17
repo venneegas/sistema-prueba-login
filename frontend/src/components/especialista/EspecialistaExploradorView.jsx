@@ -84,7 +84,7 @@ const EspecialistaExploradorView = ({
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
             <input
               type="text"
-              placeholder="Buscar por código, numero IE o nombre..."
+              placeholder="Buscar por código, número IE o nombre..."
               className="w-full pl-12 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 dark:bg-slate-700 focus:bg-white dark:focus:bg-slate-600 transition-all text-sm font-medium shadow-inner dark:text-slate-200"
               value={searchTerm}
               onChange={(e) => onSearchChange(e.target.value)}

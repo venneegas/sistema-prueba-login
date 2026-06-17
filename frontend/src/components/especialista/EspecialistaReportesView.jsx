@@ -94,8 +94,8 @@ const EspecialistaReportesView = ({
     <>
       <EspecialistaPageHeader
         icon={PieChart}
-        title="Estadisticas Financieras"
-        subtitle="Indicadores de avance, aprobacion y ranking financiero por institucion educativa."
+        title="Estadísticas Financieras"
+        subtitle="Indicadores de avance, aprobación y ranking financiero por institución educativa."
         actions={(
           <EspecialistaPeriodoFilters
             anioActual={anioActual}
@@ -170,9 +170,9 @@ const EspecialistaReportesView = ({
                   <span className="text-2xl font-bold text-slate-700 dark:text-slate-100">{pctSubidos}%</span>
                 </div>
               </div>
-              <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">Avance de Envios</h3>
+              <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">Avance de Envíos</h3>
               <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                Instituciones que ya enviaron su declaracion ({stats.subidos} de {stats.total}).
+                Instituciones que ya enviaron su declaración ({stats.subidos} de {stats.total}).
               </p>
             </div>
 
@@ -197,7 +197,7 @@ const EspecialistaReportesView = ({
                   <span className="text-2xl font-bold text-slate-700 dark:text-slate-100">{pctAprobados}%</span>
                 </div>
               </div>
-              <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">Tasa de Aprobacion</h3>
+              <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">Tasa de Aprobación</h3>
               <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
                 Reportes enviados que ya fueron aprobados ({stats.aprobados} de {stats.subidos}).
               </p>
@@ -224,7 +224,7 @@ const EspecialistaReportesView = ({
                   <span className="text-2xl font-bold text-slate-700 dark:text-slate-100">{pctObservados}%</span>
                 </div>
               </div>
-              <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">Indice de Observaciones</h3>
+              <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">Índice de Observaciones</h3>
               <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
                 Reportes enviados que presentaron inconsistencias ({stats.observados} de {stats.subidos}).
               </p>
@@ -244,7 +244,7 @@ const EspecialistaReportesView = ({
           ) : reporteGlobal.length === 0 ? (
             <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-10 text-center text-slate-500 dark:text-slate-400">
               <p className="text-lg font-semibold text-slate-700 dark:text-slate-200">No hay datos financieros para comparar</p>
-              <p className="text-sm mt-2">Cuando los colegios registren ingresos y egresos en este periodo, apareceran aqui.</p>
+              <p className="text-sm mt-2">Cuando los colegios registren ingresos y egresos en este periodo, aparecerán aquí.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">

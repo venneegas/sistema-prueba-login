@@ -56,7 +56,7 @@ const ReportesView = ({
     {
       id: 'omisos',
       title: 'Reporte de Omisos',
-      description: 'Lista las instituciones que aun no enviaron su declaracion y permanecen como pendientes en el periodo seleccionado.',
+      description: 'Lista las instituciones que aún no enviaron su declaración y permanecen como pendientes en el periodo seleccionado.',
       icon: AlertTriangle,
       accent: 'amber',
       data: omisos,
@@ -131,13 +131,13 @@ const ReportesView = ({
         reporte: reporte.data,
         tipoReporte: reporte.id
       });
-      if (showToast) showToast('Archivo Excel generado y descargado con exito.');
+      if (showToast) showToast('Archivo Excel generado y descargado con éxito.');
     } catch (error) {
       console.error('Error al exportar a Excel:', error);
       if (showToast) {
-        showToast('Ocurrio un error al generar el archivo Excel.', 'error');
+        showToast('Ocurrió un error al generar el archivo Excel.', 'error');
       } else {
-        alert('Ocurrio un error al generar el archivo Excel.');
+        alert('Ocurrió un error al generar el archivo Excel.');
       }
     } finally {
       setExportingReport(null);
@@ -148,7 +148,7 @@ const ReportesView = ({
     <>
       <EspecialistaPageHeader
         icon={FileSpreadsheet}
-        title="Reportes y Exportacion"
+        title="Reportes y Exportación"
         subtitle="Selecciona el periodo y descarga archivos Excel para seguimiento institucional."
         actions={(
           <EspecialistaPeriodoFilters
@@ -239,7 +239,7 @@ const ReportesView = ({
           ) : reporteGlobal.length === 0 ? (
             <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-8 text-center">
               <p className="text-lg font-bold text-slate-700 dark:text-slate-200">No hay instituciones para el periodo seleccionado</p>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">Cuando existan registros disponibles, los reportes se podran exportar desde aquí.</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">Cuando existan registros disponibles, los reportes se podrán exportar desde aquí.</p>
             </div>
           ) : null}
         </div>

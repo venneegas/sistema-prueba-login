@@ -28,7 +28,7 @@ const monitoringItems = [
   },
   {
     id: 'estadisticas',
-    label: 'ESTADISTICAS',
+    label: 'ESTADÍSTICAS',
     description: 'Revisa el avance financiero y los indicadores del periodo.',
     icon: PieChart
   },
@@ -75,7 +75,7 @@ const EspecialistaSidebar = ({
   const configItems = [
     {
       id: 'configuracion',
-      label: 'CONFIGURACION',
+      label: 'CONFIGURACIÓN',
       description: 'Consulta tu perfil y cambia la contraseña de acceso.',
       icon: Settings
     },
@@ -192,7 +192,7 @@ const EspecialistaSidebar = ({
           type="button"
           onClick={onToggleCollapse}
           className={`${isCollapsed ? 'right-1 top-1 h-7 w-7' : 'right-3 top-3 h-8 w-8'} absolute flex items-center justify-center rounded-lg text-slate-400 transition-all hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-slate-800 dark:hover:text-white`}
-          title={isCollapsed ? 'Expandir menu' : 'Contraer menu'}
+          title={isCollapsed ? 'Expandir menú' : 'Contraer menú'}
         >
           {isCollapsed ? <PanelLeftOpen size={17} /> : <PanelLeftClose size={18} />}
         </button>
@@ -203,8 +203,8 @@ const EspecialistaSidebar = ({
         onScroll={() => setTooltipData(null)}
       >
         {renderSection('Monitoreo', monitoringItems)}
-        {renderSection('Gestion', managementItems)}
-        {renderSection('Configuracion', configItems)}
+        {renderSection('Gestión', managementItems)}
+        {renderSection('Configuración', configItems)}
       </nav>
 
       <div className={`${isCollapsed ? 'p-3' : 'p-4'} shrink-0 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-[#091426]`}>
@@ -214,7 +214,7 @@ const EspecialistaSidebar = ({
               <div className="flex items-center justify-between p-5 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
                 <h3 className="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
                   <HelpCircle className="text-blue-500" size={20} />
-                  Soporte Tecnico UGEL
+                  Soporte Técnico UGEL
                 </h3>
                 <button
                   type="button"
@@ -227,7 +227,7 @@ const EspecialistaSidebar = ({
 
               <div className="p-6">
                 <p className="text-sm text-slate-600 dark:text-slate-300 mb-6 font-medium">
-                  Comunicate con soporte si tienes problemas durante la revision o exportacion de reportes.
+                  Comunícate con soporte si tienes problemas durante la revisión o exportación de reportes.
                 </p>
                 <div className="space-y-4">
                   <div className="flex items-center gap-4">
@@ -235,7 +235,7 @@ const EspecialistaSidebar = ({
                       <Phone size={20} />
                     </div>
                     <div>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Telefono / WhatsApp</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Teléfono / WhatsApp</p>
                       <p className="text-sm font-bold text-slate-800 dark:text-slate-200">986675438</p>
                     </div>
                   </div>
@@ -244,7 +244,7 @@ const EspecialistaSidebar = ({
                       <Mail size={20} />
                     </div>
                     <div>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Correo Electronico</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Correo Electrónico</p>
                       <p className="text-sm font-bold text-slate-800 dark:text-slate-200 break-all">recursos_propios_ie@ugelsanta.gob.pe</p>
                     </div>
                   </div>
@@ -253,7 +253,7 @@ const EspecialistaSidebar = ({
                       <Clock size={20} />
                     </div>
                     <div>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Horario de Atencion</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Horario de Atención</p>
                       <p className="text-sm font-bold text-slate-800 dark:text-slate-200">Lunes a Viernes de 8:00 AM a 5:00 PM</p>
                     </div>
                   </div>

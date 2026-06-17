@@ -25,7 +25,7 @@ const EspecialistaConfiguracionView = ({ user, onOpenChangePassword }) => {
     <>
       <EspecialistaPageHeader
         icon={Settings}
-        title="Configuracion de Cuenta"
+        title="Configuración de Cuenta"
         subtitle="Gestiona tu perfil, seguridad y preferencias del panel de especialista."
         actions={(
           <div className="inline-flex items-center gap-2 rounded-xl border border-blue-100 bg-blue-50 px-4 py-2.5 text-sm font-bold text-blue-700 dark:border-blue-900/60 dark:bg-blue-950/30 dark:text-blue-300">

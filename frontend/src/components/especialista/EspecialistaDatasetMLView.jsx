@@ -162,7 +162,7 @@ const EspecialistaDatasetMLView = ({
               <p className="font-bold">
                 {meta?.listo_para_entrenamiento
                   ? 'Dataset listo para entrenamiento.'
-                  : 'Dataset aun no listo para entrenamiento: revisa filas incompletas.'}
+                  : 'Dataset aún no listo para entrenamiento: revisa filas incompletas.'}
               </p>
             </div>
           </div>
@@ -174,7 +174,7 @@ const EspecialistaDatasetMLView = ({
                 type="text"
                 value={busqueda}
                 onChange={(event) => setBusqueda(event.target.value)}
-                placeholder="Buscar por I.E., codigo modular o numero..."
+                placeholder="Buscar por I.E., código modular o número..."
                 className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-11 pr-4 text-sm text-slate-700 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:focus:ring-blue-900/40"
               />
             </label>
@@ -185,7 +185,7 @@ const EspecialistaDatasetMLView = ({
               <table className="w-full min-w-[1120px] border-collapse text-left">
                 <thead>
                   <tr className="border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wider text-slate-500 dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-400">
-                    <th className="p-4 font-bold">Institucion</th>
+                    <th className="p-4 font-bold">Institución</th>
                     <th className="p-4 font-bold text-right">Inicial</th>
                     <th className="p-4 font-bold text-right">Ingresos</th>
                     <th className="p-4 font-bold text-right">Egresos</th>
@@ -226,7 +226,7 @@ const EspecialistaDatasetMLView = ({
                       <td className="p-4 text-right font-mono font-bold">{money(row.saldo_final)}</td>
                       <td className="p-4 text-center">
                         <span className={`rounded-full px-3 py-1 text-xs font-bold ${row.carga_manual ? 'bg-blue-50 text-blue-700' : 'bg-slate-100 text-slate-500'}`}>
-                          {row.carga_manual ? 'Si' : 'No'}
+                          {row.carga_manual ? 'Sí' : 'No'}
                         </span>
                       </td>
                       <td className="p-4 text-center">

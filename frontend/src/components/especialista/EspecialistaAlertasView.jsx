@@ -155,7 +155,7 @@ const EspecialistaAlertasView = ({
       <EspecialistaPageHeader
         icon={Bell}
         title="Alertas"
-        subtitle="Deteccion automatica de anomalias financieras con Isolation Forest."
+        subtitle="Detección automática de anomalías financieras con Isolation Forest."
         actions={(
           <>
             <EspecialistaPeriodoFilters
@@ -168,9 +168,9 @@ const EspecialistaAlertasView = ({
             <div className="flex items-center gap-3 rounded-xl border border-blue-100 bg-blue-50/60 px-4 py-2.5 text-sm dark:border-slate-700 dark:bg-slate-900">
               <Clock3 size={18} className="text-blue-600 dark:text-blue-400" />
               <div>
-                <p className="font-bold text-slate-700 dark:text-slate-200">Ultima actualizacion</p>
+                <p className="font-bold text-slate-700 dark:text-slate-200">Última actualización</p>
                 <p className="text-slate-500 dark:text-slate-400">
-                  {ultimaActualizacion ? ultimaActualizacion.toLocaleString('es-PE') : 'Pendiente de ejecucion'}
+                  {ultimaActualizacion ? ultimaActualizacion.toLocaleString('es-PE') : 'Pendiente de ejecución'}
                 </p>
               </div>
             </div>
@@ -197,7 +197,7 @@ const EspecialistaAlertasView = ({
               <div>
                 <h2 className="font-bold text-slate-800 dark:text-slate-100">Modelo Isolation Forest</h2>
                 <p className="text-sm text-slate-600 dark:text-slate-300 mt-1 max-w-3xl">
-                  Ejecuta el modelo con las filas completas del dataset del periodo seleccionado. Los resultados se muestran como alertas de anomalias financieras.
+                  Ejecuta el modelo con las filas completas del dataset del periodo seleccionado. Los resultados se muestran como alertas de anomalías financieras.
                 </p>
               </div>
             </div>
@@ -233,7 +233,7 @@ const EspecialistaAlertasView = ({
           <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-5">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
               <label className="lg:col-span-3">
-                <span className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Tipo de anomalia</span>
+                <span className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Tipo de anomalía</span>
                 <select
                   value={filtros.tipo}
                   onChange={(e) => setFiltros({ ...filtros, tipo: e.target.value })}
@@ -268,7 +268,7 @@ const EspecialistaAlertasView = ({
                     type="text"
                     value={filtros.busqueda}
                     onChange={(e) => setFiltros({ ...filtros, busqueda: e.target.value })}
-                    placeholder="Buscar por I.E., codigo modular o numero..."
+                    placeholder="Buscar por I.E., código modular o número..."
                     className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 pl-11 pr-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 outline-none"
                   />
                 </div>
@@ -284,11 +284,11 @@ const EspecialistaAlertasView = ({
                     <th className="p-4 font-bold">Fecha y hora</th>
                     <th className="p-4 font-bold">Variables atipicas</th>
                     <th className="p-4 font-bold">Institucion</th>
-                    <th className="p-4 font-bold">Codigo</th>
+                    <th className="p-4 font-bold">Código</th>
                     <th className="p-4 font-bold text-right">Saldo final</th>
                     <th className="p-4 font-bold text-center">Nivel</th>
                     <th className="p-4 font-bold text-center">Puntaje</th>
-                    <th className="p-4 font-bold text-center">Accion</th>
+                    <th className="p-4 font-bold text-center">Acción</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -299,7 +299,7 @@ const EspecialistaAlertasView = ({
                           <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-300 mb-4">
                             <FileSearch size={30} />
                           </div>
-                          <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">No hay alertas de anomalias para mostrar</h3>
+                          <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">No hay alertas de anomalías para mostrar</h3>
                           <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
                             Ejecuta el modelo o ajusta los filtros para el periodo {periodoLabel}.
                           </p>
@@ -310,7 +310,7 @@ const EspecialistaAlertasView = ({
                     <tr key={alerta.director_id} className="border-b border-slate-100 text-sm hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-900/50">
                       <td className="p-4">{ultimaActualizacion?.toLocaleString('es-PE') || '-'}</td>
                       <td className="p-4 font-bold text-slate-700 dark:text-slate-200">
-                        {(alerta.top_features || []).slice(0, 2).map((feature) => feature.feature).join(', ') || 'Patron financiero'}
+                        {(alerta.top_features || []).slice(0, 2).map((feature) => feature.feature).join(', ') || 'Patrón financiero'}
                       </td>
                       <td className="p-4 text-slate-600 dark:text-slate-300">
                         {alerta.institucion}
@@ -348,9 +348,9 @@ const EspecialistaAlertasView = ({
                 <Info size={18} />
               </div>
               <div>
-                <h3 className="font-bold text-slate-800 dark:text-slate-100">Sobre las alertas de anomalias</h3>
+                <h3 className="font-bold text-slate-800 dark:text-slate-100">Sobre las alertas de anomalías</h3>
                 <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                  El modelo compara colegios del mismo periodo y marca patrones inusuales. Una alerta no es error confirmado; es una senal para revision.
+                  El modelo compara colegios del mismo periodo y marca patrones inusuales. Una alerta no es error confirmado; es una señal para revisión.
                 </p>
               </div>
             </div>
