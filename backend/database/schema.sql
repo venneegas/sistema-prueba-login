@@ -12,14 +12,14 @@
 -- ============================================
 CREATE TABLE IF NOT EXISTS instituciones (
   id                 INT AUTO_INCREMENT PRIMARY KEY,
-  codigo_modular     VARCHAR(20) NOT NULL COMMENT 'Codigo MINEDU unico',
+  codigo_modular     VARCHAR(20) DEFAULT NULL COMMENT 'Codigo MINEDU unico',
   ruc                VARCHAR(11) DEFAULT NULL COMMENT 'RUC de la institucion educativa si corresponde',
   numero             VARCHAR(20) DEFAULT NULL COMMENT 'Numero oficial de la institucion educativa',
   nombre             VARCHAR(200) NOT NULL COMMENT 'Nombre completo de la institucion',
   nivel_educativo    ENUM('inicial', 'primaria', 'secundaria', 'tecnico', 'superior') NOT NULL,
   modalidad          ENUM('regular', 'especial', 'alternativa') NOT NULL,
   provincia          VARCHAR(100) NOT NULL,
-  distrito           VARCHAR(100) NOT NULL,
+  distrito           VARCHAR(100) DEFAULT NULL,
   creado_en          TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
   actualizado_en     TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS instituciones (
 -- ============================================
 CREATE TABLE IF NOT EXISTS directores (
   id                 INT AUTO_INCREMENT PRIMARY KEY,
-  dni                VARCHAR(8) NOT NULL COMMENT 'DNI peruano (8 digitos)',
+  dni                VARCHAR(8) DEFAULT NULL COMMENT 'DNI peruano (8 digitos)',
   nombres            VARCHAR(100) NOT NULL,
   apellido_paterno   VARCHAR(100) NOT NULL,
   apellido_materno   VARCHAR(100) DEFAULT NULL,

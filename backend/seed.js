@@ -46,10 +46,18 @@ async function runSeeder() {
 
     // 6. Insertar Usuarios
     console.log('🔐 Insertando Usuarios...');
+    const rolesMap = {
+      director: 1,
+      especialista: 2,
+      admin: 3,
+    };
+
     for (const usr of datos.usuarios) {
+      const rolId = rolesMap[String(usr.rol || '').toLowerCase()] || 1;
+
       await pool.execute(
-        `INSERT IGNORE INTO usuarios (id, email, nombre, password_hash, rol, director_id, estado) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [usr.id, usr.email, usr.nombre || null, usr.password_hash, usr.rol, usr.director_id, usr.estado]
+        `INSERT IGNORE INTO usuarios (id, email, nombre, password_hash, rol_id, director_id, estado, debe_cambiar_password) VALUES (?, ?, ?, ?, ?, ?, ?, TRUE)`,
+        [usr.id, usr.email, usr.nombre || null, usr.password_hash, rolId, usr.director_id, usr.estado]
       );
     }
     

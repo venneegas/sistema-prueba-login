@@ -7,3 +7,7 @@ node_modules/
 # Python
 __pycache__/
 *.pyc
+
+# Datos locales / exportaciones SQL generadas
+backend/data/*.sql
+backend/data/*.json
