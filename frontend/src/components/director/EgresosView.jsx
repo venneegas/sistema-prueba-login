@@ -6,6 +6,7 @@ import { jsPDF } from 'jspdf';
 import { autoTable } from 'jspdf-autotable';
 import ExcelJS from 'exceljs';
 import ConfirmModal from './ConfirmModal';
+import { UGEL_LOGO_SRC } from '../../config/assets';
 
 const API_URL = buildApiUrl('/api/movimientos/egresos');
 
@@ -515,12 +516,12 @@ const EgresosView = ({ trimestreMeses, trimestreId, anio, directorId, trimestreC
 
     // Intento de cargar logo de la UGEL
     try {
-      const logoRes = await fetch('https://ugelsanta.gob.pe/wp-content/uploads/2026/02/Logo_US3.png');
+      const logoRes = await fetch(UGEL_LOGO_SRC);
       const logoBuffer = await logoRes.arrayBuffer();
       const logoId = wb.addImage({ buffer: logoBuffer, extension: 'png' });
       ws.addImage(logoId, { tl: { col: 0.1, row: 0.1 }, ext: { width: 90, height: 35 } });
     } catch (e) {
-      console.log('El logo no se pudo incrustar (CORS protegido por el servidor UGEL). Se omitirá.');
+      console.log('El logo local no se pudo incrustar. Se omitira.');
     }
 
     ws.columns = [

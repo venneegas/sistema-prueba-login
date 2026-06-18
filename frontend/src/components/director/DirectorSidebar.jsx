@@ -19,6 +19,7 @@ import {
   UserRound,
   FileCheck2,
 } from 'lucide-react';
+import { UGEL_COMPACT_LOGO_SRC, UGEL_LOGO_SRC } from '../../config/assets';
 
 const DirectorSidebar = ({
   activeTab,
@@ -124,10 +125,9 @@ const DirectorSidebar = ({
     <aside className={`${isCollapsed ? 'w-20' : 'w-64'} bg-white dark:bg-[#07111f] text-slate-800 dark:text-white h-screen min-h-0 shrink-0 flex flex-col shadow-[10px_0_35px_-28px_rgba(15,23,42,0.9)] z-20 border-r border-slate-200 dark:border-slate-800 transition-all duration-300`}>
       <div className={`${isCollapsed ? 'px-3 py-5' : 'p-6'} relative shrink-0 border-b border-slate-200 dark:border-slate-800 text-center flex justify-center bg-white dark:bg-[#07111f]`}>
         <img
-          src="https://ugelsanta.gob.pe/wp-content/uploads/2026/02/Logo_US3.png"
+          src={isCollapsed ? UGEL_COMPACT_LOGO_SRC : UGEL_LOGO_SRC}
           alt="Logo UGEL"
-          className={`${isCollapsed ? 'mt-1 h-10 w-12 object-contain' : 'h-16 w-auto object-contain'} drop-shadow-sm transition-all duration-300`}
-          onError={(e) => { e.target.src = 'https://via.placeholder.com/150?text=Logo+UGEL'; }}
+          className={`${isCollapsed ? 'mt-1 h-12 w-12 rounded-lg object-contain' : 'h-16 w-auto object-contain'} drop-shadow-sm transition-all duration-300`}
         />
         <button
           type="button"

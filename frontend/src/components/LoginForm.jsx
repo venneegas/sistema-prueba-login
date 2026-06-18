@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { User, Lock, Eye, EyeOff, CheckCircle } from 'lucide-react';
 import { buildApiUrl } from '../config/api';
+import { UGEL_LOGO_SRC } from '../config/assets';
 import ForgotPassword from './ForgotPassword';
 import { saveSession } from '../utils/sessionManager';
 
@@ -67,10 +68,9 @@ const LoginForm = ({ onLoginSuccess }) => {
         <div className="relative z-10 text-white max-w-lg">
           <div className="bg-white p-5 rounded-3xl border border-slate-200 inline-block mb-8 shadow-2xl">
             <img 
-              src="https://ugelsanta.gob.pe/wp-content/uploads/2026/02/Logo_US3.png" 
+              src={UGEL_LOGO_SRC}
               alt="Logo UGEL" 
               className="h-16 w-auto object-contain drop-shadow-md" 
-              onError={(e) => { e.target.src = 'https://via.placeholder.com/150?text=Logo+UGEL' }}
             />
           </div>
           <h1 className="text-4xl lg:text-5xl font-extrabold mb-5 leading-tight tracking-tight">
@@ -100,7 +100,7 @@ const LoginForm = ({ onLoginSuccess }) => {
           <div className="lg:hidden mb-8 flex justify-center">
             <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
               <img 
-                src="https://ugelsanta.gob.pe/wp-content/uploads/2026/02/Logo_US3.png" 
+                src={UGEL_LOGO_SRC}
                 alt="Logo UGEL" 
                 className="h-14 w-auto object-contain" 
               />

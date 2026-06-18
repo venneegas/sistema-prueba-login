@@ -19,6 +19,7 @@ const perfilRoutes = require('./routes/perfilRoutes');
 const app = express();
 app.set('trust proxy', 1); // Si estás detrás de un proxy (como Nginx o Heroku), esto es importante para que el rate limiter funcione correctamente con las IPs reales
 const PORT = process.env.PORT || 5000;
+const isProduction = process.env.NODE_ENV === 'production';
 const allowedOrigins = (process.env.CORS_ORIGIN || 'http://localhost:3000')
   .split(',')
   .map((origin) => origin.trim())
@@ -28,6 +29,15 @@ const allowedOrigins = (process.env.CORS_ORIGIN || 'http://localhost:3000')
 // 1. Helmet: Seguridad de Cabeceras HTTP
 app.use(helmet({
   crossOriginResourcePolicy: false, // Permite que tu frontend cargue los PDFs de /uploads sin ser bloqueado
+  contentSecurityPolicy: {
+    directives: {
+      ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+      'script-src': [
+        "'self'",
+        ...(isProduction ? [] : ["'unsafe-eval'"]),
+      ],
+    },
+  },
 }));
 
 // 2. Rate Limiting: Protección Anti-Fuerza Bruta
