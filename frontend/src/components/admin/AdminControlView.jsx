@@ -370,7 +370,7 @@ const AdminControlView = ({ showToast }) => {
           </section>
 
           <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-            <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+            <section className="min-w-0 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
               <div className="mb-5 flex items-center gap-3">
                 <Building2 className="text-blue-700 dark:text-blue-300" size={22} />
                 <div>
@@ -395,7 +395,7 @@ const AdminControlView = ({ showToast }) => {
               </div>
             </section>
 
-            <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+            <section className="min-w-0 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
               <div className="mb-5 flex items-center gap-3">
                 <Link2 className="text-blue-700 dark:text-blue-300" size={22} />
                 <div>
@@ -419,28 +419,28 @@ const AdminControlView = ({ showToast }) => {
                   <button onClick={saveInstitucion} className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-700 px-5 py-2.5 text-sm font-bold text-white hover:bg-blue-800 md:col-span-2"><Save size={18} /> Guardar institucion</button>
                 </div>
               )}
-              <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-[1fr_1fr_auto]">
-                <select value={institucionId} onChange={(e) => setInstitucionId(e.target.value)} className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+              <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
+                <select value={institucionId} onChange={(e) => setInstitucionId(e.target.value)} className="min-w-0 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
                   {instituciones.map((item) => <option key={item.id} value={item.id}>{item.numero || '-'} - {item.nombre}</option>)}
                 </select>
-                <select value={especialistaId} onChange={(e) => setEspecialistaId(e.target.value)} className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+                <select value={especialistaId} onChange={(e) => setEspecialistaId(e.target.value)} className="min-w-0 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
                   {especialistas.map((item) => <option key={item.id} value={item.id}>{item.nombre || item.email}</option>)}
                 </select>
-                <button onClick={asignar} disabled={!institucionId || !especialistaId} className="rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-emerald-700 disabled:opacity-60">Asignar</button>
+                <button onClick={asignar} disabled={!institucionId || !especialistaId} className="rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-emerald-700 disabled:opacity-60 md:whitespace-nowrap">Asignar</button>
               </div>
               <div className="mt-4 rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4 dark:border-emerald-900/50 dark:bg-emerald-950/20">
                 <div className="mb-3 flex items-center gap-2">
                   <CheckSquare size={18} className="text-emerald-700 dark:text-emerald-300" />
                   <p className="text-sm font-black text-slate-800 dark:text-slate-100">Asignacion masiva: {bulkSelected.length} I.E. seleccionadas</p>
                 </div>
-                <div className="flex flex-wrap items-center gap-3">
-                  <label className="inline-flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-200">
+                <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr)_auto_auto_auto]">
+                  <label className="inline-flex min-w-0 items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-200">
                     <input type="checkbox" checked={bulkReplace} onChange={(e) => setBulkReplace(e.target.checked)} className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" />
-                    Reemplazar cartera actual del especialista
+                    <span className="min-w-0">Reemplazar cartera actual</span>
                   </label>
-                  <button onClick={() => setBulkSelected(filteredInstituciones.slice(0, 80).map((item) => item.id))} className="rounded-xl border border-emerald-200 bg-white px-4 py-2 text-xs font-black text-emerald-700 hover:bg-emerald-50 dark:border-emerald-900 dark:bg-slate-900 dark:text-emerald-300">Seleccionar visibles</button>
-                  <button onClick={() => setBulkSelected([])} className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-black text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">Limpiar</button>
-                  <button onClick={asignarMasivo} disabled={!especialistaId || bulkSelected.length === 0 || savingKey === 'asignar-masivo'} className="rounded-xl bg-emerald-600 px-5 py-2 text-sm font-bold text-white hover:bg-emerald-700 disabled:opacity-60">Aplicar masivo</button>
+                  <button onClick={() => setBulkSelected(filteredInstituciones.slice(0, 80).map((item) => item.id))} className="rounded-xl border border-emerald-200 bg-white px-4 py-2 text-xs font-black text-emerald-700 hover:bg-emerald-50 dark:border-emerald-900 dark:bg-slate-900 dark:text-emerald-300 lg:whitespace-nowrap">Seleccionar visibles</button>
+                  <button onClick={() => setBulkSelected([])} className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-black text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 lg:whitespace-nowrap">Limpiar</button>
+                  <button onClick={asignarMasivo} disabled={!especialistaId || bulkSelected.length === 0 || savingKey === 'asignar-masivo'} className="rounded-xl bg-emerald-600 px-5 py-2 text-sm font-bold text-white hover:bg-emerald-700 disabled:opacity-60 lg:whitespace-nowrap">Aplicar masivo</button>
                 </div>
               </div>
             </section>
