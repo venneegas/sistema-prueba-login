@@ -10,6 +10,7 @@ const TIPO_MOVIMIENTO = {
 const ESTADO_BLOQUEO_TRIMESTRE = 423;
 let cierreTableReadyPromise = null;
 let periodoConfigReadyPromise = null;
+let periodoProrrogasReadyPromise = null;
 
 const obtenerTipoMovimiento = (tipo) => TIPO_MOVIMIENTO[tipo];
 
@@ -74,6 +75,31 @@ const asegurarTablaPeriodoConfig = async (connection = pool) => {
   await periodoConfigReadyPromise;
 };
 
+const asegurarTablaPeriodoProrrogas = async (connection = pool) => {
+  if (!periodoProrrogasReadyPromise) {
+    periodoProrrogasReadyPromise = connection.execute(
+      `CREATE TABLE IF NOT EXISTS periodo_prorrogas (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        director_id INT NOT NULL,
+        anio INT NOT NULL,
+        trimestre TINYINT NOT NULL,
+        fecha_limite DATETIME NOT NULL,
+        motivo VARCHAR(255) DEFAULT NULL,
+        creado_por INT DEFAULT NULL,
+        creado_en TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+        actualizado_en TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        UNIQUE KEY uk_periodo_prorroga (director_id, anio, trimestre),
+        KEY idx_periodo_prorroga_director (director_id, anio, trimestre)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`
+    ).catch((error) => {
+      periodoProrrogasReadyPromise = null;
+      throw error;
+    });
+  }
+
+  await periodoProrrogasReadyPromise;
+};
+
 const obtenerFechaLimiteDefault = (anio, trimestre) => {
   const year = Number(anio);
   switch (String(trimestre)) {
@@ -86,7 +112,7 @@ const obtenerFechaLimiteDefault = (anio, trimestre) => {
 };
 
 const obtenerConfigPeriodo = async (req, res) => {
-  const { anio, trimestreId } = req.query;
+  const { anio, trimestreId, directorId } = req.query;
 
   if (!anio || !trimestreId) {
     return res.status(400).json({ success: false, message: 'anio y trimestreId son requeridos.' });
@@ -94,6 +120,32 @@ const obtenerConfigPeriodo = async (req, res) => {
 
   try {
     await asegurarTablaPeriodoConfig(pool);
+    await asegurarTablaPeriodoProrrogas(pool);
+
+    if (directorId) {
+      const [prorrogaRows] = await pool.execute(
+        `SELECT fecha_limite, motivo
+         FROM periodo_prorrogas
+         WHERE director_id = ? AND anio = ? AND trimestre = ?
+         LIMIT 1`,
+        [directorId, anio, trimestreId]
+      );
+
+      if (prorrogaRows[0]) {
+        return res.json({
+          success: true,
+          data: {
+            anio: Number(anio),
+            trimestre: Number(trimestreId),
+            fechaLimite: prorrogaRows[0].fecha_limite,
+            descripcion: prorrogaRows[0].motivo || null,
+            configurado: true,
+            fuente: 'prorroga',
+          },
+        });
+      }
+    }
+
     const [rows] = await pool.execute(
       `SELECT fecha_limite, descripcion
        FROM periodo_config
@@ -112,6 +164,7 @@ const obtenerConfigPeriodo = async (req, res) => {
         fechaLimite,
         descripcion: rows[0]?.descripcion || null,
         configurado: Boolean(rows[0]),
+        fuente: rows[0] ? 'global' : 'default',
       },
     });
   } catch (error) {

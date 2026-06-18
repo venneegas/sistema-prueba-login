@@ -15,8 +15,10 @@ import useEspecialistaReporteGlobal from '../../hooks/useEspecialistaReporteGlob
 import useEspecialistaStats from '../../hooks/useEspecialistaStats';
 import useTheme from '../../hooks/useTheme';
 import FloatingThemeToggle from '../FloatingThemeToggle';
+import GlobalNoticeBanner from '../GlobalNoticeBanner';
 import { AlertTriangle, CheckCircle } from 'lucide-react';
 import { ESTADOS_REPORTE } from '../../utils/estadoReporte';
+import { buildApiUrl } from '../../config/api';
 
 const ESTADOS_EXPLORADOR = ESTADOS_REPORTE;
 const COLEGIO_DETALLE_HISTORY_STATE = 'especialista-colegio-detalle';
@@ -48,6 +50,7 @@ const EspecialistaDashboard = ({ user, onLogout }) => {
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [avisosGlobales, setAvisosGlobales] = useState([]);
   const { isDarkMode, toggleTheme } = useTheme();
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' }); // ESTADO GLOBAL DEL TOAST
 
@@ -68,6 +71,24 @@ const EspecialistaDashboard = ({ user, onLogout }) => {
   useEffect(() => {
     selectedColegioRef.current = selectedColegio;
   }, [selectedColegio]);
+
+  useEffect(() => {
+    const cargarAvisosGlobales = async () => {
+      try {
+        const response = await fetch(buildApiUrl('/api/admin/avisos/activos?rol=especialista'), {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        });
+        const data = await response.json();
+        if (response.ok && data.success) {
+          setAvisosGlobales(data.data || []);
+        }
+      } catch (error) {
+        console.error('No se pudieron cargar los avisos globales:', error);
+      }
+    };
+
+    cargarAvisosGlobales();
+  }, []);
 
   useEffect(() => {
     if (anioActual > currentSysYear) {
@@ -176,6 +197,12 @@ const EspecialistaDashboard = ({ user, onLogout }) => {
       />
 
       <main className="flex-1 flex flex-col overflow-hidden">
+        {avisosGlobales.length > 0 && (
+          <div className="shrink-0 bg-slate-50 px-6 pt-5 dark:bg-slate-900">
+            <GlobalNoticeBanner avisos={avisosGlobales} />
+          </div>
+        )}
+
         {activeView === 'solicitudes' ? (
           <EspecialistaSolicitudesPage />
         ) : activeView === 'estadisticas' ? (

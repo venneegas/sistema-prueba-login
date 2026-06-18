@@ -14,6 +14,7 @@ import EstadoReporteView from './EstadoReporteView';
 import { buildApiUrl } from '../../config/api';
 import useTheme from '../../hooks/useTheme';
 import FloatingThemeToggle from '../FloatingThemeToggle';
+import GlobalNoticeBanner from '../GlobalNoticeBanner';
 
 const CIERRES_API_URL = buildApiUrl('/api/movimientos/cierres');
 
@@ -56,6 +57,7 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
   const [mensajeCierre, setMensajeCierre] = useState('');
   const [errorCierre, setErrorCierre] = useState('');
   const [fechaLimiteAdmin, setFechaLimiteAdmin] = useState(null);
+  const [avisosGlobales, setAvisosGlobales] = useState([]);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [notificaciones, setNotificaciones] = useState([]);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -240,13 +242,14 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
 
   useEffect(() => {
     const cargarConfigPeriodo = async () => {
-      if (!anioActual || !trimestreId || cambioObligatorioPendiente) return;
+      if (!anioActual || !trimestreId || !user.director?.id || cambioObligatorioPendiente) return;
 
       try {
         setFechaLimiteAdmin(null);
         const query = new URLSearchParams({
           anio: String(anioActual),
           trimestreId: String(trimestreId),
+          directorId: String(user.director.id),
         });
         const response = await fetch(`${buildApiUrl('/api/movimientos/periodos/config')}?${query.toString()}`, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
@@ -263,7 +266,27 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
     };
 
     cargarConfigPeriodo();
-  }, [anioActual, trimestreId, cambioObligatorioPendiente]);
+  }, [anioActual, trimestreId, user.director?.id, cambioObligatorioPendiente]);
+
+  useEffect(() => {
+    const cargarAvisosGlobales = async () => {
+      if (cambioObligatorioPendiente) return;
+
+      try {
+        const response = await fetch(buildApiUrl('/api/admin/avisos/activos?rol=director'), {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        });
+        const data = await leerRespuestaJson(response);
+        if (response.ok && data.success) {
+          setAvisosGlobales(data.data || []);
+        }
+      } catch (noticeError) {
+        console.error('No se pudieron cargar los avisos globales:', noticeError);
+      }
+    };
+
+    cargarAvisosGlobales();
+  }, [cambioObligatorioPendiente]);
 
   const handleCerrarTrimestre = async () => {
     if (trimestreCerrado || !user.director?.id || cambioObligatorioPendiente) return;
@@ -466,6 +489,8 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
             </div>
           </div>
         </div>
+
+        <GlobalNoticeBanner avisos={avisosGlobales} />
 
         {cambioObligatorioPendiente ? (
           <div className="bg-amber-50 border border-amber-200 rounded-xl p-6 text-amber-900">

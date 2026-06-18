@@ -36,6 +36,50 @@ const asegurarTablasAdmin = async () => {
           KEY idx_especialista_instituciones_especialista (especialista_id),
           KEY idx_especialista_instituciones_institucion (institucion_id)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`
+      ),
+      pool.execute(
+        `CREATE TABLE IF NOT EXISTS periodo_prorrogas (
+          id INT AUTO_INCREMENT PRIMARY KEY,
+          director_id INT NOT NULL,
+          anio INT NOT NULL,
+          trimestre TINYINT NOT NULL,
+          fecha_limite DATETIME NOT NULL,
+          motivo VARCHAR(255) DEFAULT NULL,
+          creado_por INT DEFAULT NULL,
+          creado_en TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+          actualizado_en TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+          UNIQUE KEY uk_periodo_prorroga (director_id, anio, trimestre),
+          KEY idx_periodo_prorroga_director (director_id, anio, trimestre)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`
+      ),
+      pool.execute(
+        `CREATE TABLE IF NOT EXISTS admin_cierre_historial (
+          id INT AUTO_INCREMENT PRIMARY KEY,
+          director_id INT NOT NULL,
+          anio INT NOT NULL,
+          trimestre TINYINT NOT NULL,
+          accion VARCHAR(20) NOT NULL,
+          motivo VARCHAR(255) DEFAULT NULL,
+          usuario_id INT DEFAULT NULL,
+          fecha TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+          ip_address VARCHAR(45) DEFAULT NULL,
+          KEY idx_cierre_historial_periodo (director_id, anio, trimestre),
+          KEY idx_cierre_historial_fecha (fecha)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`
+      ),
+      pool.execute(
+        `CREATE TABLE IF NOT EXISTS avisos_globales (
+          id INT AUTO_INCREMENT PRIMARY KEY,
+          titulo VARCHAR(150) NOT NULL,
+          mensaje TEXT NOT NULL,
+          rol_destino VARCHAR(30) NOT NULL DEFAULT 'todos',
+          activo TINYINT(1) NOT NULL DEFAULT 1,
+          visible_desde DATETIME DEFAULT NULL,
+          visible_hasta DATETIME DEFAULT NULL,
+          creado_por INT DEFAULT NULL,
+          creado_en TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+          KEY idx_avisos_visibilidad (activo, rol_destino, visible_desde, visible_hasta)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`
       )
     ]).catch((error) => {
       adminTablesReadyPromise = null;
@@ -644,8 +688,162 @@ const quitarEspecialista = async (req, res) => {
   }
 };
 
+const asignacionMasiva = async (req, res) => {
+  const { especialistaId, institucionIds, replace = true } = req.body;
+
+  if (!especialistaId || !Array.isArray(institucionIds) || institucionIds.length === 0) {
+    return res.status(400).json({ success: false, message: 'especialistaId e institucionIds son requeridos.' });
+  }
+
+  const ids = [...new Set(institucionIds.map((id) => Number(id)).filter(Boolean))];
+  if (ids.length === 0) {
+    return res.status(400).json({ success: false, message: 'No hay instituciones validas para asignar.' });
+  }
+
+  const connection = await pool.getConnection();
+
+  try {
+    await asegurarTablasAdmin();
+    await connection.beginTransaction();
+
+    if (replace) {
+      await connection.execute(
+        'DELETE FROM especialista_instituciones WHERE especialista_id = ?',
+        [especialistaId]
+      );
+    }
+
+    await connection.query(
+      `INSERT IGNORE INTO especialista_instituciones (especialista_id, institucion_id, asignado_por)
+       VALUES ?`,
+      [ids.map((institucionId) => [especialistaId, institucionId, req.usuario?.id || null])]
+    );
+
+    await connection.commit();
+
+    await logAuditoria({
+      usuario_id: req.usuario?.id || 1,
+      modulo: 'Administracion',
+      accion: 'ACTUALIZAR',
+      descripcion: `Asignacion masiva de ${ids.length} instituciones al especialista ${especialistaId}.`,
+      ip_address: req.ip
+    });
+
+    res.json({ success: true, message: 'Asignacion masiva completada.' });
+  } catch (error) {
+    await connection.rollback();
+    console.error('Error en asignacion masiva:', error);
+    res.status(500).json({ success: false, message: 'Error al realizar la asignacion masiva.' });
+  } finally {
+    connection.release();
+  }
+};
+
+const getProrrogas = async (req, res) => {
+  try {
+    await asegurarTablasAdmin();
+
+    const [rows] = await pool.execute(`
+      SELECT
+        pp.id,
+        pp.director_id,
+        pp.anio,
+        pp.trimestre,
+        pp.fecha_limite,
+        pp.motivo,
+        pp.actualizado_en,
+        i.numero,
+        i.nombre AS institucion,
+        CONCAT(d.nombres, ' ', d.apellido_paterno, ' ', COALESCE(d.apellido_materno, '')) AS director
+      FROM periodo_prorrogas pp
+      LEFT JOIN directores d ON d.id = pp.director_id
+      LEFT JOIN instituciones i ON i.id = d.institucion_id
+      ORDER BY pp.actualizado_en DESC
+      LIMIT 80
+    `);
+
+    res.json({ success: true, data: rows });
+  } catch (error) {
+    console.error('Error listando prorrogas:', error);
+    res.status(500).json({ success: false, message: 'Error al listar prorrogas.' });
+  }
+};
+
+const upsertProrroga = async (req, res) => {
+  const { directorId, anio, trimestre, fechaLimite, motivo } = req.body;
+  const fechaMysql = toMysqlDateTime(fechaLimite);
+
+  if (!directorId || !anio || !trimestre || !fechaMysql) {
+    return res.status(400).json({ success: false, message: 'directorId, anio, trimestre y fechaLimite son requeridos.' });
+  }
+
+  try {
+    await asegurarTablasAdmin();
+    await pool.execute(
+      `INSERT INTO periodo_prorrogas (director_id, anio, trimestre, fecha_limite, motivo, creado_por)
+       VALUES (?, ?, ?, ?, ?, ?)
+       ON DUPLICATE KEY UPDATE
+        fecha_limite = VALUES(fecha_limite),
+        motivo = VALUES(motivo),
+        creado_por = VALUES(creado_por)`,
+      [directorId, anio, trimestre, fechaMysql, motivo || null, req.usuario?.id || null]
+    );
+
+    await pool.execute(
+      `INSERT INTO admin_cierre_historial (director_id, anio, trimestre, accion, motivo, usuario_id, ip_address)
+       VALUES (?, ?, ?, 'prorroga', ?, ?, ?)`,
+      [directorId, anio, trimestre, motivo || `Fecha limite: ${fechaMysql}`, req.usuario?.id || null, req.ip || null]
+    );
+
+    await logAuditoria({
+      usuario_id: req.usuario?.id || 1,
+      modulo: 'Administracion',
+      accion: 'ACTUALIZAR',
+      descripcion: `Registro prorroga para director ${directorId}, trimestre ${trimestre}-${anio}, hasta ${fechaMysql}.`,
+      ip_address: req.ip
+    });
+
+    res.json({ success: true, message: 'Prorroga registrada correctamente.' });
+  } catch (error) {
+    console.error('Error guardando prorroga:', error);
+    res.status(500).json({ success: false, message: 'Error al guardar la prorroga.' });
+  }
+};
+
+const getCierreHistorial = async (req, res) => {
+  try {
+    await asegurarTablasAdmin();
+
+    const [rows] = await pool.execute(`
+      SELECT
+        h.id,
+        h.director_id,
+        h.anio,
+        h.trimestre,
+        h.accion,
+        h.motivo,
+        h.fecha,
+        h.ip_address,
+        u.email AS admin_email,
+        i.numero,
+        i.nombre AS institucion
+      FROM admin_cierre_historial h
+      LEFT JOIN usuarios u ON u.id = h.usuario_id
+      LEFT JOIN directores d ON d.id = h.director_id
+      LEFT JOIN instituciones i ON i.id = d.institucion_id
+      ORDER BY h.fecha DESC
+      LIMIT 100
+    `);
+
+    res.json({ success: true, data: rows });
+  } catch (error) {
+    console.error('Error listando historial de cierres:', error);
+    res.status(500).json({ success: false, message: 'Error al listar historial.' });
+  }
+};
+
 const cambiarCierreAdmin = async (req, res) => {
-  const { directorId, anio, trimestre, accion } = req.body;
+  const { directorId, anio, trimestre, accion, motivo } = req.body;
 
   if (!directorId || !anio || !trimestre || !['cerrar', 'reabrir'].includes(accion)) {
     return res.status(400).json({ success: false, message: 'Datos de cierre invalidos.' });
@@ -687,6 +885,13 @@ const cambiarCierreAdmin = async (req, res) => {
         [directorId, trimestre, anio]
       );
     }
+
+    await asegurarTablasAdmin();
+    await pool.execute(
+      `INSERT INTO admin_cierre_historial (director_id, anio, trimestre, accion, motivo, usuario_id, ip_address)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [directorId, anio, trimestre, accion, motivo || null, req.usuario?.id || null, req.ip || null]
+    );
 
     await logAuditoria({
       usuario_id: req.usuario?.id || 1,
@@ -733,6 +938,176 @@ const resetPasswordAdmin = async (req, res) => {
   }
 };
 
+const getAvisos = async (req, res) => {
+  try {
+    await asegurarTablasAdmin();
+
+    const [rows] = await pool.execute(`
+      SELECT id, titulo, mensaje, rol_destino, activo, visible_desde, visible_hasta, creado_en
+      FROM avisos_globales
+      ORDER BY creado_en DESC
+      LIMIT 80
+    `);
+
+    res.json({ success: true, data: rows });
+  } catch (error) {
+    console.error('Error listando avisos:', error);
+    res.status(500).json({ success: false, message: 'Error al listar avisos.' });
+  }
+};
+
+const getAvisosActivos = async (req, res) => {
+  const rol = String(req.query.rol || 'todos').toLowerCase();
+
+  try {
+    await asegurarTablasAdmin();
+
+    const [rows] = await pool.execute(
+      `SELECT id, titulo, mensaje, rol_destino, visible_hasta
+       FROM avisos_globales
+       WHERE activo = 1
+        AND (rol_destino = 'todos' OR rol_destino = ?)
+        AND (visible_desde IS NULL OR visible_desde <= NOW())
+        AND (visible_hasta IS NULL OR visible_hasta >= NOW())
+       ORDER BY creado_en DESC
+       LIMIT 5`,
+      [rol]
+    );
+
+    res.json({ success: true, data: rows });
+  } catch (error) {
+    console.error('Error obteniendo avisos activos:', error);
+    res.status(500).json({ success: false, message: 'Error al obtener avisos.' });
+  }
+};
+
+const createAviso = async (req, res) => {
+  const { titulo, mensaje, rolDestino = 'todos', visibleDesde, visibleHasta } = req.body;
+
+  if (!titulo || !mensaje) {
+    return res.status(400).json({ success: false, message: 'Titulo y mensaje son requeridos.' });
+  }
+
+  try {
+    await asegurarTablasAdmin();
+    await pool.execute(
+      `INSERT INTO avisos_globales (titulo, mensaje, rol_destino, visible_desde, visible_hasta, creado_por)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [
+        String(titulo).trim(),
+        String(mensaje).trim(),
+        String(rolDestino || 'todos').toLowerCase(),
+        toMysqlDateTime(visibleDesde),
+        toMysqlDateTime(visibleHasta),
+        req.usuario?.id || null
+      ]
+    );
+
+    await logAuditoria({
+      usuario_id: req.usuario?.id || 1,
+      modulo: 'Administracion',
+      accion: 'CREAR',
+      descripcion: `Creo aviso global: ${titulo}.`,
+      ip_address: req.ip
+    });
+
+    res.status(201).json({ success: true, message: 'Aviso creado correctamente.' });
+  } catch (error) {
+    console.error('Error creando aviso:', error);
+    res.status(500).json({ success: false, message: 'Error al crear aviso.' });
+  }
+};
+
+const toggleAviso = async (req, res) => {
+  const { id } = req.params;
+  const { activo } = req.body;
+
+  try {
+    await asegurarTablasAdmin();
+    await pool.execute('UPDATE avisos_globales SET activo = ? WHERE id = ?', [activo ? 1 : 0, id]);
+
+    await logAuditoria({
+      usuario_id: req.usuario?.id || 1,
+      modulo: 'Administracion',
+      accion: 'ACTUALIZAR',
+      descripcion: `Cambio estado del aviso global ID ${id}.`,
+      ip_address: req.ip
+    });
+
+    res.json({ success: true, message: 'Aviso actualizado.' });
+  } catch (error) {
+    console.error('Error actualizando aviso:', error);
+    res.status(500).json({ success: false, message: 'Error al actualizar aviso.' });
+  }
+};
+
+const getAdminComprobantes = async (req, res) => {
+  try {
+    const [rows] = await pool.execute('SELECT id, nombre, activo FROM comprobantes ORDER BY nombre ASC');
+    res.json({ success: true, data: rows });
+  } catch (error) {
+    console.error('Error listando comprobantes admin:', error);
+    res.status(500).json({ success: false, message: 'Error al listar comprobantes.' });
+  }
+};
+
+const createAdminComprobante = async (req, res) => {
+  const { nombre } = req.body;
+
+  if (!String(nombre || '').trim()) {
+    return res.status(400).json({ success: false, message: 'El nombre del comprobante es requerido.' });
+  }
+
+  try {
+    await pool.execute(
+      'INSERT IGNORE INTO comprobantes (nombre, activo) VALUES (?, 1)',
+      [String(nombre).trim()]
+    );
+
+    await logAuditoria({
+      usuario_id: req.usuario?.id || 1,
+      modulo: 'Administracion',
+      accion: 'CREAR',
+      descripcion: `Creo comprobante ${nombre}.`,
+      ip_address: req.ip
+    });
+
+    res.status(201).json({ success: true, message: 'Comprobante creado.' });
+  } catch (error) {
+    console.error('Error creando comprobante:', error);
+    res.status(500).json({ success: false, message: 'Error al crear comprobante.' });
+  }
+};
+
+const updateAdminComprobante = async (req, res) => {
+  const { id } = req.params;
+  const { nombre, activo } = req.body;
+
+  if (!String(nombre || '').trim()) {
+    return res.status(400).json({ success: false, message: 'El nombre del comprobante es requerido.' });
+  }
+
+  try {
+    await pool.execute(
+      'UPDATE comprobantes SET nombre = ?, activo = ? WHERE id = ?',
+      [String(nombre).trim(), activo ? 1 : 0, id]
+    );
+
+    await logAuditoria({
+      usuario_id: req.usuario?.id || 1,
+      modulo: 'Administracion',
+      accion: 'ACTUALIZAR',
+      descripcion: `Actualizo comprobante ID ${id}.`,
+      ip_address: req.ip
+    });
+
+    res.json({ success: true, message: 'Comprobante actualizado.' });
+  } catch (error) {
+    console.error('Error actualizando comprobante:', error);
+    res.status(500).json({ success: false, message: 'Error al actualizar comprobante.' });
+  }
+};
+
 module.exports = {
   downloadBackup,
   getAuditoriaLogs,
@@ -748,7 +1123,18 @@ module.exports = {
   updateInstitucion,
   getEspecialistas,
   asignarEspecialista,
+  asignacionMasiva,
   quitarEspecialista,
+  getProrrogas,
+  upsertProrroga,
+  getCierreHistorial,
   cambiarCierreAdmin,
-  resetPasswordAdmin
+  resetPasswordAdmin,
+  getAvisos,
+  getAvisosActivos,
+  createAviso,
+  toggleAviso,
+  getAdminComprobantes,
+  createAdminComprobante,
+  updateAdminComprobante
 };

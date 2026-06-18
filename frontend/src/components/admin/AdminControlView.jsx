@@ -1,11 +1,16 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  Bell,
   Building2,
   CalendarClock,
+  CheckSquare,
+  ClipboardList,
   Gauge,
+  History,
   KeyRound,
   Link2,
   Lock,
+  Megaphone,
   RefreshCw,
   Save,
   Search,
@@ -39,6 +44,10 @@ const AdminControlView = ({ showToast }) => {
   const [instituciones, setInstituciones] = useState([]);
   const [especialistas, setEspecialistas] = useState([]);
   const [usuarios, setUsuarios] = useState([]);
+  const [prorrogas, setProrrogas] = useState([]);
+  const [historial, setHistorial] = useState([]);
+  const [avisos, setAvisos] = useState([]);
+  const [comprobantes, setComprobantes] = useState([]);
   const [anio, setAnio] = useState(currentYear >= 2026 ? currentYear : 2026);
   const [trimestre, setTrimestre] = useState(1);
   const [directorId, setDirectorId] = useState('');
@@ -52,6 +61,19 @@ const AdminControlView = ({ showToast }) => {
     fechaLimite: '',
     descripcion: ''
   });
+  const [prorrogaForm, setProrrogaForm] = useState({
+    fechaLimite: '',
+    motivo: ''
+  });
+  const [avisoForm, setAvisoForm] = useState({
+    titulo: '',
+    mensaje: '',
+    rolDestino: 'todos',
+    visibleHasta: ''
+  });
+  const [comprobanteNombre, setComprobanteNombre] = useState('');
+  const [bulkSelected, setBulkSelected] = useState([]);
+  const [bulkReplace, setBulkReplace] = useState(true);
   const [institucionForm, setInstitucionForm] = useState(null);
 
   const fetchJson = useCallback(async (url, options = {}) => {
@@ -73,12 +95,26 @@ const AdminControlView = ({ showToast }) => {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [summaryData, periodosData, institucionesData, especialistasData, usuariosData] = await Promise.all([
+      const [
+        summaryData,
+        periodosData,
+        institucionesData,
+        especialistasData,
+        usuariosData,
+        prorrogasData,
+        historialData,
+        avisosData,
+        comprobantesData
+      ] = await Promise.all([
         fetchJson(buildApiUrl('/api/admin/resumen')),
         fetchJson(buildApiUrl(`/api/admin/periodos?anio=${anio}`)),
         fetchJson(buildApiUrl('/api/admin/instituciones')),
         fetchJson(buildApiUrl('/api/admin/especialistas')),
-        fetchJson(buildApiUrl('/api/admin/usuarios'))
+        fetchJson(buildApiUrl('/api/admin/usuarios')),
+        fetchJson(buildApiUrl('/api/admin/prorrogas')),
+        fetchJson(buildApiUrl('/api/admin/cierres/historial')),
+        fetchJson(buildApiUrl('/api/admin/avisos')),
+        fetchJson(buildApiUrl('/api/admin/comprobantes-admin'))
       ]);
 
       setSummary(summaryData.data);
@@ -86,6 +122,10 @@ const AdminControlView = ({ showToast }) => {
       setInstituciones(institucionesData.data || []);
       setEspecialistas(especialistasData.data || []);
       setUsuarios(usuariosData.data || []);
+      setProrrogas(prorrogasData.data || []);
+      setHistorial(historialData.data || []);
+      setAvisos(avisosData.data || []);
+      setComprobantes(comprobantesData.data || []);
 
       const firstInstitution = institucionesData.data?.[0];
       setDirectorId((prev) => prev || (firstInstitution?.director_id ? String(firstInstitution.director_id) : ''));
@@ -120,6 +160,11 @@ const AdminControlView = ({ showToast }) => {
     [periodos, periodoForm.trimestre]
   );
 
+  const selectedDirectorInstitution = useMemo(
+    () => instituciones.find((item) => String(item.director_id) === String(directorId)),
+    [instituciones, directorId]
+  );
+
   useEffect(() => {
     if (!selectedPeriodo) return;
     setPeriodoForm((prev) => ({
@@ -129,14 +174,29 @@ const AdminControlView = ({ showToast }) => {
     }));
   }, [selectedPeriodo]);
 
+  useEffect(() => {
+    const currentProrroga = prorrogas.find((item) => (
+      String(item.director_id) === String(directorId)
+      && Number(item.anio) === Number(anio)
+      && Number(item.trimestre) === Number(trimestre)
+    ));
+
+    setProrrogaForm({
+      fechaLimite: toDateTimeLocal(currentProrroga?.fecha_limite),
+      motivo: currentProrroga?.motivo || ''
+    });
+  }, [anio, directorId, prorrogas, trimestre]);
+
   const runAction = async (key, action, successMessage) => {
     setSavingKey(key);
     try {
       await action();
       showToast?.(successMessage || 'Operacion completada correctamente.');
       await loadData();
+      return true;
     } catch (error) {
       showToast?.(error.message, 'error');
+      return false;
     } finally {
       setSavingKey('');
     }
@@ -154,8 +214,19 @@ const AdminControlView = ({ showToast }) => {
 
   const cambiarCierre = (accion) => runAction(`cierre-${accion}`, () => fetchJson(buildApiUrl('/api/admin/cierres'), {
     method: 'POST',
-    body: JSON.stringify({ directorId, anio, trimestre, accion })
+    body: JSON.stringify({ directorId, anio, trimestre, accion, motivo: prorrogaForm.motivo })
   }), accion === 'cerrar' ? 'Trimestre cerrado por admin.' : 'Trimestre reabierto por admin.');
+
+  const guardarProrroga = () => runAction('prorroga', () => fetchJson(buildApiUrl('/api/admin/prorrogas'), {
+    method: 'PUT',
+    body: JSON.stringify({
+      directorId,
+      anio,
+      trimestre,
+      fechaLimite: prorrogaForm.fechaLimite,
+      motivo: prorrogaForm.motivo
+    })
+  }), 'Prorroga por institucion guardada.');
 
   const saveInstitucion = () => {
     if (!institucionForm?.id) return;
@@ -169,6 +240,45 @@ const AdminControlView = ({ showToast }) => {
     method: 'POST',
     body: JSON.stringify({ institucionId, especialistaId })
   }), 'Especialista asignado.');
+
+  const toggleBulkInstitution = (id) => {
+    setBulkSelected((prev) => (
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    ));
+  };
+
+  const asignarMasivo = () => runAction('asignar-masivo', () => fetchJson(buildApiUrl('/api/admin/asignaciones/masivas'), {
+    method: 'POST',
+    body: JSON.stringify({
+      especialistaId,
+      institucionIds: bulkSelected,
+      replace: bulkReplace
+    })
+  }), `Asignacion masiva aplicada a ${bulkSelected.length} I.E.`);
+
+  const crearAviso = () => runAction('aviso', () => fetchJson(buildApiUrl('/api/admin/avisos'), {
+    method: 'POST',
+    body: JSON.stringify(avisoForm)
+  }), 'Aviso global publicado.').then((success) => {
+    if (success) setAvisoForm({ titulo: '', mensaje: '', rolDestino: 'todos', visibleHasta: '' });
+  });
+
+  const toggleAviso = (aviso) => runAction(`aviso-${aviso.id}`, () => fetchJson(buildApiUrl(`/api/admin/avisos/${aviso.id}`), {
+    method: 'PUT',
+    body: JSON.stringify({ activo: !aviso.activo })
+  }), aviso.activo ? 'Aviso desactivado.' : 'Aviso activado.');
+
+  const crearComprobante = () => runAction('comprobante', () => fetchJson(buildApiUrl('/api/admin/comprobantes-admin'), {
+    method: 'POST',
+    body: JSON.stringify({ nombre: comprobanteNombre })
+  }), 'Comprobante creado.').then((success) => {
+    if (success) setComprobanteNombre('');
+  });
+
+  const toggleComprobante = (comprobante) => runAction(`comprobante-${comprobante.id}`, () => fetchJson(buildApiUrl(`/api/admin/comprobantes-admin/${comprobante.id}`), {
+    method: 'PUT',
+    body: JSON.stringify({ nombre: comprobante.nombre, activo: !comprobante.activo })
+  }), comprobante.activo ? 'Comprobante desactivado.' : 'Comprobante activado.');
 
   const resetPassword = () => runAction('password', () => fetchJson(buildApiUrl(`/api/admin/usuarios/${usuarioId}/reset-password`), {
     method: 'POST',
@@ -243,6 +353,20 @@ const AdminControlView = ({ showToast }) => {
               <button onClick={() => cambiarCierre('reabrir')} disabled={!directorId || savingKey === 'cierre-reabrir'} className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-emerald-700 disabled:opacity-60"><Unlock size={18} /> Reabrir</button>
               <button onClick={() => cambiarCierre('cerrar')} disabled={!directorId || savingKey === 'cierre-cerrar'} className="inline-flex items-center gap-2 rounded-xl bg-slate-800 px-5 py-2.5 text-sm font-bold text-white hover:bg-slate-900 disabled:opacity-60"><Lock size={18} /> Cerrar</button>
             </div>
+
+            <div className="mt-5 rounded-2xl border border-blue-100 bg-blue-50/70 p-4 dark:border-blue-900/50 dark:bg-blue-950/20">
+              <div className="mb-3 flex items-center gap-2">
+                <CalendarClock size={18} className="text-blue-700 dark:text-blue-300" />
+                <p className="text-sm font-black text-slate-800 dark:text-slate-100">
+                  Prorroga puntual: {selectedDirectorInstitution ? `${selectedDirectorInstitution.numero || '-'} - ${selectedDirectorInstitution.nombre}` : 'selecciona una institucion'}
+                </p>
+              </div>
+              <div className="grid grid-cols-1 gap-3 lg:grid-cols-[220px_1fr_auto]">
+                <input type="datetime-local" value={prorrogaForm.fechaLimite} onChange={(e) => setProrrogaForm((prev) => ({ ...prev, fechaLimite: e.target.value }))} className="rounded-xl border border-blue-200 bg-white px-4 py-2.5 text-sm font-bold dark:border-blue-900 dark:bg-slate-900 dark:text-slate-200" />
+                <input value={prorrogaForm.motivo} onChange={(e) => setProrrogaForm((prev) => ({ ...prev, motivo: e.target.value }))} placeholder="Motivo administrativo de la prorroga o reapertura" className="rounded-xl border border-blue-200 bg-white px-4 py-2.5 text-sm dark:border-blue-900 dark:bg-slate-900 dark:text-slate-200" />
+                <button onClick={guardarProrroga} disabled={!directorId || !prorrogaForm.fechaLimite || savingKey === 'prorroga'} className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-700 px-5 py-2.5 text-sm font-bold text-white hover:bg-blue-800 disabled:opacity-60"><Save size={18} /> Guardar prorroga</button>
+              </div>
+            </div>
           </section>
 
           <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
@@ -260,10 +384,13 @@ const AdminControlView = ({ showToast }) => {
               </label>
               <div className="max-h-72 overflow-y-auto rounded-xl border border-slate-100 dark:border-slate-700">
                 {filteredInstituciones.slice(0, 80).map((item) => (
-                  <button key={item.id} type="button" onClick={() => { setInstitucionForm(item); setInstitucionId(String(item.id)); if (item.director_id) setDirectorId(String(item.director_id)); }} className={`block w-full border-b border-slate-100 px-4 py-3 text-left text-sm hover:bg-blue-50 dark:border-slate-700 dark:hover:bg-slate-900 ${institucionForm?.id === item.id ? 'bg-blue-50 dark:bg-slate-900' : ''}`}>
-                    <p className="font-black text-slate-800 dark:text-slate-100">{item.numero || '-'} - {item.nombre}</p>
-                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Director: {item.director || 'Sin director'} | Especialistas: {item.especialistas || 'Sin asignar'}</p>
-                  </button>
+                  <div key={item.id} className={`flex items-start gap-3 border-b border-slate-100 px-4 py-3 text-sm hover:bg-blue-50 dark:border-slate-700 dark:hover:bg-slate-900 ${institucionForm?.id === item.id ? 'bg-blue-50 dark:bg-slate-900' : ''}`}>
+                    <input type="checkbox" checked={bulkSelected.includes(item.id)} onChange={() => toggleBulkInstitution(item.id)} className="mt-1 h-4 w-4 rounded border-slate-300 text-blue-700 focus:ring-blue-500" />
+                    <button type="button" onClick={() => { setInstitucionForm(item); setInstitucionId(String(item.id)); if (item.director_id) setDirectorId(String(item.director_id)); }} className="flex-1 text-left">
+                      <p className="font-black text-slate-800 dark:text-slate-100">{item.numero || '-'} - {item.nombre}</p>
+                      <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Director: {item.director || 'Sin director'} | Especialistas: {item.especialistas || 'Sin asignar'}</p>
+                    </button>
+                  </div>
                 ))}
               </div>
             </section>
@@ -301,8 +428,108 @@ const AdminControlView = ({ showToast }) => {
                 </select>
                 <button onClick={asignar} disabled={!institucionId || !especialistaId} className="rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-emerald-700 disabled:opacity-60">Asignar</button>
               </div>
+              <div className="mt-4 rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4 dark:border-emerald-900/50 dark:bg-emerald-950/20">
+                <div className="mb-3 flex items-center gap-2">
+                  <CheckSquare size={18} className="text-emerald-700 dark:text-emerald-300" />
+                  <p className="text-sm font-black text-slate-800 dark:text-slate-100">Asignacion masiva: {bulkSelected.length} I.E. seleccionadas</p>
+                </div>
+                <div className="flex flex-wrap items-center gap-3">
+                  <label className="inline-flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-200">
+                    <input type="checkbox" checked={bulkReplace} onChange={(e) => setBulkReplace(e.target.checked)} className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" />
+                    Reemplazar cartera actual del especialista
+                  </label>
+                  <button onClick={() => setBulkSelected(filteredInstituciones.slice(0, 80).map((item) => item.id))} className="rounded-xl border border-emerald-200 bg-white px-4 py-2 text-xs font-black text-emerald-700 hover:bg-emerald-50 dark:border-emerald-900 dark:bg-slate-900 dark:text-emerald-300">Seleccionar visibles</button>
+                  <button onClick={() => setBulkSelected([])} className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-black text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">Limpiar</button>
+                  <button onClick={asignarMasivo} disabled={!especialistaId || bulkSelected.length === 0 || savingKey === 'asignar-masivo'} className="rounded-xl bg-emerald-600 px-5 py-2 text-sm font-bold text-white hover:bg-emerald-700 disabled:opacity-60">Aplicar masivo</button>
+                </div>
+              </div>
             </section>
           </div>
+
+          <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+            <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+              <div className="mb-5 flex items-center gap-3">
+                <History className="text-blue-700 dark:text-blue-300" size={22} />
+                <div>
+                  <h2 className="text-lg font-black text-slate-900 dark:text-white">Historial de reaperturas y prorrogas</h2>
+                  <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Registro reciente de acciones administrativas sobre trimestres.</p>
+                </div>
+              </div>
+              <div className="max-h-80 overflow-y-auto rounded-xl border border-slate-100 dark:border-slate-700">
+                {historial.length === 0 ? (
+                  <p className="p-4 text-sm font-medium text-slate-500 dark:text-slate-400">Aun no hay acciones registradas.</p>
+                ) : historial.slice(0, 20).map((item) => (
+                  <div key={item.id} className="border-b border-slate-100 px-4 py-3 text-sm dark:border-slate-700">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <p className="font-black text-slate-800 dark:text-slate-100">{item.accion} T{item.trimestre}-{item.anio}</p>
+                      <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-black text-slate-600 dark:bg-slate-900 dark:text-slate-300">{new Date(item.fecha).toLocaleString('es-PE')}</span>
+                    </div>
+                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{item.numero || '-'} - {item.institucion || `Director ${item.director_id}`}</p>
+                    {item.motivo && <p className="mt-1 text-xs font-medium text-slate-600 dark:text-slate-300">{item.motivo}</p>}
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+              <div className="mb-5 flex items-center gap-3">
+                <Megaphone className="text-blue-700 dark:text-blue-300" size={22} />
+                <div>
+                  <h2 className="text-lg font-black text-slate-900 dark:text-white">Avisos globales</h2>
+                  <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Publica mensajes para directores, especialistas o todo el sistema.</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-[1fr_160px]">
+                <input value={avisoForm.titulo} onChange={(e) => setAvisoForm((prev) => ({ ...prev, titulo: e.target.value }))} placeholder="Titulo del aviso" className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200" />
+                <select value={avisoForm.rolDestino} onChange={(e) => setAvisoForm((prev) => ({ ...prev, rolDestino: e.target.value }))} className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-bold dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+                  <option value="todos">Todos</option>
+                  <option value="director">Directores</option>
+                  <option value="especialista">Especialistas</option>
+                  <option value="admin">Admins</option>
+                </select>
+                <textarea value={avisoForm.mensaje} onChange={(e) => setAvisoForm((prev) => ({ ...prev, mensaje: e.target.value }))} placeholder="Mensaje visible para los usuarios" rows={3} className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 md:col-span-2" />
+                <input type="datetime-local" value={avisoForm.visibleHasta} onChange={(e) => setAvisoForm((prev) => ({ ...prev, visibleHasta: e.target.value }))} className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200" />
+                <button onClick={crearAviso} disabled={!avisoForm.titulo || !avisoForm.mensaje || savingKey === 'aviso'} className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-700 px-5 py-2.5 text-sm font-bold text-white hover:bg-blue-800 disabled:opacity-60"><Bell size={18} /> Publicar</button>
+              </div>
+              <div className="mt-4 max-h-52 overflow-y-auto rounded-xl border border-slate-100 dark:border-slate-700">
+                {avisos.slice(0, 10).map((aviso) => (
+                  <div key={aviso.id} className="flex items-start justify-between gap-3 border-b border-slate-100 px-4 py-3 text-sm dark:border-slate-700">
+                    <div>
+                      <p className="font-black text-slate-800 dark:text-slate-100">{aviso.titulo}</p>
+                      <p className="mt-1 line-clamp-2 text-xs text-slate-500 dark:text-slate-400">{aviso.mensaje}</p>
+                    </div>
+                    <button onClick={() => toggleAviso(aviso)} className={`rounded-full px-3 py-1 text-xs font-black ${aviso.activo ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300' : 'bg-slate-100 text-slate-600 dark:bg-slate-900 dark:text-slate-300'}`}>
+                      {aviso.activo ? 'Activo' : 'Inactivo'}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </section>
+          </div>
+
+          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+            <div className="mb-5 flex items-center gap-3">
+              <ClipboardList className="text-blue-700 dark:text-blue-300" size={22} />
+              <div>
+                <h2 className="text-lg font-black text-slate-900 dark:text-white">Comprobantes</h2>
+                <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Activa, desactiva o agrega tipos usados en ingresos y egresos.</p>
+              </div>
+            </div>
+            <div className="mb-4 grid grid-cols-1 gap-3 md:grid-cols-[1fr_auto]">
+              <input value={comprobanteNombre} onChange={(e) => setComprobanteNombre(e.target.value)} placeholder="Nuevo tipo de comprobante" className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200" />
+              <button onClick={crearComprobante} disabled={!comprobanteNombre.trim() || savingKey === 'comprobante'} className="rounded-xl bg-blue-700 px-5 py-2.5 text-sm font-bold text-white hover:bg-blue-800 disabled:opacity-60">Agregar</button>
+            </div>
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+              {comprobantes.map((comprobante) => (
+                <div key={comprobante.id} className="flex items-center justify-between gap-3 rounded-xl border border-slate-100 bg-slate-50 px-4 py-3 dark:border-slate-700 dark:bg-slate-900">
+                  <p className="text-sm font-bold text-slate-800 dark:text-slate-100">{comprobante.nombre}</p>
+                  <button onClick={() => toggleComprobante(comprobante)} className={`rounded-full px-3 py-1 text-xs font-black ${comprobante.activo ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300' : 'bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}`}>
+                    {comprobante.activo ? 'Activo' : 'Inactivo'}
+                  </button>
+                </div>
+              ))}
+            </div>
+          </section>
 
           <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
             <div className="mb-5 flex items-center gap-3">
