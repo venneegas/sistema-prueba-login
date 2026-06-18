@@ -5,12 +5,13 @@ import UsersView from './UsersView';
 import AuditoriaView from './AuditoriaView';
 import LoginLogsView from './LoginLogsView';
 import FlujosView from './FlujosView';
+import AdminControlView from './AdminControlView';
 import AdminSidebar from './AdminSidebar';
 import useTheme from '../../hooks/useTheme';
 import FloatingThemeToggle from '../FloatingThemeToggle';
 
 const AdminDashboard = ({ user, onLogout }) => {
-  const [activeTab, setActiveTab] = useState('database');
+  const [activeTab, setActiveTab] = useState('control');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const { isDarkMode, toggleTheme } = useTheme();
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
@@ -31,6 +32,8 @@ const AdminDashboard = ({ user, onLogout }) => {
 
   const renderContent = () => {
     switch (activeTab) {
+      case 'control':
+        return <AdminControlView showToast={showToast} />;
       case 'database':
         return <DatabaseView showToast={showToast} />;
       case 'usuarios':

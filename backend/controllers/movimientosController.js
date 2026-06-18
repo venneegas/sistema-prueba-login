@@ -9,6 +9,7 @@ const TIPO_MOVIMIENTO = {
 
 const ESTADO_BLOQUEO_TRIMESTRE = 423;
 let cierreTableReadyPromise = null;
+let periodoConfigReadyPromise = null;
 
 const obtenerTipoMovimiento = (tipo) => TIPO_MOVIMIENTO[tipo];
 
@@ -48,6 +49,75 @@ const obtenerAnioYTrimestre = (fecha) => {
     anio: date.getFullYear(),
     trimestre: Math.floor(month / 3) + 1,
   };
+};
+
+const asegurarTablaPeriodoConfig = async (connection = pool) => {
+  if (!periodoConfigReadyPromise) {
+    periodoConfigReadyPromise = connection.execute(
+      `CREATE TABLE IF NOT EXISTS periodo_config (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        anio INT NOT NULL,
+        trimestre TINYINT NOT NULL,
+        fecha_limite DATETIME DEFAULT NULL,
+        descripcion VARCHAR(255) DEFAULT NULL,
+        actualizado_por INT DEFAULT NULL,
+        actualizado_en TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        UNIQUE KEY uk_periodo_config (anio, trimestre),
+        CONSTRAINT chk_periodo_config_trimestre CHECK (trimestre BETWEEN 1 AND 4)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`
+    ).catch((error) => {
+      periodoConfigReadyPromise = null;
+      throw error;
+    });
+  }
+
+  await periodoConfigReadyPromise;
+};
+
+const obtenerFechaLimiteDefault = (anio, trimestre) => {
+  const year = Number(anio);
+  switch (String(trimestre)) {
+    case '1': return new Date(year, 3, 30, 23, 59, 59);
+    case '2': return new Date(year, 6, 31, 23, 59, 59);
+    case '3': return new Date(year, 9, 31, 23, 59, 59);
+    case '4': return new Date(year + 1, 0, 31, 23, 59, 59);
+    default: return new Date(year, 11, 31, 23, 59, 59);
+  }
+};
+
+const obtenerConfigPeriodo = async (req, res) => {
+  const { anio, trimestreId } = req.query;
+
+  if (!anio || !trimestreId) {
+    return res.status(400).json({ success: false, message: 'anio y trimestreId son requeridos.' });
+  }
+
+  try {
+    await asegurarTablaPeriodoConfig(pool);
+    const [rows] = await pool.execute(
+      `SELECT fecha_limite, descripcion
+       FROM periodo_config
+       WHERE anio = ? AND trimestre = ?
+       LIMIT 1`,
+      [anio, trimestreId]
+    );
+
+    const fechaLimite = rows[0]?.fecha_limite || obtenerFechaLimiteDefault(anio, trimestreId);
+
+    return res.json({
+      success: true,
+      data: {
+        anio: Number(anio),
+        trimestre: Number(trimestreId),
+        fechaLimite,
+        descripcion: rows[0]?.descripcion || null,
+        configurado: Boolean(rows[0]),
+      },
+    });
+  } catch (error) {
+    console.error('Error obteniendo configuracion de periodo:', error);
+    return res.status(500).json({ success: false, message: 'Error interno del servidor.' });
+  }
 };
 
 const validarPeriodoTrimestral = (startDate, endDate) => {
@@ -488,6 +558,7 @@ const guardarSaldosBanco = async (req, res) => {
 module.exports = {
   listarMovimientos,
   guardarMovimientos,
+  obtenerConfigPeriodo,
   obtenerCierreTrimestral,
   cerrarTrimestre,
   obtenerSaldosBanco,

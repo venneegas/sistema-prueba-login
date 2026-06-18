@@ -55,6 +55,7 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
   const [estadoReporte, setEstadoReporte] = useState(null);
   const [mensajeCierre, setMensajeCierre] = useState('');
   const [errorCierre, setErrorCierre] = useState('');
+  const [fechaLimiteAdmin, setFechaLimiteAdmin] = useState(null);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [notificaciones, setNotificaciones] = useState([]);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -102,7 +103,7 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
       : 0;
   
   // Cálculos en tiempo real para las fechas de cierre
-  const fechaLimite = obtenerFechaLimite(trimestreId, anioActual);
+  const fechaLimite = fechaLimiteAdmin ? new Date(fechaLimiteAdmin) : obtenerFechaLimite(trimestreId, anioActual);
   const ahora = new Date();
   const diferenciaMs = fechaLimite.getTime() - ahora.getTime();
   const diasRestantes = diferenciaMs > 0 ? Math.ceil(diferenciaMs / (1000 * 3600 * 24)) : 0;
@@ -236,6 +237,33 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
 
     cargarEstadoCierre();
   }, [anioActual, trimestreId, user.director?.id, cambioObligatorioPendiente]);
+
+  useEffect(() => {
+    const cargarConfigPeriodo = async () => {
+      if (!anioActual || !trimestreId || cambioObligatorioPendiente) return;
+
+      try {
+        setFechaLimiteAdmin(null);
+        const query = new URLSearchParams({
+          anio: String(anioActual),
+          trimestreId: String(trimestreId),
+        });
+        const response = await fetch(`${buildApiUrl('/api/movimientos/periodos/config')}?${query.toString()}`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        });
+        const data = await leerRespuestaJson(response);
+
+        if (response.ok && data.success) {
+          setFechaLimiteAdmin(data.data?.fechaLimite || null);
+        }
+      } catch (configError) {
+        console.error('No se pudo cargar la configuracion del periodo:', configError);
+        setFechaLimiteAdmin(null);
+      }
+    };
+
+    cargarConfigPeriodo();
+  }, [anioActual, trimestreId, cambioObligatorioPendiente]);
 
   const handleCerrarTrimestre = async () => {
     if (trimestreCerrado || !user.director?.id || cambioObligatorioPendiente) return;

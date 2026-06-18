@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import {
   Activity,
   Database,
+  Gauge,
   Key,
   LogOut,
   Network,
@@ -16,6 +17,12 @@ import {
 import { UGEL_COMPACT_LOGO_SRC, UGEL_LOGO_SRC } from '../../config/assets';
 
 const systemItems = [
+  {
+    id: 'control',
+    label: 'CONTROL UGEL',
+    description: 'Resumen, periodos, instituciones, asignaciones y credenciales.',
+    icon: Gauge
+  },
   {
     id: 'database',
     label: 'BASE DE DATOS',

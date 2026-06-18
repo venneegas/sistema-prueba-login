@@ -81,6 +81,20 @@ const getColegiosPorTrimestre = async (req, res) => {
     // 1. Recibir los parámetros de trimestre y año (por defecto el actual si no envían)
     const trimestre = req.query.trimestre || 1;
     const anio = req.query.anio || new Date().getFullYear();
+    const especialistaId = req.usuario?.id || req.user?.id || null;
+
+    await pool.execute(
+      `CREATE TABLE IF NOT EXISTS especialista_instituciones (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        especialista_id INT NOT NULL,
+        institucion_id INT NOT NULL,
+        asignado_por INT DEFAULT NULL,
+        asignado_en TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY uk_especialista_institucion (especialista_id, institucion_id),
+        KEY idx_especialista_instituciones_especialista (especialista_id),
+        KEY idx_especialista_instituciones_institucion (institucion_id)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`
+    );
 
     // 2. Consulta SQL usando LEFT JOIN y COALESCE
     const sql = `
@@ -96,11 +110,28 @@ const getColegiosPorTrimestre = async (req, res) => {
           ON d.id = e.director_id 
           AND e.trimestre = ? 
           AND e.anio = ?
+      WHERE (
+        ? IS NULL
+        OR NOT EXISTS (
+          SELECT 1 FROM especialista_instituciones ei_scope
+          WHERE ei_scope.especialista_id = ?
+        )
+        OR EXISTS (
+          SELECT 1 FROM especialista_instituciones ei
+          WHERE ei.especialista_id = ? AND ei.institucion_id = i.id
+        )
+      )
       ORDER BY i.nombre ASC
     `;
 
     // 3. Ejecutar la consulta pasando los parámetros asegurando que sean números
-    const [rows] = await pool.execute(sql, [Number(trimestre), Number(anio)]);
+    const [rows] = await pool.execute(sql, [
+      Number(trimestre),
+      Number(anio),
+      especialistaId,
+      especialistaId,
+      especialistaId
+    ]);
 
     // 4. Devolver la respuesta exitosa al frontend
     res.status(200).json({
