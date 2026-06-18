@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Download, FileDigit, FileSpreadsheet, FileText, Filter, Info, Search } from 'lucide-react';
 import { buildApiUrl } from '../../config/api';
+import AdminPageHeader from './AdminPageHeader';
 
 const formatCurrency = (value) => Number(value || 0).toLocaleString('es-PE', {
   minimumFractionDigits: 2,
@@ -135,12 +136,11 @@ const ReportesView = ({ showToast }) => {
 
   return (
     <>
-      <header className="bg-white shadow-sm px-8 py-5 flex items-center justify-between z-10 border-b border-slate-200">
-        <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-3">
-          <FileSpreadsheet className="text-blue-600" size={28} />
-          Reportes y Exportacion
-        </h1>
-      </header>
+      <AdminPageHeader
+        icon={FileSpreadsheet}
+        title="Reportes y Exportacion"
+        subtitle="Filtra informacion consolidada y prepara archivos de salida para seguimiento administrativo."
+      />
 
       <div className="flex-1 overflow-y-auto p-8 bg-slate-50">
         <div className="max-w-6xl mx-auto space-y-6">
@@ -335,3 +335,4 @@ const ExportCard = ({ icon: Icon, tone, title, description, buttonText, onClick 
 };
 
 export default ReportesView;
+

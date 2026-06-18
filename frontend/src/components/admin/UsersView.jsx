@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Users, Search, Plus, Edit, Trash2, Shield, User, ShieldCheck, RefreshCw, X, AlertTriangle } from 'lucide-react';
 import { buildApiUrl } from '../../config/api';
+import AdminPageHeader from './AdminPageHeader';
 
 const UsersView = ({ showToast }) => {
   const [users, setUsers] = useState([]);
@@ -209,16 +210,16 @@ const UsersView = ({ showToast }) => {
 
   return (
     <>
-      <header className="bg-white shadow-sm px-8 py-5 flex items-center justify-between z-10 border-b border-slate-200">
-        <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-3">
-          <Users className="text-blue-600" size={28} />
-          Gestión de Usuarios
-        </h1>
-        
-        <div className="flex items-center gap-3">
+      <AdminPageHeader
+        icon={Users}
+        title="Gestion de Usuarios"
+        subtitle="Administra accesos de administradores, especialistas y directores registrados."
+        actions={(
+          <>
           <button 
             onClick={fetchUsers} 
-            className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-600 px-4 py-2.5 rounded-xl font-bold transition-all shadow-sm"
+            className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-600 px-4 py-2.5 rounded-xl font-bold transition-all shadow-sm dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+            title="Actualizar usuarios"
           >
             <RefreshCw size={18} />
           </button>
@@ -230,13 +231,14 @@ const UsersView = ({ showToast }) => {
               setInitialFormData(defaultForm);
               setShowModal(true);
             }}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-sm"
+            className="flex items-center gap-2 bg-blue-700 hover:bg-blue-800 text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-sm"
           >
             <Plus size={18} />
             Nuevo Usuario
           </button>
-        </div>
-      </header>
+          </>
+        )}
+      />
       
       <div className="flex-1 overflow-y-auto p-8 bg-slate-50">
         <div className="max-w-6xl mx-auto space-y-6">
@@ -570,3 +572,4 @@ const UsersView = ({ showToast }) => {
 };
 
 export default UsersView;
+

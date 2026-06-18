@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { HardDrive, Database, ShieldAlert, Download } from 'lucide-react';
 import { buildApiUrl } from '../../config/api';
+import AdminPageHeader from './AdminPageHeader';
 
 const DatabaseView = ({ showToast }) => {
   const [isDownloading, setIsDownloading] = useState(false);
@@ -36,12 +37,11 @@ const DatabaseView = ({ showToast }) => {
 
   return (
     <>
-      <header className="bg-white shadow-sm px-8 py-5 flex items-center justify-between z-10 border-b border-slate-200">
-        <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-3">
-          <HardDrive className="text-blue-600" size={28} />
-          Gestión de Base de Datos
-        </h1>
-      </header>
+      <AdminPageHeader
+        icon={HardDrive}
+        title="Gestion de Base de Datos"
+        subtitle="Administra respaldos y recursos criticos para restauracion o migracion del sistema."
+      />
       
       <div className="flex-1 overflow-y-auto p-8 bg-slate-50">
         <div className="max-w-4xl mx-auto space-y-6">
@@ -82,3 +82,4 @@ const DatabaseView = ({ showToast }) => {
 };
 
 export default DatabaseView;
+

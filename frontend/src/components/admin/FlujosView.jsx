@@ -1,15 +1,15 @@
 import React from 'react';
 import { Network, Server, Eye, GraduationCap, ArrowDown, ShieldCheck, FileCheck, UploadCloud, Users, Database } from 'lucide-react';
+import AdminPageHeader from './AdminPageHeader';
 
 const FlujosView = () => {
   return (
     <>
-      <header className="bg-white shadow-sm px-8 py-5 flex items-center justify-between z-10 border-b border-slate-200">
-        <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-3">
-          <Network className="text-blue-600" size={28} />
-          Flujos del Sistema
-        </h1>
-      </header>
+      <AdminPageHeader
+        icon={Network}
+        title="Flujos del Sistema"
+        subtitle="Visualiza el recorrido operativo entre administrador, especialista y director."
+      />
 
       <div className="flex-1 overflow-y-auto p-8 bg-slate-50">
         <div className="max-w-4xl mx-auto relative pt-4 pb-10">
