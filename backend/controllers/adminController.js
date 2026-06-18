@@ -8,6 +8,7 @@ const bcrypt = require('bcryptjs');
 const escapeIdentifier = (identifier) => `\`${String(identifier).replace(/`/g, '``')}\``;
 
 let adminTablesReadyPromise = null;
+let institucionesColumnsPromise = null;
 
 const asegurarTablasAdmin = async () => {
   if (!adminTablesReadyPromise) {
@@ -110,6 +111,23 @@ const toMysqlDateTime = (value) => {
   if (Number.isNaN(date.getTime())) return null;
   return date.toISOString().slice(0, 19).replace('T', ' ');
 };
+
+const obtenerColumnasInstituciones = async () => {
+  if (!institucionesColumnsPromise) {
+    institucionesColumnsPromise = pool.execute('SHOW COLUMNS FROM instituciones')
+      .then(([rows]) => new Set(rows.map((row) => row.Field)))
+      .catch((error) => {
+        institucionesColumnsPromise = null;
+        throw error;
+      });
+  }
+
+  return institucionesColumnsPromise;
+};
+
+const selectInstitucionColumn = (columns, column) => (
+  columns.has(column) ? `i.${column}` : `NULL AS ${column}`
+);
 
 const formatSqlValue = (value) => {
   if (value instanceof Date) {
@@ -554,18 +572,19 @@ const updatePeriodo = async (req, res) => {
 const getInstituciones = async (req, res) => {
   try {
     await asegurarTablasAdmin();
+    const columns = await obtenerColumnasInstituciones();
 
     const [rows] = await pool.execute(`
       SELECT
         i.id,
-        i.codigo_modular,
-        i.ruc,
-        i.numero,
+        ${selectInstitucionColumn(columns, 'codigo_modular')},
+        ${selectInstitucionColumn(columns, 'ruc')},
+        ${selectInstitucionColumn(columns, 'numero')},
         i.nombre,
-        i.nivel_educativo,
-        i.modalidad,
-        i.provincia,
-        i.distrito,
+        ${selectInstitucionColumn(columns, 'nivel_educativo')},
+        ${selectInstitucionColumn(columns, 'modalidad')},
+        ${selectInstitucionColumn(columns, 'provincia')},
+        ${selectInstitucionColumn(columns, 'distrito')},
         d.id AS director_id,
         CONCAT(d.nombres, ' ', d.apellido_paterno, ' ', COALESCE(d.apellido_materno, '')) AS director,
         d.email AS director_email,
@@ -594,11 +613,27 @@ const updateInstitucion = async (req, res) => {
   }
 
   try {
+    const columns = await obtenerColumnasInstituciones();
+    const candidates = [
+      ['codigo_modular', codigo_modular || null],
+      ['ruc', ruc || null],
+      ['numero', numero || null],
+      ['nombre', nombre],
+      ['nivel_educativo', nivel_educativo],
+      ['modalidad', modalidad],
+      ['provincia', provincia],
+      ['distrito', distrito || null],
+    ].filter(([column]) => columns.has(column));
+
+    if (candidates.length === 0) {
+      return res.status(400).json({ success: false, message: 'No hay campos compatibles para actualizar.' });
+    }
+
     await pool.execute(
       `UPDATE instituciones
-       SET codigo_modular = ?, ruc = ?, numero = ?, nombre = ?, nivel_educativo = ?, modalidad = ?, provincia = ?, distrito = ?
+       SET ${candidates.map(([column]) => `${escapeIdentifier(column)} = ?`).join(', ')}
        WHERE id = ?`,
-      [codigo_modular || null, ruc || null, numero || null, nombre, nivel_educativo, modalidad, provincia, distrito || null, id]
+      [...candidates.map(([, value]) => value), id]
     );
 
     await logAuditoria({
