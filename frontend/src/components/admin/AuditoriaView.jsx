@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Activity, RefreshCw, Search } from 'lucide-react';
 import { buildApiUrl } from '../../config/api';
 
@@ -11,11 +11,7 @@ const AuditoriaView = ({ showToast }) => {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
 
-  useEffect(() => {
-    cargarLogs(false);
-  }, []);
-
-  const cargarLogs = async (isManualRefresh = false) => {
+  const cargarLogs = useCallback(async (isManualRefresh = false) => {
     try {
       if (isManualRefresh) setIsRefreshing(true);
       const token = localStorage.getItem('token'); // Asegúrate de usar la key de tu token
@@ -40,7 +36,11 @@ const AuditoriaView = ({ showToast }) => {
       setCargando(false);
       setIsRefreshing(false);
     }
-  };
+  }, [showToast]);
+
+  useEffect(() => {
+    cargarLogs(false);
+  }, [cargarLogs]);
 
   // Función para darle color a la acción
   const getBadgeColor = (accion) => {

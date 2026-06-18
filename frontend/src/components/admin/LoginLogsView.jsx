@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Key, RefreshCw, Search } from 'lucide-react';
 import { buildApiUrl } from '../../config/api'; // Ajusta la ruta si es necesario
 
@@ -11,11 +11,7 @@ const LoginLogsView = ({ showToast }) => {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
 
-  useEffect(() => {
-    fetchLogs(false);
-  }, []);
-
-  const fetchLogs = async (isManualRefresh = false) => {
+  const fetchLogs = useCallback(async (isManualRefresh = false) => {
     try {
       if (isManualRefresh) setIsRefreshing(true);
       const token = localStorage.getItem('token');
@@ -41,7 +37,11 @@ const LoginLogsView = ({ showToast }) => {
       setLoading(false);
       setIsRefreshing(false);
     }
-  };
+  }, [showToast]);
+
+  useEffect(() => {
+    fetchLogs(false);
+  }, [fetchLogs]);
 
   const filteredLogs = logs.filter(log => 
     (log.email && log.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
