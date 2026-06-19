@@ -256,6 +256,13 @@ const AdminControlView = ({ showToast }) => {
     })
   }), `Asignacion masiva aplicada a ${bulkSelected.length} I.E.`);
 
+  const limpiarAsignaciones = () => {
+    if (!especialistaId) return;
+    return runAction('limpiar-asignaciones', () => fetchJson(buildApiUrl(`/api/admin/asignaciones/especialista/${especialistaId}`), {
+      method: 'DELETE'
+    }), 'Asignaciones retiradas. El especialista volvera a ver todos los colegios.');
+  };
+
   const crearAviso = () => runAction('aviso', () => fetchJson(buildApiUrl('/api/admin/avisos'), {
     method: 'POST',
     body: JSON.stringify(avisoForm)
@@ -441,6 +448,14 @@ const AdminControlView = ({ showToast }) => {
                   <button onClick={() => setBulkSelected(filteredInstituciones.slice(0, 80).map((item) => item.id))} className="rounded-xl border border-emerald-200 bg-white px-4 py-2 text-xs font-black text-emerald-700 hover:bg-emerald-50 dark:border-emerald-900 dark:bg-slate-900 dark:text-emerald-300 lg:whitespace-nowrap">Seleccionar visibles</button>
                   <button onClick={() => setBulkSelected([])} className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-black text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 lg:whitespace-nowrap">Limpiar</button>
                   <button onClick={asignarMasivo} disabled={!especialistaId || bulkSelected.length === 0 || savingKey === 'asignar-masivo'} className="rounded-xl bg-emerald-600 px-5 py-2 text-sm font-bold text-white hover:bg-emerald-700 disabled:opacity-60 lg:whitespace-nowrap">Aplicar masivo</button>
+                </div>
+                <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3 dark:border-amber-900/60 dark:bg-amber-950/20">
+                  <p className="text-xs font-bold leading-relaxed text-amber-900 dark:text-amber-100">
+                    Si este especialista debe ver todos los colegios, retira sus asignaciones. Sin registros en cartera, el sistema muestra todas las I.E.
+                  </p>
+                  <button onClick={limpiarAsignaciones} disabled={!especialistaId || savingKey === 'limpiar-asignaciones'} className="mt-2 rounded-xl bg-amber-600 px-4 py-2 text-xs font-black text-white hover:bg-amber-700 disabled:opacity-60">
+                    Retirar restricciones y ver todos
+                  </button>
                 </div>
               </div>
             </section>

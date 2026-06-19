@@ -17,6 +17,7 @@ const {
   asignarEspecialista,
   asignacionMasiva,
   quitarEspecialista,
+  limpiarAsignacionesEspecialista,
   getProrrogas,
   upsertProrroga,
   getCierreHistorial,
@@ -78,6 +79,7 @@ router.put('/instituciones/:id', updateInstitucion);
 router.get('/especialistas', getEspecialistas);
 router.post('/asignaciones', asignarEspecialista);
 router.post('/asignaciones/masivas', asignacionMasiva);
+router.delete('/asignaciones/especialista/:id', limpiarAsignacionesEspecialista);
 router.delete('/asignaciones', quitarEspecialista);
 
 module.exports = router;

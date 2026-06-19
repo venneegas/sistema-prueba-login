@@ -723,6 +723,39 @@ const quitarEspecialista = async (req, res) => {
   }
 };
 
+const limpiarAsignacionesEspecialista = async (req, res) => {
+  const { id } = req.params;
+
+  if (!id) {
+    return res.status(400).json({ success: false, message: 'El especialista es requerido.' });
+  }
+
+  try {
+    await asegurarTablasAdmin();
+    const [result] = await pool.execute(
+      'DELETE FROM especialista_instituciones WHERE especialista_id = ?',
+      [id]
+    );
+
+    await logAuditoria({
+      usuario_id: req.usuario?.id || 1,
+      modulo: 'Administracion',
+      accion: 'ELIMINAR',
+      descripcion: `Limpio ${result.affectedRows || 0} asignaciones del especialista ${id}.`,
+      ip_address: req.ip
+    });
+
+    res.json({
+      success: true,
+      message: 'Asignaciones retiradas. Si el especialista no tiene asignaciones, vera todas las instituciones.',
+      totalEliminadas: result.affectedRows || 0
+    });
+  } catch (error) {
+    console.error('Error limpiando asignaciones del especialista:', error);
+    res.status(500).json({ success: false, message: 'Error al limpiar asignaciones del especialista.' });
+  }
+};
+
 const asignacionMasiva = async (req, res) => {
   const { especialistaId, institucionIds, replace = true } = req.body;
 
@@ -1160,6 +1193,7 @@ module.exports = {
   asignarEspecialista,
   asignacionMasiva,
   quitarEspecialista,
+  limpiarAsignacionesEspecialista,
   getProrrogas,
   upsertProrroga,
   getCierreHistorial,
