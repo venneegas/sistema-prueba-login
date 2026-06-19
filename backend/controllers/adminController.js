@@ -976,6 +976,87 @@ const cambiarCierreAdmin = async (req, res) => {
   }
 };
 
+const reabrirCierresMasivo = async (req, res) => {
+  const { anio, trimestre, motivo } = req.body;
+
+  if (!anio || !trimestre) {
+    return res.status(400).json({ success: false, message: 'anio y trimestre son requeridos.' });
+  }
+
+  const connection = await pool.getConnection();
+
+  try {
+    await asegurarTablasAdmin();
+    await connection.execute(
+      `CREATE TABLE IF NOT EXISTS cierres (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        director_id INT NOT NULL,
+        anio INT NOT NULL,
+        trimestre TINYINT NOT NULL,
+        cerrado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY uk_cierres_trimestre (director_id, anio, trimestre)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`
+    );
+
+    await connection.beginTransaction();
+
+    const [cierresRows] = await connection.execute(
+      'SELECT director_id FROM cierres WHERE anio = ? AND trimestre = ?',
+      [anio, trimestre]
+    );
+
+    if (cierresRows.length > 0) {
+      await connection.query(
+        `INSERT INTO admin_cierre_historial (director_id, anio, trimestre, accion, motivo, usuario_id, ip_address)
+         VALUES ?`,
+        [cierresRows.map((row) => [
+          row.director_id,
+          anio,
+          trimestre,
+          'reabrir_todos',
+          motivo || 'Reapertura masiva del periodo',
+          req.usuario?.id || null,
+          req.ip || null
+        ])]
+      );
+    }
+
+    const [deleteResult] = await connection.execute(
+      'DELETE FROM cierres WHERE anio = ? AND trimestre = ?',
+      [anio, trimestre]
+    );
+
+    await connection.execute(
+      `UPDATE estados
+       SET estado = 'Borrador', fecha_actualizacion = NOW()
+       WHERE anio = ? AND trimestre = ? AND estado <> 'Aprobado'`,
+      [anio, trimestre]
+    );
+
+    await connection.commit();
+
+    await logAuditoria({
+      usuario_id: req.usuario?.id || 1,
+      modulo: 'Administracion',
+      accion: 'ACTUALIZAR',
+      descripcion: `Admin reabrio masivamente el trimestre ${trimestre}-${anio}. Cierres retirados: ${deleteResult.affectedRows || 0}.`,
+      ip_address: req.ip
+    });
+
+    res.json({
+      success: true,
+      message: 'Trimestre reabierto para todos los colegios con cierre registrado.',
+      totalReabiertos: deleteResult.affectedRows || 0
+    });
+  } catch (error) {
+    await connection.rollback();
+    console.error('Error reabriendo cierres masivamente:', error);
+    res.status(500).json({ success: false, message: 'Error al reabrir el trimestre para todos.' });
+  } finally {
+    connection.release();
+  }
+};
+
 const resetPasswordAdmin = async (req, res) => {
   const { id } = req.params;
   const { password, forceChange = true } = req.body;
@@ -1198,6 +1279,7 @@ module.exports = {
   upsertProrroga,
   getCierreHistorial,
   cambiarCierreAdmin,
+  reabrirCierresMasivo,
   resetPasswordAdmin,
   getAvisos,
   getAvisosActivos,

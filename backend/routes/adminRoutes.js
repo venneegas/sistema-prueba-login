@@ -22,6 +22,7 @@ const {
   upsertProrroga,
   getCierreHistorial,
   cambiarCierreAdmin,
+  reabrirCierresMasivo,
   resetPasswordAdmin,
   getAvisos,
   getAvisosActivos,
@@ -64,6 +65,7 @@ router.get('/resumen', getDashboardResumen);
 router.get('/periodos', getPeriodos);
 router.put('/periodos', updatePeriodo);
 router.post('/cierres', cambiarCierreAdmin);
+router.post('/cierres/reabrir-todos', reabrirCierresMasivo);
 router.get('/cierres/historial', getCierreHistorial);
 router.get('/prorrogas', getProrrogas);
 router.put('/prorrogas', upsertProrroga);

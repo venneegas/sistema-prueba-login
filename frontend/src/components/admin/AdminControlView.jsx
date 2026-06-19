@@ -217,6 +217,20 @@ const AdminControlView = ({ showToast }) => {
     body: JSON.stringify({ directorId, anio, trimestre, accion, motivo: prorrogaForm.motivo })
   }), accion === 'cerrar' ? 'Trimestre cerrado por admin.' : 'Trimestre reabierto por admin.');
 
+  const reabrirTodos = () => {
+    const confirmado = window.confirm(`Se reabrira el T${trimestre}-${anio} para todos los colegios con cierre registrado. Si necesitas ampliar la fecha limite, guarda tambien el plazo global. ¿Deseas continuar?`);
+    if (!confirmado) return Promise.resolve(false);
+
+    return runAction('cierre-reabrir-todos', () => fetchJson(buildApiUrl('/api/admin/cierres/reabrir-todos'), {
+      method: 'POST',
+      body: JSON.stringify({
+        anio,
+        trimestre,
+        motivo: prorrogaForm.motivo || 'Reapertura masiva desde Control UGEL'
+      })
+    }), `T${trimestre}-${anio} reabierto para todos los cierres registrados.`);
+  };
+
   const guardarProrroga = () => runAction('prorroga', () => fetchJson(buildApiUrl('/api/admin/prorrogas'), {
     method: 'PUT',
     body: JSON.stringify({
@@ -335,7 +349,7 @@ const AdminControlView = ({ showToast }) => {
               <CalendarClock className="text-blue-700 dark:text-blue-300" size={22} />
               <div>
                 <h2 className="text-lg font-black text-slate-900 dark:text-white">Control de periodos y cierres</h2>
-                <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Amplia plazos o reabre una institucion sin tocar codigo.</p>
+                <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Amplia plazos globales, reabre una institucion o quita cierres de todo un trimestre.</p>
               </div>
             </div>
 
@@ -359,6 +373,7 @@ const AdminControlView = ({ showToast }) => {
               </select>
               <button onClick={() => cambiarCierre('reabrir')} disabled={!directorId || savingKey === 'cierre-reabrir'} className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-emerald-700 disabled:opacity-60"><Unlock size={18} /> Reabrir</button>
               <button onClick={() => cambiarCierre('cerrar')} disabled={!directorId || savingKey === 'cierre-cerrar'} className="inline-flex items-center gap-2 rounded-xl bg-slate-800 px-5 py-2.5 text-sm font-bold text-white hover:bg-slate-900 disabled:opacity-60"><Lock size={18} /> Cerrar</button>
+              <button onClick={reabrirTodos} disabled={savingKey === 'cierre-reabrir-todos'} className="inline-flex items-center gap-2 rounded-xl bg-amber-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-amber-700 disabled:opacity-60"><Unlock size={18} /> Reabrir todos</button>
             </div>
 
             <div className="mt-5 rounded-2xl border border-blue-100 bg-blue-50/70 p-4 dark:border-blue-900/50 dark:bg-blue-950/20">
