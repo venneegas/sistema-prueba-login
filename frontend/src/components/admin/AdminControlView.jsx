@@ -36,6 +36,16 @@ const toDateTimeLocal = (value) => {
   return new Date(date.getTime() - offsetMs).toISOString().slice(0, 16);
 };
 
+const manualFormFromRow = (row) => ({
+  directorId: row?.directorId ? String(row.directorId) : '',
+  saldoInicialCaja: String(Number(row?.saldoInicialCaja || 0).toFixed(2)),
+  ingresosMensuales: (row?.ingresosMensuales || [0, 0, 0]).map((value) => String(Number(value || 0).toFixed(2))),
+  egresosMensuales: (row?.egresosMensuales || [0, 0, 0]).map((value) => String(Number(value || 0).toFixed(2))),
+  saldosBancoMensuales: (row?.saldosBancoMensuales || [0, 0, 0]).map((value) => String(Number(value || 0).toFixed(2))),
+  observacion: '',
+  estadoDestino: row?.estado === 'Aprobado' ? 'Aprobado' : 'Enviado'
+});
+
 const AdminControlView = ({ showToast }) => {
   const [loading, setLoading] = useState(true);
   const [savingKey, setSavingKey] = useState('');
@@ -48,6 +58,7 @@ const AdminControlView = ({ showToast }) => {
   const [historial, setHistorial] = useState([]);
   const [avisos, setAvisos] = useState([]);
   const [comprobantes, setComprobantes] = useState([]);
+  const [consolidadoAdmin, setConsolidadoAdmin] = useState([]);
   const [anio, setAnio] = useState(currentYear >= 2026 ? currentYear : 2026);
   const [trimestre, setTrimestre] = useState(1);
   const [directorId, setDirectorId] = useState('');
@@ -74,6 +85,9 @@ const AdminControlView = ({ showToast }) => {
   const [comprobanteNombre, setComprobanteNombre] = useState('');
   const [bulkSelected, setBulkSelected] = useState([]);
   const [bulkReplace, setBulkReplace] = useState(true);
+  const [estadoConsolidadoFiltro, setEstadoConsolidadoFiltro] = useState('pendiente');
+  const [manualSearch, setManualSearch] = useState('');
+  const [manualForm, setManualForm] = useState(manualFormFromRow(null));
   const [institucionForm, setInstitucionForm] = useState(null);
 
   const fetchJson = useCallback(async (url, options = {}) => {
@@ -104,7 +118,8 @@ const AdminControlView = ({ showToast }) => {
         prorrogasData,
         historialData,
         avisosData,
-        comprobantesData
+        comprobantesData,
+        consolidadoData
       ] = await Promise.all([
         fetchJson(buildApiUrl('/api/admin/resumen')),
         fetchJson(buildApiUrl(`/api/admin/periodos?anio=${anio}`)),
@@ -114,7 +129,8 @@ const AdminControlView = ({ showToast }) => {
         fetchJson(buildApiUrl('/api/admin/prorrogas')),
         fetchJson(buildApiUrl('/api/admin/cierres/historial')),
         fetchJson(buildApiUrl('/api/admin/avisos')),
-        fetchJson(buildApiUrl('/api/admin/comprobantes-admin'))
+        fetchJson(buildApiUrl('/api/admin/comprobantes-admin')),
+        fetchJson(buildApiUrl(`/api/admin/consolidado-manual?anio=${anio}&trimestre=${trimestre}`))
       ]);
 
       setSummary(summaryData.data);
@@ -126,19 +142,22 @@ const AdminControlView = ({ showToast }) => {
       setHistorial(historialData.data || []);
       setAvisos(avisosData.data || []);
       setComprobantes(comprobantesData.data || []);
+      setConsolidadoAdmin(consolidadoData.data || []);
 
       const firstInstitution = institucionesData.data?.[0];
+      const firstConsolidado = consolidadoData.data?.[0];
       setDirectorId((prev) => prev || (firstInstitution?.director_id ? String(firstInstitution.director_id) : ''));
       setInstitucionId((prev) => prev || (firstInstitution?.id ? String(firstInstitution.id) : ''));
       setInstitucionForm((prev) => prev || firstInstitution || null);
       setEspecialistaId((prev) => prev || (especialistasData.data?.[0]?.id ? String(especialistasData.data[0].id) : ''));
       setUsuarioId((prev) => prev || (usuariosData.data?.[0]?.id ? String(usuariosData.data[0].id) : ''));
+      setManualForm((prev) => (prev.directorId ? prev : manualFormFromRow(firstConsolidado)));
     } catch (error) {
       showToast?.(error.message, 'error');
     } finally {
       setLoading(false);
     }
-  }, [anio, fetchJson, showToast]);
+  }, [anio, fetchJson, showToast, trimestre]);
 
   useEffect(() => {
     loadData();
@@ -163,6 +182,40 @@ const AdminControlView = ({ showToast }) => {
   const selectedDirectorInstitution = useMemo(
     () => instituciones.find((item) => String(item.director_id) === String(directorId)),
     [instituciones, directorId]
+  );
+
+  const mesesTrimestre = useMemo(() => {
+    const grupos = [
+      ['Enero', 'Febrero', 'Marzo'],
+      ['Abril', 'Mayo', 'Junio'],
+      ['Julio', 'Agosto', 'Septiembre'],
+      ['Octubre', 'Noviembre', 'Diciembre']
+    ];
+    return grupos[Number(trimestre) - 1] || grupos[0];
+  }, [trimestre]);
+
+  const filteredConsolidadoAdmin = useMemo(() => {
+    const term = manualSearch.trim().toLowerCase();
+    const matchesEstado = (row) => {
+      if (estadoConsolidadoFiltro === 'todos') return true;
+      if (estadoConsolidadoFiltro === 'pendiente') return ['Borrador', 'Observado'].includes(row.estado);
+      return String(row.estado || '').toLowerCase() === estadoConsolidadoFiltro;
+    };
+
+    return consolidadoAdmin.filter((row) => (
+      matchesEstado(row)
+      && (
+        !term
+        || String(row.institucion || '').toLowerCase().includes(term)
+        || String(row.numeroIE || '').toLowerCase().includes(term)
+        || String(row.director || '').toLowerCase().includes(term)
+      )
+    ));
+  }, [consolidadoAdmin, estadoConsolidadoFiltro, manualSearch]);
+
+  const selectedManualRow = useMemo(
+    () => consolidadoAdmin.find((row) => String(row.directorId) === String(manualForm.directorId)),
+    [consolidadoAdmin, manualForm.directorId]
   );
 
   useEffect(() => {
@@ -301,6 +354,43 @@ const AdminControlView = ({ showToast }) => {
     body: JSON.stringify({ nombre: comprobante.nombre, activo: !comprobante.activo })
   }), comprobante.activo ? 'Comprobante desactivado.' : 'Comprobante activado.');
 
+  const selectManualRow = (row) => {
+    setManualForm(manualFormFromRow(row));
+  };
+
+  const updateManualAmount = (group, index, value) => {
+    setManualForm((prev) => ({
+      ...prev,
+      [group]: prev[group].map((item, itemIndex) => (itemIndex === index ? value : item))
+    }));
+  };
+
+  const saveConsolidadoManual = () => runAction('consolidado-manual', () => fetchJson(buildApiUrl('/api/admin/consolidado-manual'), {
+    method: 'POST',
+    body: JSON.stringify({
+      directorId: manualForm.directorId,
+      anio,
+      trimestre,
+      saldoInicialCaja: manualForm.saldoInicialCaja,
+      ingresosMensuales: manualForm.ingresosMensuales,
+      egresosMensuales: manualForm.egresosMensuales,
+      saldosBancoMensuales: manualForm.saldosBancoMensuales,
+      observacion: manualForm.observacion,
+      estadoDestino: manualForm.estadoDestino
+    })
+  }), 'Consolidado administrativo guardado.');
+
+  const updateEstadoConsolidado = (estado) => runAction(`estado-consolidado-${estado}`, () => fetchJson(buildApiUrl('/api/admin/consolidado-manual/estado'), {
+    method: 'POST',
+    body: JSON.stringify({
+      directorId: manualForm.directorId,
+      anio,
+      trimestre,
+      estado,
+      comentario: manualForm.observacion || `Cambio de estado administrativo a ${estado}`
+    })
+  }), `Estado cambiado a ${estado}.`);
+
   const resetPassword = () => runAction('password', () => fetchJson(buildApiUrl(`/api/admin/usuarios/${usuarioId}/reset-password`), {
     method: 'POST',
     body: JSON.stringify({ password: newPassword, forceChange: true })
@@ -387,6 +477,105 @@ const AdminControlView = ({ showToast }) => {
                 <input type="datetime-local" value={prorrogaForm.fechaLimite} onChange={(e) => setProrrogaForm((prev) => ({ ...prev, fechaLimite: e.target.value }))} className="rounded-xl border border-blue-200 bg-white px-4 py-2.5 text-sm font-bold dark:border-blue-900 dark:bg-slate-900 dark:text-slate-200" />
                 <input value={prorrogaForm.motivo} onChange={(e) => setProrrogaForm((prev) => ({ ...prev, motivo: e.target.value }))} placeholder="Motivo administrativo de la prorroga o reapertura" className="rounded-xl border border-blue-200 bg-white px-4 py-2.5 text-sm dark:border-blue-900 dark:bg-slate-900 dark:text-slate-200" />
                 <button onClick={guardarProrroga} disabled={!directorId || !prorrogaForm.fechaLimite || savingKey === 'prorroga'} className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-700 px-5 py-2.5 text-sm font-bold text-white hover:bg-blue-800 disabled:opacity-60"><Save size={18} /> Guardar prorroga</button>
+              </div>
+            </div>
+          </section>
+
+          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+            <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex items-center gap-3">
+                <ClipboardList className="text-blue-700 dark:text-blue-300" size={22} />
+                <div>
+                  <h2 className="text-lg font-black text-slate-900 dark:text-white">Carga manual administrativa del consolidado</h2>
+                  <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Completa ingresos, egresos y saldos bancarios por colegio sin ingresar como director.</p>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                <select value={estadoConsolidadoFiltro} onChange={(e) => setEstadoConsolidadoFiltro(e.target.value)} className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-bold dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+                  <option value="pendiente">Pendientes</option>
+                  <option value="enviado">Enviados</option>
+                  <option value="aprobado">Aprobados</option>
+                  <option value="observado">Observados</option>
+                  <option value="todos">Todos</option>
+                </select>
+                <input value={manualSearch} onChange={(e) => setManualSearch(e.target.value)} placeholder="Buscar colegio o director..." className="min-w-72 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200" />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(280px,0.9fr)_minmax(0,1.4fr)]">
+              <div className="max-h-[520px] overflow-y-auto rounded-2xl border border-slate-100 dark:border-slate-700">
+                {filteredConsolidadoAdmin.length === 0 ? (
+                  <p className="p-4 text-sm font-medium text-slate-500 dark:text-slate-400">No hay colegios para el filtro seleccionado.</p>
+                ) : filteredConsolidadoAdmin.map((row) => (
+                  <button key={row.directorId} type="button" onClick={() => selectManualRow(row)} className={`block w-full border-b border-slate-100 px-4 py-3 text-left transition hover:bg-blue-50 dark:border-slate-700 dark:hover:bg-slate-900 ${String(manualForm.directorId) === String(row.directorId) ? 'bg-blue-50 dark:bg-slate-900' : ''}`}>
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-black text-slate-900 dark:text-slate-100">{row.numeroIE || '-'} - {row.institucion}</p>
+                        <p className="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400">{row.director || 'Sin director'}</p>
+                      </div>
+                      <span className={`rounded-full px-2.5 py-1 text-[10px] font-black uppercase ${row.estado === 'Aprobado' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300' : row.estado === 'Enviado' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300' : 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'}`}>
+                        {row.estado}
+                      </span>
+                    </div>
+                    <p className="mt-2 text-xs font-bold text-slate-500 dark:text-slate-400">
+                      Ing. S/ {Number(row.totalIngresos || 0).toFixed(2)} | Egr. S/ {Number(row.totalEgresos || 0).toFixed(2)} | Saldo S/ {Number(row.saldoTotal || 0).toFixed(2)}
+                    </p>
+                  </button>
+                ))}
+              </div>
+
+              <div className="rounded-2xl border border-slate-100 bg-slate-50 p-5 dark:border-slate-700 dark:bg-slate-900">
+                <div className="mb-4 flex flex-col gap-2 border-b border-slate-200 pb-4 dark:border-slate-700">
+                  <p className="text-xs font-black uppercase tracking-[0.16em] text-blue-700 dark:text-blue-300">T{trimestre} - {anio}</p>
+                  <h3 className="text-xl font-black text-slate-900 dark:text-white">{selectedManualRow ? `${selectedManualRow.numeroIE || '-'} - ${selectedManualRow.institucion}` : 'Selecciona un colegio'}</h3>
+                  <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Estado actual: {selectedManualRow?.estado || '-'}</p>
+                </div>
+
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
+                  <label className="md:col-span-1">
+                    <span className="mb-1 block text-xs font-black uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">Saldo inicial caja</span>
+                    <input type="number" min="0" step="0.01" value={manualForm.saldoInicialCaja} onChange={(e) => setManualForm((prev) => ({ ...prev, saldoInicialCaja: e.target.value }))} className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200" />
+                  </label>
+                  <label className="md:col-span-1">
+                    <span className="mb-1 block text-xs font-black uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">Estado al guardar</span>
+                    <select value={manualForm.estadoDestino} onChange={(e) => setManualForm((prev) => ({ ...prev, estadoDestino: e.target.value }))} className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200">
+                      <option value="Enviado">Enviado</option>
+                      <option value="Aprobado">Aprobado</option>
+                      <option value="Borrador">Borrador</option>
+                    </select>
+                  </label>
+                  <label className="md:col-span-2">
+                    <span className="mb-1 block text-xs font-black uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">Motivo administrativo</span>
+                    <input value={manualForm.observacion} onChange={(e) => setManualForm((prev) => ({ ...prev, observacion: e.target.value }))} placeholder="Ej. Regularizacion de carga por mesa de partes" className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200" />
+                  </label>
+                </div>
+
+                <div className="mt-5 grid grid-cols-1 gap-4 lg:grid-cols-3">
+                  {[
+                    ['ingresosMensuales', 'Ingresos', 'text-blue-700 dark:text-blue-300'],
+                    ['egresosMensuales', 'Egresos', 'text-rose-700 dark:text-rose-300'],
+                    ['saldosBancoMensuales', 'Saldos banco', 'text-emerald-700 dark:text-emerald-300']
+                  ].map(([group, label, colorClass]) => (
+                    <div key={group} className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-950">
+                      <p className={`mb-3 text-sm font-black ${colorClass}`}>{label}</p>
+                      <div className="space-y-3">
+                        {mesesTrimestre.map((mes, index) => (
+                          <label key={`${group}-${mes}`} className="block">
+                            <span className="mb-1 block text-xs font-bold text-slate-500 dark:text-slate-400">{mes}</span>
+                            <input type="number" min="0" step="0.01" value={manualForm[group][index]} onChange={(e) => updateManualAmount(group, index, e.target.value)} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200" />
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-5 flex flex-wrap gap-3">
+                  <button onClick={saveConsolidadoManual} disabled={!manualForm.directorId || !manualForm.observacion.trim() || savingKey === 'consolidado-manual'} className="inline-flex items-center gap-2 rounded-xl bg-blue-700 px-5 py-2.5 text-sm font-bold text-white hover:bg-blue-800 disabled:opacity-60"><Save size={18} /> Guardar consolidado</button>
+                  <button onClick={() => updateEstadoConsolidado('Enviado')} disabled={!manualForm.directorId || savingKey === 'estado-consolidado-Enviado'} className="rounded-xl bg-slate-800 px-4 py-2.5 text-sm font-bold text-white hover:bg-slate-900 disabled:opacity-60">Marcar enviado</button>
+                  <button onClick={() => updateEstadoConsolidado('Aprobado')} disabled={!manualForm.directorId || savingKey === 'estado-consolidado-Aprobado'} className="rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-emerald-700 disabled:opacity-60">Aprobar</button>
+                  <button onClick={() => updateEstadoConsolidado('Borrador')} disabled={!manualForm.directorId || savingKey === 'estado-consolidado-Borrador'} className="rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-amber-700 disabled:opacity-60">Volver a pendiente</button>
+                </div>
               </div>
             </div>
           </section>

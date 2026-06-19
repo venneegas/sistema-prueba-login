@@ -10,6 +10,8 @@ const escapeIdentifier = (identifier) => `\`${String(identifier).replace(/`/g, '
 let adminTablesReadyPromise = null;
 let institucionesColumnsPromise = null;
 
+const ADMIN_MANUAL_CONCEPT_PREFIX = '[CARGA MANUAL ADMIN]';
+
 const asegurarTablasAdmin = async () => {
   if (!adminTablesReadyPromise) {
     adminTablesReadyPromise = Promise.all([
@@ -127,6 +129,48 @@ const obtenerColumnasInstituciones = async () => {
 
 const selectInstitucionColumn = (columns, column) => (
   columns.has(column) ? `i.${column}` : `NULL AS ${column}`
+);
+
+const toMoney = (value) => {
+  const normalized = typeof value === 'string' ? value.replace(/,/g, '').trim() : value;
+  const numberValue = Number(normalized);
+  return Number.isFinite(numberValue) && numberValue >= 0 ? Number(numberValue.toFixed(2)) : null;
+};
+
+const toMonthlyMoney = (values) => {
+  if (!Array.isArray(values)) return null;
+  const monthly = values.slice(0, 3).map((value) => toMoney(value ?? 0));
+  return monthly.length === 3 && monthly.every((value) => value !== null) ? monthly : null;
+};
+
+const getQuarterMonths = (trimestre) => {
+  const start = (Number(trimestre) - 1) * 3 + 1;
+  return [start, start + 1, start + 2];
+};
+
+const formatDateOnly = (date) => date.toISOString().slice(0, 10);
+
+const getQuarterDateRange = (anio, trimestre) => {
+  const year = Number(anio);
+  const months = getQuarterMonths(trimestre);
+  const start = new Date(Date.UTC(year, months[0] - 1, 1));
+  const end = new Date(Date.UTC(year, months[2], 0));
+  return {
+    startDate: formatDateOnly(start),
+    endDate: formatDateOnly(end),
+    movementDates: months.map((month) => formatDateOnly(new Date(Date.UTC(year, month, 0))))
+  };
+};
+
+const asegurarTablaCierresAdmin = async (connection = pool) => connection.execute(
+  `CREATE TABLE IF NOT EXISTS cierres (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    director_id INT NOT NULL,
+    anio INT NOT NULL,
+    trimestre TINYINT NOT NULL,
+    cerrado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_cierres_trimestre (director_id, anio, trimestre)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`
 );
 
 const formatSqlValue = (value) => {
@@ -987,16 +1031,7 @@ const reabrirCierresMasivo = async (req, res) => {
 
   try {
     await asegurarTablasAdmin();
-    await connection.execute(
-      `CREATE TABLE IF NOT EXISTS cierres (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        director_id INT NOT NULL,
-        anio INT NOT NULL,
-        trimestre TINYINT NOT NULL,
-        cerrado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        UNIQUE KEY uk_cierres_trimestre (director_id, anio, trimestre)
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`
-    );
+    await asegurarTablaCierresAdmin(connection);
 
     await connection.beginTransaction();
 
@@ -1054,6 +1089,326 @@ const reabrirCierresMasivo = async (req, res) => {
     res.status(500).json({ success: false, message: 'Error al reabrir el trimestre para todos.' });
   } finally {
     connection.release();
+  }
+};
+
+const getConsolidadoManualAdmin = async (req, res) => {
+  const anio = Number(req.query.anio || new Date().getFullYear());
+  const trimestre = Number(req.query.trimestre || 1);
+
+  if (!anio || ![1, 2, 3, 4].includes(trimestre)) {
+    return res.status(400).json({ success: false, message: 'anio y trimestre son invalidos.' });
+  }
+
+  try {
+    const months = getQuarterMonths(trimestre);
+
+    const [rows] = await pool.execute(
+      `
+      SELECT
+        d.id AS director_id,
+        i.numero AS numero_ie,
+        i.nombre AS institucion,
+        CONCAT(d.nombres, ' ', d.apellido_paterno, ' ', COALESCE(d.apellido_materno, '')) AS director,
+        COALESCE(e.estado, 'Borrador') AS estado,
+        COALESCE(s.saldo_inicial, 0) AS saldo_inicial,
+        COALESCE(s.saldo_mes1, 0) AS saldo_banco_mes1,
+        COALESCE(s.saldo_mes2, 0) AS saldo_banco_mes2,
+        COALESCE(s.saldo_mes3, 0) AS saldo_banco_mes3,
+        SUM(CASE WHEN m.tipo_movimiento = 'INGRESO' AND MONTH(m.fecha) = ? THEN m.monto ELSE 0 END) AS ingreso_mes1,
+        SUM(CASE WHEN m.tipo_movimiento = 'INGRESO' AND MONTH(m.fecha) = ? THEN m.monto ELSE 0 END) AS ingreso_mes2,
+        SUM(CASE WHEN m.tipo_movimiento = 'INGRESO' AND MONTH(m.fecha) = ? THEN m.monto ELSE 0 END) AS ingreso_mes3,
+        SUM(CASE WHEN m.tipo_movimiento = 'EGRESO' AND MONTH(m.fecha) = ? THEN m.monto ELSE 0 END) AS egreso_mes1,
+        SUM(CASE WHEN m.tipo_movimiento = 'EGRESO' AND MONTH(m.fecha) = ? THEN m.monto ELSE 0 END) AS egreso_mes2,
+        SUM(CASE WHEN m.tipo_movimiento = 'EGRESO' AND MONTH(m.fecha) = ? THEN m.monto ELSE 0 END) AS egreso_mes3,
+        COUNT(CASE WHEN m.concepto LIKE ? THEN 1 END) AS registros_admin
+      FROM directores d
+      INNER JOIN instituciones i ON i.id = d.institucion_id
+      LEFT JOIN estados e ON e.director_id = d.id AND e.anio = ? AND e.trimestre = ?
+      LEFT JOIN saldos s ON s.director_id = d.id AND s.anio = ? AND s.trimestre = ?
+      LEFT JOIN movimientos m
+        ON m.director_id = d.id
+       AND YEAR(m.fecha) = ?
+       AND MONTH(m.fecha) BETWEEN ? AND ?
+      GROUP BY
+        d.id,
+        i.numero,
+        i.nombre,
+        d.nombres,
+        d.apellido_paterno,
+        d.apellido_materno,
+        e.estado,
+        s.saldo_inicial,
+        s.saldo_mes1,
+        s.saldo_mes2,
+        s.saldo_mes3
+      ORDER BY i.nombre ASC
+      `,
+      [
+        months[0], months[1], months[2],
+        months[0], months[1], months[2],
+        `${ADMIN_MANUAL_CONCEPT_PREFIX}%`,
+        anio, trimestre,
+        anio, trimestre,
+        anio, months[0], months[2],
+      ]
+    );
+
+    const data = rows.map((row) => {
+      const ingresosMensuales = [row.ingreso_mes1, row.ingreso_mes2, row.ingreso_mes3].map((value) => Number(value || 0));
+      const egresosMensuales = [row.egreso_mes1, row.egreso_mes2, row.egreso_mes3].map((value) => Number(value || 0));
+      const saldosBancoMensuales = [row.saldo_banco_mes1, row.saldo_banco_mes2, row.saldo_banco_mes3].map((value) => Number(value || 0));
+      const saldoInicialCaja = Number(row.saldo_inicial || 0);
+      const totalIngresos = ingresosMensuales.reduce((sum, value) => sum + value, 0);
+      const totalEgresos = egresosMensuales.reduce((sum, value) => sum + value, 0);
+      const dineroEnCaja = saldoInicialCaja + totalIngresos - totalEgresos;
+      const dineroEnBanco = saldosBancoMensuales[2] || 0;
+
+      return {
+        directorId: row.director_id,
+        numeroIE: row.numero_ie,
+        institucion: row.institucion,
+        director: row.director,
+        estado: row.estado,
+        saldoInicialCaja,
+        ingresosMensuales,
+        egresosMensuales,
+        saldosBancoMensuales,
+        totalIngresos,
+        totalEgresos,
+        dineroEnCaja,
+        dineroEnBanco,
+        saldoTotal: dineroEnCaja + dineroEnBanco,
+        cargaManualAdmin: Number(row.registros_admin || 0) > 0,
+      };
+    });
+
+    res.json({ success: true, data });
+  } catch (error) {
+    console.error('Error listando consolidado manual admin:', error);
+    res.status(500).json({ success: false, message: 'Error al cargar consolidado administrativo.' });
+  }
+};
+
+const saveConsolidadoManualAdmin = async (req, res) => {
+  const {
+    directorId,
+    anio,
+    trimestre,
+    saldoInicialCaja,
+    ingresosMensuales,
+    egresosMensuales,
+    saldosBancoMensuales,
+    observacion,
+    estadoDestino = 'Enviado',
+  } = req.body;
+
+  const periodoAnio = Number(anio);
+  const periodoTrimestre = Number(trimestre);
+  const ingresos = toMonthlyMoney(ingresosMensuales);
+  const egresos = toMonthlyMoney(egresosMensuales);
+  const saldosBanco = toMonthlyMoney(saldosBancoMensuales);
+  const saldoInicial = toMoney(saldoInicialCaja ?? 0);
+  const motivo = String(observacion || '').trim();
+  const estadosPermitidos = ['Borrador', 'Enviado', 'Aprobado'];
+
+  if (!directorId || !periodoAnio || ![1, 2, 3, 4].includes(periodoTrimestre)) {
+    return res.status(400).json({ success: false, message: 'directorId, anio y trimestre son obligatorios.' });
+  }
+
+  if (!ingresos || !egresos || !saldosBanco || saldoInicial === null) {
+    return res.status(400).json({ success: false, message: 'Los montos deben ser numericos y no negativos.' });
+  }
+
+  if (!motivo) {
+    return res.status(400).json({ success: false, message: 'Registra un motivo para la auditoria.' });
+  }
+
+  if (!estadosPermitidos.includes(estadoDestino)) {
+    return res.status(400).json({ success: false, message: 'Estado destino invalido.' });
+  }
+
+  const connection = await pool.getConnection();
+
+  try {
+    const { startDate, endDate, movementDates } = getQuarterDateRange(periodoAnio, periodoTrimestre);
+
+    await asegurarTablaCierresAdmin(connection);
+    await connection.beginTransaction();
+
+    const [[directorInfo]] = await connection.execute(
+      `SELECT d.id, i.nombre AS institucion, i.numero AS numero_ie
+       FROM directores d
+       INNER JOIN instituciones i ON i.id = d.institucion_id
+       WHERE d.id = ?
+       LIMIT 1`,
+      [directorId]
+    );
+
+    if (!directorInfo) {
+      await connection.rollback();
+      return res.status(404).json({ success: false, message: 'No se encontro el colegio seleccionado.' });
+    }
+
+    await connection.execute('INSERT IGNORE INTO comprobantes (nombre, activo) VALUES (?, 1)', ['Ajuste Manual UGEL']);
+    const [[comprobante]] = await connection.execute('SELECT id FROM comprobantes WHERE nombre = ? LIMIT 1', ['Ajuste Manual UGEL']);
+
+    await connection.execute(
+      `DELETE FROM movimientos
+       WHERE director_id = ? AND fecha BETWEEN ? AND ?`,
+      [directorId, startDate, endDate]
+    );
+
+    const movimientos = [];
+    ingresos.forEach((monto, index) => {
+      if (monto <= 0) return;
+      movimientos.push([
+        directorId,
+        'INGRESO',
+        movementDates[index],
+        comprobante.id,
+        'ADMIN',
+        `ADM-${periodoAnio}-T${periodoTrimestre}-${directorId}-ING-${index + 1}`,
+        `${ADMIN_MANUAL_CONCEPT_PREFIX} Ingreso mes ${index + 1}. Motivo: ${motivo}`.substring(0, 255),
+        monto,
+        '#2563eb',
+      ]);
+    });
+
+    egresos.forEach((monto, index) => {
+      if (monto <= 0) return;
+      movimientos.push([
+        directorId,
+        'EGRESO',
+        movementDates[index],
+        comprobante.id,
+        'ADMIN',
+        `ADM-${periodoAnio}-T${periodoTrimestre}-${directorId}-EGR-${index + 1}`,
+        `${ADMIN_MANUAL_CONCEPT_PREFIX} Egreso mes ${index + 1}. Motivo: ${motivo}`.substring(0, 255),
+        monto,
+        '#e11d48',
+      ]);
+    });
+
+    if (movimientos.length > 0) {
+      await connection.query(
+        `INSERT INTO movimientos
+         (director_id, tipo_movimiento, fecha, comprobante_id, serie, numero_comprobante, concepto, monto, color)
+         VALUES ?`,
+        [movimientos]
+      );
+    }
+
+    await connection.execute(
+      `INSERT INTO saldos (director_id, anio, trimestre, saldo_inicial, saldo_mes1, saldo_mes2, saldo_mes3)
+       VALUES (?, ?, ?, ?, ?, ?, ?)
+       ON DUPLICATE KEY UPDATE
+         saldo_inicial = VALUES(saldo_inicial),
+         saldo_mes1 = VALUES(saldo_mes1),
+         saldo_mes2 = VALUES(saldo_mes2),
+         saldo_mes3 = VALUES(saldo_mes3),
+         actualizado_en = CURRENT_TIMESTAMP`,
+      [directorId, periodoAnio, periodoTrimestre, saldoInicial, saldosBanco[0], saldosBanco[1], saldosBanco[2]]
+    );
+
+    if (estadoDestino === 'Borrador') {
+      await connection.execute(
+        `INSERT INTO estados (director_id, trimestre, anio, estado)
+         VALUES (?, ?, ?, 'Borrador')
+         ON DUPLICATE KEY UPDATE estado = 'Borrador', comentario_observacion = NULL`,
+        [directorId, periodoTrimestre, periodoAnio]
+      );
+      await connection.execute('DELETE FROM cierres WHERE director_id = ? AND anio = ? AND trimestre = ?', [directorId, periodoAnio, periodoTrimestre]);
+    } else {
+      await connection.execute(
+        `INSERT IGNORE INTO cierres (director_id, anio, trimestre)
+         VALUES (?, ?, ?)`,
+        [directorId, periodoAnio, periodoTrimestre]
+      );
+      await connection.execute(
+        `INSERT INTO estados (director_id, trimestre, anio, estado, fecha_envio, fecha_auditoria, comentario_observacion)
+         VALUES (?, ?, ?, ?, NOW(), IF(? = 'Aprobado', NOW(), NULL), ?)
+         ON DUPLICATE KEY UPDATE
+           estado = VALUES(estado),
+           fecha_envio = IFNULL(fecha_envio, NOW()),
+           fecha_auditoria = IF(VALUES(estado) = 'Aprobado', NOW(), fecha_auditoria),
+           comentario_observacion = VALUES(comentario_observacion)`,
+        [directorId, periodoTrimestre, periodoAnio, estadoDestino, estadoDestino, motivo]
+      );
+    }
+
+    await connection.commit();
+
+    await logAuditoria({
+      usuario_id: req.usuario?.id || 1,
+      modulo: 'Administracion',
+      accion: 'ACTUALIZAR',
+      descripcion: `Admin reemplazo consolidado T${periodoTrimestre}-${periodoAnio} de ${directorInfo.numero_ie || '-'} ${directorInfo.institucion}. Estado: ${estadoDestino}.`.substring(0, 255),
+      ip_address: req.ip
+    });
+
+    res.json({ success: true, message: 'Consolidado administrativo guardado correctamente.' });
+  } catch (error) {
+    await connection.rollback();
+    console.error('Error guardando consolidado manual admin:', error);
+    res.status(500).json({ success: false, message: 'Error al guardar consolidado administrativo.' });
+  } finally {
+    connection.release();
+  }
+};
+
+const updateEstadoConsolidadoAdmin = async (req, res) => {
+  const { directorId, anio, trimestre, estado, comentario } = req.body;
+  const estadosPermitidos = ['Borrador', 'Enviado', 'Observado', 'Aprobado'];
+
+  if (!directorId || !anio || !trimestre || !estadosPermitidos.includes(estado)) {
+    return res.status(400).json({ success: false, message: 'Datos de estado invalidos.' });
+  }
+
+  try {
+    await asegurarTablaCierresAdmin(pool);
+
+    if (estado === 'Borrador') {
+      await pool.execute(
+        `INSERT INTO estados (director_id, trimestre, anio, estado, comentario_observacion)
+         VALUES (?, ?, ?, 'Borrador', ?)
+         ON DUPLICATE KEY UPDATE estado = 'Borrador', comentario_observacion = VALUES(comentario_observacion)`,
+        [directorId, trimestre, anio, comentario || null]
+      );
+      await pool.execute('DELETE FROM cierres WHERE director_id = ? AND anio = ? AND trimestre = ?', [directorId, anio, trimestre]);
+    } else {
+      if (estado === 'Enviado' || estado === 'Aprobado') {
+        await pool.execute(
+          `INSERT IGNORE INTO cierres (director_id, anio, trimestre)
+           VALUES (?, ?, ?)`,
+          [directorId, anio, trimestre]
+        );
+      }
+
+      await pool.execute(
+        `INSERT INTO estados (director_id, trimestre, anio, estado, comentario_observacion, fecha_envio, fecha_auditoria)
+         VALUES (?, ?, ?, ?, ?, IF(? IN ('Enviado', 'Aprobado'), NOW(), NULL), IF(? = 'Aprobado', NOW(), NULL))
+         ON DUPLICATE KEY UPDATE
+           estado = VALUES(estado),
+           comentario_observacion = VALUES(comentario_observacion),
+           fecha_envio = IF(VALUES(estado) IN ('Enviado', 'Aprobado'), IFNULL(fecha_envio, NOW()), fecha_envio),
+           fecha_auditoria = IF(VALUES(estado) = 'Aprobado', NOW(), fecha_auditoria)`,
+        [directorId, trimestre, anio, estado, comentario || null, estado, estado]
+      );
+    }
+
+    await logAuditoria({
+      usuario_id: req.usuario?.id || 1,
+      modulo: 'Administracion',
+      accion: 'ACTUALIZAR',
+      descripcion: `Admin cambio estado del director ${directorId} T${trimestre}-${anio} a ${estado}.`,
+      ip_address: req.ip
+    });
+
+    res.json({ success: true, message: `Estado actualizado a ${estado}.` });
+  } catch (error) {
+    console.error('Error cambiando estado admin:', error);
+    res.status(500).json({ success: false, message: 'Error al actualizar estado.' });
   }
 };
 
@@ -1285,6 +1640,9 @@ module.exports = {
   getAvisosActivos,
   createAviso,
   toggleAviso,
+  getConsolidadoManualAdmin,
+  saveConsolidadoManualAdmin,
+  updateEstadoConsolidadoAdmin,
   getAdminComprobantes,
   createAdminComprobante,
   updateAdminComprobante

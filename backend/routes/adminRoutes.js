@@ -28,6 +28,9 @@ const {
   getAvisosActivos,
   createAviso,
   toggleAviso,
+  getConsolidadoManualAdmin,
+  saveConsolidadoManualAdmin,
+  updateEstadoConsolidadoAdmin,
   getAdminComprobantes,
   createAdminComprobante,
   updateAdminComprobante
@@ -72,6 +75,9 @@ router.put('/prorrogas', upsertProrroga);
 router.get('/avisos', getAvisos);
 router.post('/avisos', createAviso);
 router.put('/avisos/:id', toggleAviso);
+router.get('/consolidado-manual', getConsolidadoManualAdmin);
+router.post('/consolidado-manual', saveConsolidadoManualAdmin);
+router.post('/consolidado-manual/estado', updateEstadoConsolidadoAdmin);
 router.get('/comprobantes-admin', getAdminComprobantes);
 router.post('/comprobantes-admin', createAdminComprobante);
 router.put('/comprobantes-admin/:id', updateAdminComprobante);
