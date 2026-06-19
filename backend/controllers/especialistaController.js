@@ -652,6 +652,7 @@ const construirDatasetIsolationForest = async (anio, trimestre) => {
       i.numero AS numero_ie,
       i.nombre AS institucion,
       COALESCE(e.estado, 'Borrador') AS estado,
+      s.id AS saldo_id,
       COALESCE(s.saldo_inicial, 0) AS saldo_inicial,
       COALESCE(s.saldo_mes1, 0) AS saldo_banco_mes1,
       COALESCE(s.saldo_mes2, 0) AS saldo_banco_mes2,
@@ -662,7 +663,7 @@ const construirDatasetIsolationForest = async (anio, trimestre) => {
       SUM(CASE WHEN m.tipo_movimiento = 'EGRESO' AND MONTH(m.fecha) = ? THEN m.monto ELSE 0 END) AS egresos_mes1,
       SUM(CASE WHEN m.tipo_movimiento = 'EGRESO' AND MONTH(m.fecha) = ? THEN m.monto ELSE 0 END) AS egresos_mes2,
       SUM(CASE WHEN m.tipo_movimiento = 'EGRESO' AND MONTH(m.fecha) = ? THEN m.monto ELSE 0 END) AS egresos_mes3,
-      COUNT(CASE WHEN m.concepto LIKE ? THEN 1 END) AS registros_manual,
+      COUNT(CASE WHEN m.concepto LIKE ? OR m.concepto LIKE ? THEN 1 END) AS registros_manual,
       COUNT(m.id) AS total_movimientos
     FROM directores d
     INNER JOIN instituciones i ON d.institucion_id = i.id
@@ -689,6 +690,7 @@ const construirDatasetIsolationForest = async (anio, trimestre) => {
     meses[0], meses[1], meses[2],
     meses[0], meses[1], meses[2],
     `${MANUAL_Q1_EXCEPTION.conceptPrefix}%`,
+    '[CARGA MANUAL ADMIN]%',
     anio, trimestre,
     anio, trimestre,
     anio, mesInicio, mesInicio + 2,
@@ -710,8 +712,10 @@ const construirDatasetIsolationForest = async (anio, trimestre) => {
     const saldoBancoMes3 = Number(row.saldo_banco_mes3 || 0);
     const saldoFinal = dineroEnCaja + saldoBancoMes3;
     const tieneMovimientos = Number(row.total_movimientos || 0) > 0;
-    const tieneSaldosBanco = saldoBancoMes1 > 0 || saldoBancoMes2 > 0 || saldoBancoMes3 > 0;
+    const tieneRegistroSaldos = Boolean(row.saldo_id);
+    const tieneSaldosBanco = tieneRegistroSaldos || saldoBancoMes1 > 0 || saldoBancoMes2 > 0 || saldoBancoMes3 > 0;
     const estadoValido = ['Enviado', 'Aprobado', 'Observado'].includes(row.estado);
+    const esDeclaracionCeroValida = estadoValido && tieneRegistroSaldos && totalIngresos === 0 && totalEgresos === 0;
 
     return {
       director_id: row.director_id,
@@ -739,7 +743,7 @@ const construirDatasetIsolationForest = async (anio, trimestre) => {
       ratio_banco_saldo_final: saldoFinal > 0 ? Number((saldoBancoMes3 / saldoFinal).toFixed(4)) : 0,
       estado: row.estado,
       carga_manual: Number(row.registros_manual || 0) > 0,
-      dataset_completo: tieneMovimientos && tieneSaldosBanco && estadoValido,
+      dataset_completo: estadoValido && tieneSaldosBanco && (tieneMovimientos || esDeclaracionCeroValida),
     };
   }));
 
@@ -752,7 +756,8 @@ const construirDatasetIsolationForest = async (anio, trimestre) => {
       total_filas: dataset.length,
       filas_completas: completos,
       filas_incompletas: dataset.length - completos,
-      listo_para_entrenamiento: completos >= 10 && completos === dataset.length,
+      listo_para_entrenamiento: completos >= 5,
+      minimo_filas_entrenamiento: 5,
     },
     dataset,
   };

@@ -159,11 +159,16 @@ const EspecialistaDatasetMLView = ({
           }`}>
             <div className="flex items-center gap-3">
               {meta?.listo_para_entrenamiento ? <CheckCircle size={22} /> : <AlertTriangle size={22} />}
-              <p className="font-bold">
-                {meta?.listo_para_entrenamiento
-                  ? 'Dataset listo para entrenamiento.'
-                  : 'Dataset aún no listo para entrenamiento: revisa filas incompletas.'}
-              </p>
+              <div>
+                <p className="font-bold">
+                  {meta?.listo_para_entrenamiento
+                    ? `Dataset listo para entrenamiento: ${meta?.filas_completas || 0} filas completas disponibles.`
+                    : `Dataset aún no listo: se necesitan al menos ${meta?.minimo_filas_entrenamiento || 5} colegios completos.`}
+                </p>
+                <p className="mt-1 text-sm opacity-80">
+                  Las filas incompletas pueden permanecer en la tabla; el modelo solo usa las filas completas.
+                </p>
+              </div>
             </div>
           </div>
 
