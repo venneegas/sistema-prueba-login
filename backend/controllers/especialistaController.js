@@ -782,6 +782,7 @@ const getDatasetIsolationForest = async (req, res) => {
 
 const ejecutarPythonIsolationForest = (rows) => new Promise((resolve, reject) => {
   const pythonBin = process.env.PYTHON_BIN || 'python';
+  const timeoutMs = Number(process.env.ML_MODEL_TIMEOUT_MS || 120000);
   const scriptPath = path.join(__dirname, '..', 'ml', 'isolation_forest.py');
   const child = spawn(pythonBin, [scriptPath], {
     stdio: ['pipe', 'pipe', 'pipe'],
@@ -791,8 +792,8 @@ const ejecutarPythonIsolationForest = (rows) => new Promise((resolve, reject) =>
   let stderr = '';
   const timeout = setTimeout(() => {
     child.kill();
-    reject(new Error('Tiempo de ejecucion del modelo agotado.'));
-  }, 30000);
+    reject(new Error(`Tiempo de ejecucion del modelo agotado (${Math.round(timeoutMs / 1000)}s).`));
+  }, timeoutMs);
 
   child.stdout.on('data', (data) => { stdout += data.toString(); });
   child.stderr.on('data', (data) => { stderr += data.toString(); });

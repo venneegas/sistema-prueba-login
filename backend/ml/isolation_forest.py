@@ -56,7 +56,7 @@ def main():
     x = np.array(matrix, dtype=float)
 
     model = IsolationForest(
-        n_estimators=200,
+        n_estimators=100,
         contamination=contamination,
         random_state=42,
     )
