@@ -679,6 +679,7 @@ const construirDatasetIsolationForest = async (anio, trimestre) => {
       i.numero,
       i.nombre,
       e.estado,
+      s.id,
       s.saldo_inicial,
       s.saldo_mes1,
       s.saldo_mes2,
