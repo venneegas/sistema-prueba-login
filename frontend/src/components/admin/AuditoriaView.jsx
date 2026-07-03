@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Activity, RefreshCw, Search } from 'lucide-react';
 import { buildApiUrl } from '../../config/api';
 import AdminPageHeader from './AdminPageHeader';
-import HistorialReaperturas from './audit/HistorialReaperturas';
+import HistorialReaperturas from './HistorialReaperturas';
 
 const AuditoriaView = ({ showToast }) => {
   // Estado para la pestaña activa
