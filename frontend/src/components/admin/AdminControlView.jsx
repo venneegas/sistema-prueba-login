@@ -6,7 +6,6 @@ import {
   CheckSquare,
   ClipboardList,
   Gauge,
-  History,
   KeyRound,
   Link2,
   Lock,
@@ -55,7 +54,6 @@ const AdminControlView = ({ showToast }) => {
   const [especialistas, setEspecialistas] = useState([]);
   const [usuarios, setUsuarios] = useState([]);
   const [prorrogas, setProrrogas] = useState([]);
-  const [historial, setHistorial] = useState([]);
   const [avisos, setAvisos] = useState([]);
   const [comprobantes, setComprobantes] = useState([]);
   const [consolidadoAdmin, setConsolidadoAdmin] = useState([]);
@@ -116,7 +114,6 @@ const AdminControlView = ({ showToast }) => {
         especialistasData,
         usuariosData,
         prorrogasData,
-        historialData,
         avisosData,
         comprobantesData,
         consolidadoData
@@ -127,7 +124,6 @@ const AdminControlView = ({ showToast }) => {
         fetchJson(buildApiUrl('/api/admin/especialistas')),
         fetchJson(buildApiUrl('/api/admin/usuarios')),
         fetchJson(buildApiUrl('/api/admin/prorrogas')),
-        fetchJson(buildApiUrl('/api/admin/cierres/historial')),
         fetchJson(buildApiUrl('/api/admin/avisos')),
         fetchJson(buildApiUrl('/api/admin/comprobantes-admin')),
         fetchJson(buildApiUrl(`/api/admin/consolidado-manual?anio=${anio}&trimestre=${trimestre}`))
@@ -139,7 +135,6 @@ const AdminControlView = ({ showToast }) => {
       setEspecialistas(especialistasData.data || []);
       setUsuarios(usuariosData.data || []);
       setProrrogas(prorrogasData.data || []);
-      setHistorial(historialData.data || []);
       setAvisos(avisosData.data || []);
       setComprobantes(comprobantesData.data || []);
       setConsolidadoAdmin(consolidadoData.data || []);
@@ -668,30 +663,6 @@ const AdminControlView = ({ showToast }) => {
           <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
             <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
               <div className="mb-5 flex items-center gap-3">
-                <History className="text-blue-700 dark:text-blue-300" size={22} />
-                <div>
-                  <h2 className="text-lg font-black text-slate-900 dark:text-white">Historial de reaperturas y prorrogas</h2>
-                  <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Registro reciente de acciones administrativas sobre trimestres.</p>
-                </div>
-              </div>
-              <div className="max-h-80 overflow-y-auto rounded-xl border border-slate-100 dark:border-slate-700">
-                {historial.length === 0 ? (
-                  <p className="p-4 text-sm font-medium text-slate-500 dark:text-slate-400">Aun no hay acciones registradas.</p>
-                ) : historial.slice(0, 20).map((item) => (
-                  <div key={item.id} className="border-b border-slate-100 px-4 py-3 text-sm dark:border-slate-700">
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <p className="font-black text-slate-800 dark:text-slate-100">{item.accion} T{item.trimestre}-{item.anio}</p>
-                      <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-black text-slate-600 dark:bg-slate-900 dark:text-slate-300">{new Date(item.fecha).toLocaleString('es-PE')}</span>
-                    </div>
-                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{item.numero || '-'} - {item.institucion || `Director ${item.director_id}`}</p>
-                    {item.motivo && <p className="mt-1 text-xs font-medium text-slate-600 dark:text-slate-300">{item.motivo}</p>}
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
-              <div className="mb-5 flex items-center gap-3">
                 <Megaphone className="text-blue-700 dark:text-blue-300" size={22} />
                 <div>
                   <h2 className="text-lg font-black text-slate-900 dark:text-white">Avisos globales</h2>
@@ -724,6 +695,23 @@ const AdminControlView = ({ showToast }) => {
                 ))}
               </div>
             </section>
+
+            <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+              <div className="mb-5 flex items-center gap-3">
+                <KeyRound className="text-blue-700 dark:text-blue-300" size={22} />
+                <div>
+                  <h2 className="text-lg font-black text-slate-900 dark:text-white">Credenciales</h2>
+                  <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Restablece contrasena y fuerza cambio al siguiente ingreso.</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-[1fr_260px_auto]">
+                <select value={usuarioId} onChange={(e) => setUsuarioId(e.target.value)} className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+                  {usuarios.map((item) => <option key={item.id} value={item.id}>{item.nombre} | {item.email} | {item.rol}</option>)}
+                </select>
+                <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Nueva contrasena temporal" className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200" />
+                <button onClick={resetPassword} disabled={!usuarioId || newPassword.length < 6 || savingKey === 'password'} className="rounded-xl bg-rose-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-rose-700 disabled:opacity-60">Restablecer</button>
+              </div>
+            </section>
           </div>
 
           <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
@@ -747,23 +735,6 @@ const AdminControlView = ({ showToast }) => {
                   </button>
                 </div>
               ))}
-            </div>
-          </section>
-
-          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
-            <div className="mb-5 flex items-center gap-3">
-              <KeyRound className="text-blue-700 dark:text-blue-300" size={22} />
-              <div>
-                <h2 className="text-lg font-black text-slate-900 dark:text-white">Credenciales</h2>
-                <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Restablece contrasena y fuerza cambio al siguiente ingreso.</p>
-              </div>
-            </div>
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-[1fr_260px_auto]">
-              <select value={usuarioId} onChange={(e) => setUsuarioId(e.target.value)} className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
-                {usuarios.map((item) => <option key={item.id} value={item.id}>{item.nombre} | {item.email} | {item.rol}</option>)}
-              </select>
-              <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Nueva contrasena temporal" className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200" />
-              <button onClick={resetPassword} disabled={!usuarioId || newPassword.length < 6 || savingKey === 'password'} className="rounded-xl bg-rose-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-rose-700 disabled:opacity-60">Restablecer</button>
             </div>
           </section>
         </div>
