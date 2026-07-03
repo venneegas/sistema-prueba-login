@@ -33,11 +33,8 @@ const AuditoriaView = ({ showToast }) => {
 
   const cargarLogs = useCallback(async (isManualRefresh = false) => {
     try {
-      if (isManualRefresh) {
-        setIsRefreshing(true);
-      } else {
-        setCargando(true);
-      }
+      if (isManualRefresh) setIsRefreshing(true);
+      setCargando(true);
       setError(null);
 
       const token = localStorage.getItem('token');
@@ -54,8 +51,8 @@ const AuditoriaView = ({ showToast }) => {
       const data = await response.json();
       
       if (data.success) {
-        setLogs(data.data.items || []);
-        setPaginationInfo(data.data.pagination || { totalItems: 0, totalPages: 1 });
+        setLogs(data.data || []);
+        setPaginationInfo(data.pagination || { totalItems: 0, totalPages: 1 });
         if (isManualRefresh) showToast('Registros actualizados correctamente.');
       } else {
         setError(data.message);
@@ -189,7 +186,7 @@ const AuditoriaView = ({ showToast }) => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
-                      {cargando && !isRefreshing ? (
+                      {cargando ? (
                         <tr>
                           <td colSpan="5" className="p-8 text-center text-slate-400 font-medium">Cargando...</td>
                         </tr>

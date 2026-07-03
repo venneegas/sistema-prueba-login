@@ -28,7 +28,7 @@ const HistorialReaperturas = ({ showToast }) => {
 
   const fetchHistorial = useCallback(async (isManualRefresh = false) => {
     if (isManualRefresh) setIsRefreshing(true);
-    else setLoading(true);
+    setLoading(true);
 
     try {
       const params = new URLSearchParams({
@@ -41,8 +41,8 @@ const HistorialReaperturas = ({ showToast }) => {
       });
       const data = await response.json();
       if (data.success) {
-        setHistorial(data.data.items || []);
-        setPaginationInfo(data.data.pagination || { totalItems: 0, totalPages: 1 });
+        setHistorial(data.data || []);
+        setPaginationInfo(data.pagination || { totalItems: 0, totalPages: 1 });
         if (isManualRefresh) showToast?.('Historial actualizado correctamente.');
       } else {
         showToast?.(data.message || 'Error al cargar el historial.', 'error');
