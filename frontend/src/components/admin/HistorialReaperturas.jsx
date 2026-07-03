@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { buildApiUrl } from '../../../config/api';
+import { buildApiUrl } from '../../config/api';
 import { History, RefreshCw } from 'lucide-react';
 
 const HistorialReaperturas = ({ showToast }) => {
