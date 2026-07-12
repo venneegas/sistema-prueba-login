@@ -16,34 +16,15 @@ const AuditoriaView = ({ showToast }) => {
   const [error, setError] = useState(null);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
-  const [paginationInfo, setPaginationInfo] = useState({ totalItems: 0, totalPages: 1 });
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
-
-  // Debounce para el término de búsqueda
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedSearchTerm(searchTerm);
-      setCurrentPage(1); // Volver a la primera página con cada nueva búsqueda
-    }, 300);
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [searchTerm]);
 
   const cargarLogs = useCallback(async (isManualRefresh = false) => {
     try {
       if (isManualRefresh) setIsRefreshing(true);
-      setCargando(true);
+      else setCargando(true);
       setError(null);
 
       const token = localStorage.getItem('token');
-      const params = new URLSearchParams({
-        page: currentPage,
-        limit: itemsPerPage,
-        search: debouncedSearchTerm,
-      });
-      const response = await fetch(buildApiUrl(`/api/admin/auditoria?${params.toString()}`), {
+      const response = await fetch(buildApiUrl('/api/admin/auditoria'), {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -51,8 +32,7 @@ const AuditoriaView = ({ showToast }) => {
       const data = await response.json();
       
       if (data.success) {
-        setLogs(data.data || []);
-        setPaginationInfo(data.pagination || { totalItems: 0, totalPages: 1 });
+        setLogs(data.data);
         if (isManualRefresh) showToast('Registros actualizados correctamente.');
       } else {
         setError(data.message);
@@ -65,7 +45,7 @@ const AuditoriaView = ({ showToast }) => {
       setCargando(false);
       setIsRefreshing(false);
     }
-  }, [showToast, currentPage, itemsPerPage, debouncedSearchTerm]);
+  }, [showToast]);
 
   useEffect(() => {
     if (activeTab === 'acciones') {
@@ -88,9 +68,23 @@ const AuditoriaView = ({ showToast }) => {
   // Resetear página cuando cambian los filtros
   useEffect(() => {
     setCurrentPage(1);
-  }, [itemsPerPage]);
+  }, [searchTerm, itemsPerPage]);
 
-  if (cargando && !isRefreshing && activeTab === 'acciones') return <div className="flex-1 flex justify-center items-center p-8 text-slate-500 font-medium">Cargando registros de auditoría...</div>;
+  const filteredLogs = logs.filter(log => 
+    (log.email && log.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (log.modulo && log.modulo.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (log.accion && log.accion.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (log.descripcion && log.descripcion.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (new Date(log.fecha_hora).toLocaleString('es-PE').includes(searchTerm))
+  );
+
+  // Calcular paginación
+  const totalPages = Math.ceil(filteredLogs.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const displayedLogs = filteredLogs.slice(startIndex, endIndex);
+
+  if (cargando && !isRefreshing) return <div className="flex-1 flex justify-center items-center p-8 text-slate-500 font-medium">Cargando registros de auditoría...</div>;
   if (error) return <div className="flex-1 flex justify-center items-center p-8 text-rose-500 font-bold">{error}</div>;
 
   return (
@@ -158,17 +152,14 @@ const AuditoriaView = ({ showToast }) => {
                     <select 
                       className="bg-transparent text-slate-700 text-sm font-medium outline-none cursor-pointer"
                       value={itemsPerPage}
-                      onChange={(e) => {
-                        setItemsPerPage(parseInt(e.target.value));
-                        setCurrentPage(1);
-                      }}
+                      onChange={(e) => setItemsPerPage(parseInt(e.target.value))}
                     >
                       <option value={10}>10</option>
                       <option value={25}>25</option>
                       <option value={50}>50</option>
                       <option value={100}>100</option>
                     </select>
-                    <span className="text-slate-500 text-sm font-medium">de {paginationInfo.totalItems}</span>
+                    <span className="text-slate-500 text-sm font-medium">de {filteredLogs.length}</span>
                   </div>
                 </div>
               </div>
@@ -186,20 +177,16 @@ const AuditoriaView = ({ showToast }) => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
-                      {cargando ? (
-                        <tr>
-                          <td colSpan="5" className="p-8 text-center text-slate-400 font-medium">Cargando...</td>
-                        </tr>
-                      ) : logs.length === 0 ? (
+                      {displayedLogs.length === 0 ? (
                         <tr>
                           <td colSpan="5" className="p-8 text-center text-slate-500 font-medium">
-                            {paginationInfo.totalItems > 0
-                              ? 'No hay registros que coincidan con la búsqueda.'
-                              : 'No se encontraron registros de auditoría.'}
+                            {logs.length === 0
+                              ? 'No se encontraron registros de auditoría.'
+                              : 'No hay registros que coincidan con la búsqueda.'}
                           </td>
                         </tr>
                       ) : (
-                        logs.map((log) => (
+                        displayedLogs.map((log) => (
                           <tr key={log.id} className="hover:bg-slate-50/80 transition-colors">
                             <td className="p-4 text-sm text-slate-600 whitespace-nowrap">
                               {new Date(log.fecha_hora).toLocaleString('es-PE')}
@@ -223,10 +210,10 @@ const AuditoriaView = ({ showToast }) => {
                 </div>
 
                 {/* Controles de paginación */}
-                {paginationInfo.totalPages > 1 && (
+                {totalPages > 1 && (
                   <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 bg-slate-50 border-t border-slate-200">
                     <div className="text-sm text-slate-600 font-medium text-center sm:text-left">
-                      Mostrando <span className="font-bold">{(currentPage - 1) * itemsPerPage + 1}</span> a <span className="font-bold">{Math.min(currentPage * itemsPerPage, paginationInfo.totalItems)}</span> de <span className="font-bold">{paginationInfo.totalItems}</span> registros
+                      Mostrando <span className="font-bold">{startIndex + 1}</span> a <span className="font-bold">{Math.min(endIndex, filteredLogs.length)}</span> de <span className="font-bold">{filteredLogs.length}</span> registros
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -240,7 +227,7 @@ const AuditoriaView = ({ showToast }) => {
                       </button>
 
                       <div className="flex items-center gap-1 overflow-x-auto max-w-[150px] sm:max-w-[300px] hide-scrollbar">
-                        {Array.from({ length: paginationInfo.totalPages }, (_, i) => i + 1).map(page => (
+                        {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
                           <button
                             key={page}
                             onClick={() => setCurrentPage(page)}
@@ -256,9 +243,9 @@ const AuditoriaView = ({ showToast }) => {
                       </div>
 
                       <button
-                        onClick={() => setCurrentPage(prev => Math.min(paginationInfo.totalPages, prev + 1))}
-                        disabled={currentPage === paginationInfo.totalPages}
-                        className={`p-2 rounded-lg transition-colors ${currentPage === paginationInfo.totalPages ? 'text-slate-300 cursor-not-allowed' : 'text-slate-600 hover:bg-white hover:text-blue-600 border border-slate-200'}`}
+                        onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                        disabled={currentPage === totalPages}
+                        className={`p-2 rounded-lg transition-colors ${currentPage === totalPages ? 'text-slate-300 cursor-not-allowed' : 'text-slate-600 hover:bg-white hover:text-blue-600 border border-slate-200'}`}
                         title="Próxima página"
                       >
                         →

@@ -11,38 +11,18 @@ const HistorialReaperturas = ({ showToast }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
-  const [paginationInfo, setPaginationInfo] = useState({ totalItems: 0, totalPages: 1 });
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
-
-  // Debounce para el término de búsqueda
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedSearchTerm(searchTerm);
-      setCurrentPage(1); // Volver a la primera página con cada nueva búsqueda
-    }, 300);
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [searchTerm]);
 
   const fetchHistorial = useCallback(async (isManualRefresh = false) => {
     if (isManualRefresh) setIsRefreshing(true);
-    setLoading(true);
+    else setLoading(true);
 
     try {
-      const params = new URLSearchParams({
-        page: currentPage,
-        limit: itemsPerPage,
-        search: debouncedSearchTerm,
-      });
-      const response = await fetch(buildApiUrl(`/api/admin/cierres/historial?${params.toString()}`), {
+      const response = await fetch(buildApiUrl('/api/admin/cierres/historial'), {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await response.json();
       if (data.success) {
         setHistorial(data.data || []);
-        setPaginationInfo(data.pagination || { totalItems: 0, totalPages: 1 });
         if (isManualRefresh) showToast?.('Historial actualizado correctamente.');
       } else {
         showToast?.(data.message || 'Error al cargar el historial.', 'error');
@@ -53,13 +33,33 @@ const HistorialReaperturas = ({ showToast }) => {
       setLoading(false);
       setIsRefreshing(false);
     }
-  }, [showToast, currentPage, itemsPerPage, debouncedSearchTerm]);
+  }, [showToast]);
 
   useEffect(() => {
     fetchHistorial(false);
   }, [fetchHistorial]);
 
-  if (loading && !isRefreshing) {
+  // Lógica de filtrado
+  const filteredHistorial = historial.filter(item =>
+    (item.institucion && item.institucion.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (item.numero && String(item.numero).toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (item.accion && item.accion.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (item.motivo && item.motivo.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (new Date(item.fecha).toLocaleString('es-PE').includes(searchTerm))
+  );
+
+  // Lógica de paginación
+  const totalPages = Math.ceil(filteredHistorial.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const displayedHistorial = filteredHistorial.slice(startIndex, endIndex);
+
+  // Resetear página cuando cambian los filtros
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, itemsPerPage]);
+
+  if (loading) {
     return <div className="p-8 text-center text-slate-500 font-medium">Cargando historial de reaperturas...</div>;
   }
 
@@ -82,17 +82,14 @@ const HistorialReaperturas = ({ showToast }) => {
             <select
               className="bg-transparent text-slate-700 text-sm font-medium outline-none cursor-pointer"
               value={itemsPerPage}
-              onChange={(e) => {
-                setItemsPerPage(parseInt(e.target.value));
-                setCurrentPage(1);
-              }}
+              onChange={(e) => setItemsPerPage(parseInt(e.target.value))}
             >
               <option value={10}>10</option>
               <option value={25}>25</option>
               <option value={50}>50</option>
               <option value={100}>100</option>
             </select>
-            <span className="text-slate-500 text-sm font-medium">de {paginationInfo.totalItems}</span>
+            <span className="text-slate-500 text-sm font-medium">de {filteredHistorial.length}</span>
           </div>
         </div>
       </div>
@@ -123,20 +120,16 @@ const HistorialReaperturas = ({ showToast }) => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-            {loading ? (
-              <tr>
-                <td colSpan="4" className="p-8 text-center text-slate-400 font-medium">Cargando...</td>
-              </tr>
-            ) : historial.length === 0 ? (
+              {displayedHistorial.length === 0 ? (
               <tr>
                 <td colSpan="4" className="p-8 text-center text-slate-500 font-medium">
-                  {paginationInfo.totalItems > 0
-                    ? 'No hay registros que coincidan con la búsqueda.'
-                    : 'No se encontraron acciones de reapertura o prórroga.'}
+                    {historial.length === 0
+                      ? 'No se encontraron acciones de reapertura o prórroga.'
+                      : 'No hay registros que coincidan con la búsqueda.'}
                 </td>
               </tr>
             ) : (
-              historial.map((item) => (
+                displayedHistorial.map((item) => (
                   <tr key={item.id} className="hover:bg-slate-50/80 transition-colors">
                     <td className="p-4 text-sm text-slate-600 whitespace-nowrap">{new Date(item.fecha).toLocaleString('es-PE')}</td>
                     <td className="p-4 text-sm font-bold text-slate-800">{item.accion} T{item.trimestre}-{item.anio}</td>
@@ -150,10 +143,10 @@ const HistorialReaperturas = ({ showToast }) => {
         </div>
 
         {/* Controles de paginación */}
-        {paginationInfo.totalPages > 1 && (
+        {totalPages > 1 && (
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 bg-slate-50 border-t border-slate-200">
             <div className="text-sm text-slate-600 font-medium text-center sm:text-left">
-              Mostrando <span className="font-bold">{(currentPage - 1) * itemsPerPage + 1}</span> a <span className="font-bold">{Math.min(currentPage * itemsPerPage, paginationInfo.totalItems)}</span> de <span className="font-bold">{paginationInfo.totalItems}</span> registros
+              Mostrando <span className="font-bold">{startIndex + 1}</span> a <span className="font-bold">{Math.min(endIndex, filteredHistorial.length)}</span> de <span className="font-bold">{filteredHistorial.length}</span> registros
             </div>
 
             <div className="flex items-center gap-2">
@@ -167,7 +160,7 @@ const HistorialReaperturas = ({ showToast }) => {
               </button>
 
               <div className="flex items-center gap-1 overflow-x-auto max-w-[150px] sm:max-w-[300px] hide-scrollbar">
-                {Array.from({ length: paginationInfo.totalPages }, (_, i) => i + 1).map(page => (
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
                   <button
                     key={page}
                     onClick={() => setCurrentPage(page)}
@@ -183,9 +176,9 @@ const HistorialReaperturas = ({ showToast }) => {
               </div>
 
               <button
-                onClick={() => setCurrentPage(prev => Math.min(paginationInfo.totalPages, prev + 1))}
-                disabled={currentPage === paginationInfo.totalPages}
-                className={`p-2 rounded-lg transition-colors ${currentPage === paginationInfo.totalPages ? 'text-slate-300 cursor-not-allowed' : 'text-slate-600 hover:bg-white hover:text-blue-600 border border-slate-200'}`}
+                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                disabled={currentPage === totalPages}
+                className={`p-2 rounded-lg transition-colors ${currentPage === totalPages ? 'text-slate-300 cursor-not-allowed' : 'text-slate-600 hover:bg-white hover:text-blue-600 border border-slate-200'}`}
                 title="Próxima página"
               >
                 →
