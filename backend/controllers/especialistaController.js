@@ -582,6 +582,7 @@ const getReporteGlobal = async (req, res) => {
   try {
     const trimestre = Number(req.query.trimestre || 1);
     const anio = Number(req.query.anio || new Date().getFullYear());
+    const especialistaId = req.usuario?.id || req.user?.id || null;
     
     const mesInicio = (trimestre - 1) * 3 + 1;
     const mesFin = trimestre * 3;
@@ -609,6 +610,17 @@ const getReporteGlobal = async (req, res) => {
       INNER JOIN instituciones i ON d.institucion_id = i.id
       LEFT JOIN tesoreria t ON d.id = t.director_id
       LEFT JOIN estados e ON d.id = e.director_id AND e.trimestre = ? AND e.anio = ?
+      WHERE (
+        ? IS NULL
+        OR NOT EXISTS (
+          SELECT 1 FROM especialista_instituciones ei_scope
+          WHERE ei_scope.especialista_id = ?
+        )
+        OR EXISTS (
+          SELECT 1 FROM especialista_instituciones ei
+          WHERE ei.especialista_id = ? AND ei.institucion_id = i.id
+        )
+      )
       ORDER BY i.nombre ASC
     `;
 
@@ -616,7 +628,10 @@ const getReporteGlobal = async (req, res) => {
       anio, mesInicio, mesFin, // Para ingresos
       anio, mesInicio, mesFin, // Para egresos
       anio, trimestre,         // Para saldos
-      trimestre, anio          // Para estados
+      trimestre, anio,         // Para estados
+      especialistaId,          // Para el filtro de especialista
+      especialistaId,
+      especialistaId
     ]);
 
     // Procesar saldo inicial de caja y consolidar datos para cada colegio

@@ -13,7 +13,7 @@ const useEspecialistaColegios = ({ trimestreSeleccionado, anioActual }) => {
 
       try {
         const response = await fetch(
-          buildApiUrl(`/api/especialista/colegios?trimestre=${trimestreSeleccionado}&anio=${anioActual}`),
+          buildApiUrl(`/api/especialista/reporte-global?trimestre=${trimestreSeleccionado}&anio=${anioActual}`),
           {
             headers: {
               'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -23,7 +23,12 @@ const useEspecialistaColegios = ({ trimestreSeleccionado, anioActual }) => {
         const data = await response.json();
 
         if (data.success) {
-          setColegios(data.colegios);
+          // Mapeamos la respuesta para que coincida con la estructura que espera el frontend
+          const colegiosMapeados = data.reporte.map(c => ({
+            ...c,
+            id: c.directorId, // Renombramos directorId a id para que coincida
+          }));
+          setColegios(colegiosMapeados);
         } else {
           setError(data.message || 'Error al cargar colegios');
         }
