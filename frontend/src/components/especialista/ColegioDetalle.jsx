@@ -14,14 +14,17 @@ import {
   ClipboardCheck,
   Landmark,
   Save,
-  WalletCards
+  WalletCards,
+  UserCircle
 } from 'lucide-react';
 import { getEstadoReporteBadgeClass, getEstadoReporteLabel, isEstadoPendiente } from '../../utils/estadoReporte';
 import { buildApiUrl } from '../../config/api';
+import DirectorInfoModal from './DirectorInfoModal';
 
 const ColegioDetalle = ({ colegio, onBack, trimestre, anio, onEstadoChange }) => {
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
   const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
+  const [isDirectorModalOpen, setIsDirectorModalOpen] = useState(false);
   const [isManualModalOpen, setIsManualModalOpen] = useState(false);
   const [isSavingManual, setIsSavingManual] = useState(false);
   const [successModal, setSuccessModal] = useState(null);
@@ -322,6 +325,16 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio, onEstadoChange }) =>
             <Building2 size={26} className="shrink-0 text-blue-600 dark:text-blue-300" />
             <span className="truncate">{colegio.nombre}</span>
           </h1>
+          <div className="mt-2 flex items-center gap-2 text-sm font-semibold text-slate-500 dark:text-slate-400">
+            <span>Director(a): {[colegio.directorNombres, colegio.directorApellidoPaterno].filter(Boolean).join(' ') || 'No asignado'}</span>
+            <button
+              onClick={() => setIsDirectorModalOpen(true)}
+              className="p-1 rounded-full hover:bg-blue-100 text-blue-600 dark:hover:bg-blue-900/50"
+              title="Ver detalles del director"
+            >
+              <UserCircle size={18} />
+            </button>
+          </div>
           <div className="mt-3 flex flex-wrap items-center gap-2 text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
             <span className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 dark:border-slate-700 dark:bg-slate-900">
               {colegio.numeroIE ? `IE ${colegio.numeroIE}` : 'IE -'}
@@ -805,9 +818,15 @@ const ColegioDetalle = ({ colegio, onBack, trimestre, anio, onEstadoChange }) =>
           </div>
         </div>
       )}
+
+      {isDirectorModalOpen && (
+        <DirectorInfoModal
+          colegio={colegio}
+          onClose={() => setIsDirectorModalOpen(false)}
+        />
+      )}
     </div>
   );
 };
 
 export default ColegioDetalle;
-

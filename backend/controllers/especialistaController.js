@@ -100,6 +100,12 @@ const getColegiosPorTrimestre = async (req, res) => {
     const sql = `
       SELECT 
           d.id AS id,
+          d.nombres AS directorNombres,
+          d.apellido_paterno AS directorApellidoPaterno,
+          d.apellido_materno AS directorApellidoMaterno,
+          d.dni AS directorDni,
+          d.celular AS directorCelular,
+          d.email AS directorEmail,
           i.codigo_modular AS codigoModular,
           i.numero AS numeroIE,
           i.nombre AS nombre,
@@ -584,6 +590,12 @@ const getReporteGlobal = async (req, res) => {
     const sql = `
       SELECT 
         d.id AS directorId,
+          d.nombres AS directorNombres,
+          d.apellido_paterno AS directorApellidoPaterno,
+          d.apellido_materno AS directorApellidoMaterno,
+          d.dni AS directorDni,
+          d.celular AS directorCelular,
+          d.email AS directorEmail,
         i.codigo_modular AS codigoModular,
         i.numero AS numeroIE,
         i.nombre AS nombre,
