@@ -49,7 +49,7 @@ const InformacionGeneralView = ({ director, section = 'perfil', onUserUpdate }) 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
 
-    if (name === 'dni_tesorero' || name === 'celular_tesorero') {
+    if (name === 'dni_tesorero' || name === 'celular_tesorero' || name === 'numero_cuenta_corriente') {
       if (value !== '' && !/^\d+$/.test(value)) return;
     }
 
@@ -182,10 +182,12 @@ const InformacionGeneralView = ({ director, section = 'perfil', onUserUpdate }) 
                     <input
                       type="text"
                       name="numero_cuenta_corriente"
+                      inputMode="numeric"
+                      maxLength="20"
                       value={formData.numero_cuenta_corriente}
                       onChange={handleInputChange}
                       className={inputClass}
-                      placeholder="Número de cuenta corriente"
+                      placeholder="Solo números"
                     />
                   </div>
                 </div>

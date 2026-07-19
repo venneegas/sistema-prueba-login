@@ -40,6 +40,11 @@ const saveDatos = async (req, res) => {
       return res.status(400).json({ success: false, message: 'El celular del tesorero debe contener exactamente 9 dígitos numéricos.' });
     }
 
+    // Validamos que si se envía un número de cuenta corriente, contenga solo dígitos.
+    if (numero_cuenta_corriente && !/^\d+$/.test(numero_cuenta_corriente)) {
+      return res.status(400).json({ success: false, message: 'El número de cuenta corriente solo puede contener dígitos.' });
+    }
+
     // Operación atómica: Insertar o actualizar si el director_id ya existe
     await pool.execute(`
       INSERT INTO tesoreria (director_id, nombre_tesorero, dni_tesorero, celular_tesorero, numero_cuenta_corriente, banco)
