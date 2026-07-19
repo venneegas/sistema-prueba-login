@@ -3,7 +3,7 @@ import { Save } from 'lucide-react';
 import { buildApiUrl } from '../../config/api';
 import PerfilDirectorView from './perfil/PerfilDirectorView';
 
-const InformacionGeneralView = ({ director, section = 'perfil' }) => {
+const InformacionGeneralView = ({ director, section = 'perfil', onUserUpdate }) => {
   const [formData, setFormData] = useState({
     nombre_tesorero: '',
     dni_tesorero: '',
@@ -89,7 +89,7 @@ const InformacionGeneralView = ({ director, section = 'perfil' }) => {
   };
 
   if (section === 'perfil') {
-    return <PerfilDirectorView director={director} />;
+    return <PerfilDirectorView director={director} onProfileUpdate={onUserUpdate} />;
   }
 
   const labelClass = 'mb-2 block text-[11px] font-extrabold uppercase tracking-[0.16em] text-slate-400 dark:text-slate-500';

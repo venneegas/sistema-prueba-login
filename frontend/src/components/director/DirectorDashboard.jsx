@@ -15,6 +15,7 @@ import { buildApiUrl } from '../../config/api';
 import useTheme from '../../hooks/useTheme';
 import FloatingThemeToggle from '../FloatingThemeToggle';
 import GlobalNoticeBanner from '../GlobalNoticeBanner';
+import { saveSession } from '../../utils/sessionManager';
 
 const CIERRES_API_URL = buildApiUrl('/api/movimientos/cierres');
 
@@ -65,6 +66,20 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
   const dropdownRef = useRef(null);
 
   const cambioObligatorioPendiente = Boolean(user?.debeCambiarPassword);
+
+  const handleDirectorProfileUpdate = (updatedDirectorData) => {
+    if (!user) return;
+
+    const nextUser = {
+      ...user,
+      director: user.director
+        ? { ...user.director, ...updatedDirectorData }
+        : updatedDirectorData,
+    };
+
+    saveSession({ token: localStorage.getItem('token') || '', user: nextUser });
+    onUserUpdate?.(nextUser);
+  };
 
   useEffect(() => {
     const previousBodyOverflow = document.body.style.overflow;
@@ -562,7 +577,7 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
               />
             )}
 
-            {activeTab === 'informacion' && <InformacionGeneralView director={user.director} section="perfil" />}
+            {activeTab === 'informacion' && <InformacionGeneralView director={user.director} section="perfil" onUserUpdate={handleDirectorProfileUpdate} />}
             {activeTab === 'tesoreria' && <InformacionGeneralView director={user.director} section="tesoreria" />}
           </div>
         )}
