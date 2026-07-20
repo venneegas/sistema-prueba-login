@@ -57,7 +57,12 @@ exports.getComprobantes = async (req, res) => {
     }
 
     const [rows] = await pool.query(
-      "SELECT id, nombre FROM comprobantes WHERE activo = 1 AND nombre <> 'Recibo Interno' ORDER BY id ASC"
+      `SELECT id, nombre
+         FROM comprobantes
+         WHERE activo = 1
+           AND nombre <> 'Recibo Interno'
+           AND nombre <> 'Ajuste Manual UGEL'
+         ORDER BY id ASC`,
     );
     res.status(200).json({ success: true, data: rows });
   } catch (error) {

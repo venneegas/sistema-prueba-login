@@ -218,6 +218,21 @@ const validarRegistro = (registro) => (
   && registro.monto !== undefined
 );
 
+const obtenerComprobantesPermitidos = async (tipoMovimiento, connection = pool) => {
+  const sql = tipoMovimiento === 'INGRESO'
+    ? `SELECT id
+       FROM comprobantes
+       WHERE activo = 1 AND nombre IN ('Recibo Interno', 'Voucher Banco')`
+    : `SELECT id
+       FROM comprobantes
+       WHERE activo = 1
+         AND nombre <> 'Recibo Interno'
+         AND nombre <> 'Ajuste Manual UGEL'`;
+
+  const [rows] = await connection.execute(sql);
+  return new Set(rows.map((row) => Number(row.id)));
+};
+
 const listarMovimientos = async (req, res) => {
   const { tipo } = req.params;
   const { directorId, startDate, endDate } = req.query;
@@ -323,6 +338,24 @@ const guardarMovimientos = async (req, res) => {
   const connection = await pool.getConnection();
 
   try {
+    if (registrosValidos.length > 0) {
+      const comprobantesPermitidos = await obtenerComprobantesPermitidos(tipoMovimiento, connection);
+      const filasComprobanteNoPermitido = registros
+        .map((registro, index) => ({ registro, index }))
+        .filter(({ registro }) => (
+          validarRegistro(registro)
+          && !comprobantesPermitidos.has(Number(registro.comprobante_id))
+        ))
+        .map(({ index }) => index + 1);
+
+      if (filasComprobanteNoPermitido.length > 0) {
+        return res.status(400).json({
+          success: false,
+          message: `Tipo de comprobante no permitido en la(s) fila(s): ${filasComprobanteNoPermitido.join(', ')}.`,
+        });
+      }
+    }
+
     const cierre = await obtenerEstadoCierre(connection, directorId, periodo.anio, periodo.trimestre);
 
     if (cierre) {
