@@ -33,7 +33,9 @@ const {
   updateEstadoConsolidadoAdmin,
   getAdminComprobantes,
   createAdminComprobante,
-  updateAdminComprobante
+  updateAdminComprobante,
+  getSchemaOverview,
+  getTableSchemaDetail
 } = require('../controllers/adminController');
 const { verificarToken } = require('../middlewares/authMiddleware');
 
@@ -52,6 +54,8 @@ router.use(verificarAdmin);
 // Ruta GET: /api/admin/backup
 // Genera y descarga un archivo .sql con la base de datos completa
 router.get('/backup', downloadBackup);
+router.get('/schema', getSchemaOverview);
+router.get('/schema/:table', getTableSchemaDetail);
 
 router.get('/login-logs', getLoginLogs); // Nueva ruta para logs de inicio de sesión
 

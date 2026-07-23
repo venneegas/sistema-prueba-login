@@ -185,6 +185,188 @@ const formatSqlValue = (value) => {
   return mysql.escape(value);
 };
 
+const SENSITIVE_COLUMN_PATTERN = /(password|pass|token|secret|hash|otp|codigo_verificacion|reset)/i;
+
+const maskSchemaValue = (columnName, value) => {
+  if (value === null || value === undefined) return value;
+  if (SENSITIVE_COLUMN_PATTERN.test(String(columnName))) return '***';
+  return value;
+};
+
+const getDatabaseName = () => process.env.DB_NAME || 'ugel_db';
+
+const getSchemaOverview = async (req, res) => {
+  const dbName = getDatabaseName();
+
+  try {
+    const [tables] = await pool.execute(
+      `SELECT
+         t.TABLE_NAME AS nombre,
+         COALESCE(t.TABLE_ROWS, 0) AS filas_estimadas,
+         COALESCE(t.TABLE_COMMENT, '') AS comentario,
+         t.CREATE_TIME AS creado_en,
+         t.UPDATE_TIME AS actualizado_en
+       FROM information_schema.TABLES t
+       WHERE t.TABLE_SCHEMA = ? AND t.TABLE_TYPE = 'BASE TABLE'
+       ORDER BY t.TABLE_NAME ASC`,
+      [dbName]
+    );
+
+    const [columns] = await pool.execute(
+      `SELECT
+         c.TABLE_NAME AS tabla,
+         COUNT(*) AS total_columnas,
+         SUM(c.COLUMN_KEY = 'PRI') AS total_pk
+       FROM information_schema.COLUMNS c
+       WHERE c.TABLE_SCHEMA = ?
+       GROUP BY c.TABLE_NAME`,
+      [dbName]
+    );
+
+    const [relations] = await pool.execute(
+      `SELECT
+         kcu.TABLE_NAME AS tabla,
+         kcu.COLUMN_NAME AS columna,
+         kcu.REFERENCED_TABLE_NAME AS tabla_referenciada,
+         kcu.REFERENCED_COLUMN_NAME AS columna_referenciada,
+         kcu.CONSTRAINT_NAME AS restriccion
+       FROM information_schema.KEY_COLUMN_USAGE kcu
+       WHERE kcu.TABLE_SCHEMA = ?
+         AND kcu.REFERENCED_TABLE_NAME IS NOT NULL
+       ORDER BY kcu.TABLE_NAME ASC, kcu.COLUMN_NAME ASC`,
+      [dbName]
+    );
+
+    const columnStats = new Map(columns.map((row) => [row.tabla, row]));
+    const outgoingCount = new Map();
+    const incomingCount = new Map();
+
+    relations.forEach((relation) => {
+      outgoingCount.set(relation.tabla, (outgoingCount.get(relation.tabla) || 0) + 1);
+      incomingCount.set(relation.tabla_referenciada, (incomingCount.get(relation.tabla_referenciada) || 0) + 1);
+    });
+
+    res.json({
+      success: true,
+      data: {
+        database: dbName,
+        tables: tables.map((table) => {
+          const stats = columnStats.get(table.nombre) || {};
+
+          return {
+            nombre: table.nombre,
+            filasEstimadas: Number(table.filas_estimadas || 0),
+            totalColumnas: Number(stats.total_columnas || 0),
+            totalLlavesPrimarias: Number(stats.total_pk || 0),
+            relacionesSalientes: outgoingCount.get(table.nombre) || 0,
+            relacionesEntrantes: incomingCount.get(table.nombre) || 0,
+            comentario: table.comentario || null,
+            creadoEn: table.creado_en || null,
+            actualizadoEn: table.actualizado_en || null,
+          };
+        }),
+        relations,
+      },
+    });
+  } catch (error) {
+    console.error('Error obteniendo esquema de BD:', error);
+    res.status(500).json({ success: false, message: 'Error al leer el esquema de la base de datos.' });
+  }
+};
+
+const getTableSchemaDetail = async (req, res) => {
+  const dbName = getDatabaseName();
+  const tableName = String(req.params.table || '').trim();
+  const limit = Math.min(Math.max(Number(req.query.limit || 25), 1), 100);
+
+  if (!tableName) {
+    return res.status(400).json({ success: false, message: 'El nombre de la tabla es requerido.' });
+  }
+
+  try {
+    const [[table]] = await pool.execute(
+      `SELECT TABLE_NAME AS nombre, COALESCE(TABLE_ROWS, 0) AS filas_estimadas
+       FROM information_schema.TABLES
+       WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND TABLE_TYPE = 'BASE TABLE'
+       LIMIT 1`,
+      [dbName, tableName]
+    );
+
+    if (!table) {
+      return res.status(404).json({ success: false, message: 'Tabla no encontrada.' });
+    }
+
+    const [columns] = await pool.execute(
+      `SELECT
+         COLUMN_NAME AS nombre,
+         COLUMN_TYPE AS tipo,
+         IS_NULLABLE AS permite_null,
+         COLUMN_KEY AS llave,
+         COLUMN_DEFAULT AS valor_default,
+         EXTRA AS extra,
+         COLUMN_COMMENT AS comentario
+       FROM information_schema.COLUMNS
+       WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?
+       ORDER BY ORDINAL_POSITION ASC`,
+      [dbName, tableName]
+    );
+
+    const [outgoingRelations] = await pool.execute(
+      `SELECT
+         COLUMN_NAME AS columna,
+         REFERENCED_TABLE_NAME AS tabla_referenciada,
+         REFERENCED_COLUMN_NAME AS columna_referenciada,
+         CONSTRAINT_NAME AS restriccion
+       FROM information_schema.KEY_COLUMN_USAGE
+       WHERE TABLE_SCHEMA = ?
+         AND TABLE_NAME = ?
+         AND REFERENCED_TABLE_NAME IS NOT NULL
+       ORDER BY COLUMN_NAME ASC`,
+      [dbName, tableName]
+    );
+
+    const [incomingRelations] = await pool.execute(
+      `SELECT
+         TABLE_NAME AS tabla,
+         COLUMN_NAME AS columna,
+         REFERENCED_COLUMN_NAME AS columna_referenciada,
+         CONSTRAINT_NAME AS restriccion
+       FROM information_schema.KEY_COLUMN_USAGE
+       WHERE TABLE_SCHEMA = ?
+         AND REFERENCED_TABLE_NAME = ?
+       ORDER BY TABLE_NAME ASC, COLUMN_NAME ASC`,
+      [dbName, tableName]
+    );
+
+    const tableIdentifier = escapeIdentifier(tableName);
+    const [sampleRows] = await pool.query(
+      `SELECT * FROM ${tableIdentifier} LIMIT ?`,
+      [limit]
+    );
+
+    res.json({
+      success: true,
+      data: {
+        table: {
+          nombre: table.nombre,
+          filasEstimadas: Number(table.filas_estimadas || 0),
+        },
+        columns,
+        outgoingRelations,
+        incomingRelations,
+        sampleRows: sampleRows.map((row) => (
+          Object.fromEntries(
+            Object.entries(row).map(([key, value]) => [key, maskSchemaValue(key, value)])
+          )
+        )),
+      },
+    });
+  } catch (error) {
+    console.error('Error obteniendo detalle de tabla:', error);
+    res.status(500).json({ success: false, message: 'Error al leer el detalle de la tabla.' });
+  }
+};
+
 const generarBackupSql = async (dbName) => {
   const [tableRows] = await pool.query('SHOW FULL TABLES WHERE Table_type = ?', ['BASE TABLE']);
   const tableNameKey = `Tables_in_${dbName}`;
@@ -1645,5 +1827,7 @@ module.exports = {
   updateEstadoConsolidadoAdmin,
   getAdminComprobantes,
   createAdminComprobante,
-  updateAdminComprobante
+  updateAdminComprobante,
+  getSchemaOverview,
+  getTableSchemaDetail
 };
