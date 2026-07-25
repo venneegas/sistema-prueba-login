@@ -16,6 +16,7 @@ import useTheme from '../../hooks/useTheme';
 import FloatingThemeToggle from '../FloatingThemeToggle';
 import GlobalNoticeBanner from '../GlobalNoticeBanner';
 import { saveSession } from '../../utils/sessionManager';
+import { getViewFromPath, syncRolePath } from '../../utils/navigationPaths';
 
 const CIERRES_API_URL = buildApiUrl('/api/movimientos/cierres');
 
@@ -41,7 +42,7 @@ const leerRespuestaJson = async (response) => {
 };
 
 const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
-  const [activeTab, setActiveTab] = useState('general');
+  const [activeTab, setActiveTab] = useState(() => getViewFromPath('director') || 'general');
   const obtenerTrimestreActual = () => {
     const mesActual = new Date().getMonth();
     return String(Math.floor(mesActual / 3) + 1);
@@ -66,6 +67,11 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
   const dropdownRef = useRef(null);
 
   const cambioObligatorioPendiente = Boolean(user?.debeCambiarPassword);
+
+  const handleChangeTab = (tab) => {
+    setActiveTab(tab);
+    syncRolePath('director', tab);
+  };
 
   const handleDirectorProfileUpdate = (updatedDirectorData) => {
     if (!user) return;
@@ -93,6 +99,17 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
       document.documentElement.style.overflow = previousHtmlOverflow;
     };
   }, []);
+
+  useEffect(() => {
+    syncRolePath('director', activeTab, { replace: true });
+
+    const handlePopState = () => {
+      setActiveTab(getViewFromPath('director') || 'general');
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [activeTab]);
 
   const periodos = {
     '1': ['Enero', 'Febrero', 'Marzo'],
@@ -357,7 +374,7 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
     <div className="flex h-screen bg-slate-100 dark:bg-[#111827]">
       <DirectorSidebar
         activeTab={activeTab}
-        setActiveTab={setActiveTab}
+        setActiveTab={handleChangeTab}
         onLogoutClick={() => setIsLogoutModalOpen(true)}
         onChangePasswordClick={() => setIsChangePasswordOpen(true)}
         onRequestReplacementClick={() => setIsSolicitudReemplazoOpen(true)}

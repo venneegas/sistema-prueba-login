@@ -22,6 +22,7 @@ function App() {
     clearSession();
     setUser(null);
     setShowWelcomeSplash(false);
+    window.history.replaceState({}, '', '/');
   }, []);
 
   useEffect(() => {

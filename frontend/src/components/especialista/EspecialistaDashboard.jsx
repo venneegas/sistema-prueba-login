@@ -19,6 +19,7 @@ import GlobalNoticeBanner from '../GlobalNoticeBanner';
 import { AlertTriangle, CheckCircle } from 'lucide-react';
 import { ESTADOS_REPORTE } from '../../utils/estadoReporte';
 import { buildApiUrl } from '../../config/api';
+import { getViewFromPath, syncRolePath } from '../../utils/navigationPaths';
 
 const ESTADOS_EXPLORADOR = ESTADOS_REPORTE;
 const COLEGIO_DETALLE_HISTORY_STATE = 'especialista-colegio-detalle';
@@ -31,7 +32,7 @@ const obtenerTrimestreActual = () => {
 const EspecialistaDashboard = ({ user, onLogout }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [estadoFiltro, setEstadoFiltro] = useState('Todos');
-  const [activeView, setActiveView] = useState('explorador');
+  const [activeView, setActiveView] = useState(() => getViewFromPath('especialista') || 'explorador');
   const [selectedColegio, setSelectedColegio] = useState(null);
   const selectedColegioRef = useRef(null);
   const [trimestreSeleccionado, setTrimestreSeleccionado] = useState(obtenerTrimestreActual);
@@ -106,12 +107,16 @@ const EspecialistaDashboard = ({ user, onLogout }) => {
       if (selectedColegioRef.current) {
         setSelectedColegio(null);
         setActiveView('explorador');
+        return;
       }
+
+      setActiveView(getViewFromPath('especialista') || 'explorador');
     };
 
+    syncRolePath('especialista', activeView, { replace: true });
     window.addEventListener('popstate', handleBrowserBack);
     return () => window.removeEventListener('popstate', handleBrowserBack);
-  }, []);
+  }, [activeView]);
 
   const { colegios, setColegios, loading, error } = useEspecialistaColegios({
     trimestreSeleccionado,
@@ -149,6 +154,7 @@ const EspecialistaDashboard = ({ user, onLogout }) => {
   const handleChangeView = (view) => {
     setActiveView(view);
     setSelectedColegio(null);
+    syncRolePath('especialista', view);
   };
 
   const handleSelectColegio = (colegio) => {

@@ -9,9 +9,10 @@ import AdminControlView from './AdminControlView';
 import AdminSidebar from './AdminSidebar';
 import useTheme from '../../hooks/useTheme';
 import FloatingThemeToggle from '../FloatingThemeToggle';
+import { getViewFromPath, syncRolePath } from '../../utils/navigationPaths';
 
 const AdminDashboard = ({ user, onLogout }) => {
-  const [activeTab, setActiveTab] = useState('control');
+  const [activeTab, setActiveTab] = useState(() => getViewFromPath('admin') || 'control');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const { isDarkMode, toggleTheme } = useTheme();
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
@@ -29,6 +30,22 @@ const AdminDashboard = ({ user, onLogout }) => {
   const showToast = useCallback((message, type = 'success') => {
     setToast({ show: true, message, type });
   }, []);
+
+  const handleChangeTab = useCallback((tab) => {
+    setActiveTab(tab);
+    syncRolePath('admin', tab);
+  }, []);
+
+  useEffect(() => {
+    syncRolePath('admin', activeTab, { replace: true });
+
+    const handlePopState = () => {
+      setActiveTab(getViewFromPath('admin') || 'control');
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [activeTab]);
 
   const renderContent = () => {
     switch (activeTab) {
@@ -64,7 +81,7 @@ const AdminDashboard = ({ user, onLogout }) => {
       <AdminSidebar
         activeTab={activeTab}
         user={user}
-        onChangeTab={setActiveTab}
+        onChangeTab={handleChangeTab}
         onLogout={onLogout}
         isCollapsed={isSidebarCollapsed}
         onToggleCollapse={() => setIsSidebarCollapsed((prev) => !prev)}
