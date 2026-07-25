@@ -16,7 +16,7 @@ import useTheme from '../../hooks/useTheme';
 import FloatingThemeToggle from '../FloatingThemeToggle';
 import GlobalNoticeBanner from '../GlobalNoticeBanner';
 import { saveSession } from '../../utils/sessionManager';
-import { getViewFromPath, syncRolePath } from '../../utils/navigationPaths';
+import { getModalFromPath, getViewFromPath, syncRolePath } from '../../utils/navigationPaths';
 
 const CIERRES_API_URL = buildApiUrl('/api/movimientos/cierres');
 
@@ -49,9 +49,9 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
   };
   const [trimestreId, setTrimestreId] = useState(obtenerTrimestreActual);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
-  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
+  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(() => getModalFromPath('director') === 'credenciales');
   const [isCerrarTrimestreOpen, setIsCerrarTrimestreOpen] = useState(false);
-  const [isSolicitudReemplazoOpen, setIsSolicitudReemplazoOpen] = useState(false);
+  const [isSolicitudReemplazoOpen, setIsSolicitudReemplazoOpen] = useState(() => getModalFromPath('director') === 'solicitud');
   const [trimestreCerrado, setTrimestreCerrado] = useState(false);
   const [cerrandoTrimestre, setCerrandoTrimestre] = useState(false);
   const [cerradoEn, setCerradoEn] = useState(null);
@@ -70,7 +70,24 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
 
   const handleChangeTab = (tab) => {
     setActiveTab(tab);
+    setIsChangePasswordOpen(false);
+    setIsSolicitudReemplazoOpen(false);
     syncRolePath('director', tab);
+  };
+
+  const openRouteModal = (modal) => {
+    setIsChangePasswordOpen(modal === 'credenciales');
+    setIsSolicitudReemplazoOpen(modal === 'solicitud');
+    syncRolePath('director', activeTab, { modal });
+  };
+
+  const closeRouteModal = (modal) => {
+    if (modal === 'credenciales' && cambioObligatorioPendiente) return;
+
+    if (modal === 'credenciales') setIsChangePasswordOpen(false);
+    if (modal === 'solicitud') setIsSolicitudReemplazoOpen(false);
+
+    syncRolePath('director', activeTab, { replace: true });
   };
 
   const handleDirectorProfileUpdate = (updatedDirectorData) => {
@@ -101,15 +118,24 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
   }, []);
 
   useEffect(() => {
-    syncRolePath('director', activeTab, { replace: true });
+    const activeModal = isChangePasswordOpen
+      ? 'credenciales'
+      : isSolicitudReemplazoOpen
+        ? 'solicitud'
+        : null;
+
+    syncRolePath('director', activeTab, { modal: activeModal, replace: true });
 
     const handlePopState = () => {
       setActiveTab(getViewFromPath('director') || 'general');
+      const modal = getModalFromPath('director');
+      setIsChangePasswordOpen(modal === 'credenciales');
+      setIsSolicitudReemplazoOpen(modal === 'solicitud');
     };
 
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, [activeTab]);
+  }, [activeTab, isChangePasswordOpen, isSolicitudReemplazoOpen]);
 
   const periodos = {
     '1': ['Enero', 'Febrero', 'Marzo'],
@@ -222,8 +248,10 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
   useEffect(() => {
     if (cambioObligatorioPendiente) {
       setIsChangePasswordOpen(true);
+      setIsSolicitudReemplazoOpen(false);
+      syncRolePath('director', activeTab, { modal: 'credenciales' });
     }
-  }, [cambioObligatorioPendiente]);
+  }, [activeTab, cambioObligatorioPendiente]);
 
   useEffect(() => {
     if (anioActual > currentSysYear) {
@@ -376,8 +404,8 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
         activeTab={activeTab}
         setActiveTab={handleChangeTab}
         onLogoutClick={() => setIsLogoutModalOpen(true)}
-        onChangePasswordClick={() => setIsChangePasswordOpen(true)}
-        onRequestReplacementClick={() => setIsSolicitudReemplazoOpen(true)}
+        onChangePasswordClick={() => openRouteModal('credenciales')}
+        onRequestReplacementClick={() => openRouteModal('solicitud')}
         isCollapsed={isSidebarCollapsed}
         onToggleCollapse={() => setIsSidebarCollapsed((prev) => !prev)}
         user={user}
@@ -609,9 +637,7 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
         <ChangePasswordModal
           isOpen={isChangePasswordOpen}
           onClose={() => {
-            if (!cambioObligatorioPendiente) {
-              setIsChangePasswordOpen(false);
-            }
+            closeRouteModal('credenciales');
           }}
           mode={cambioObligatorioPendiente ? 'required' : 'optional'}
           onPasswordChanged={handlePasswordChanged}
@@ -628,7 +654,7 @@ const DirectorDashboard = ({ user, onLogout, onUserUpdate }) => {
 
       <SolicitudReemplazoModal
         isOpen={isSolicitudReemplazoOpen}
-        onClose={() => setIsSolicitudReemplazoOpen(false)}
+        onClose={() => closeRouteModal('solicitud')}
         director={user.director}
       />
       {!cambioObligatorioPendiente && (

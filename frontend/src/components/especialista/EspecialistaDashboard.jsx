@@ -19,7 +19,7 @@ import GlobalNoticeBanner from '../GlobalNoticeBanner';
 import { AlertTriangle, CheckCircle } from 'lucide-react';
 import { ESTADOS_REPORTE } from '../../utils/estadoReporte';
 import { buildApiUrl } from '../../config/api';
-import { getViewFromPath, syncRolePath } from '../../utils/navigationPaths';
+import { getModalFromPath, getViewFromPath, syncRolePath } from '../../utils/navigationPaths';
 
 const ESTADOS_EXPLORADOR = ESTADOS_REPORTE;
 const COLEGIO_DETALLE_HISTORY_STATE = 'especialista-colegio-detalle';
@@ -48,7 +48,7 @@ const EspecialistaDashboard = ({ user, onLogout }) => {
       ? Number(trimestreActualSistema)
       : 0;
 
-  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
+  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(() => getModalFromPath('especialista') === 'credenciales');
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [avisosGlobales, setAvisosGlobales] = useState([]);
@@ -111,12 +111,16 @@ const EspecialistaDashboard = ({ user, onLogout }) => {
       }
 
       setActiveView(getViewFromPath('especialista') || 'explorador');
+      setIsChangePasswordOpen(getModalFromPath('especialista') === 'credenciales');
     };
 
-    syncRolePath('especialista', activeView, { replace: true });
+    syncRolePath('especialista', activeView, {
+      modal: isChangePasswordOpen ? 'credenciales' : null,
+      replace: true,
+    });
     window.addEventListener('popstate', handleBrowserBack);
     return () => window.removeEventListener('popstate', handleBrowserBack);
-  }, [activeView]);
+  }, [activeView, isChangePasswordOpen]);
 
   const { colegios, setColegios, loading, error } = useEspecialistaColegios({
     trimestreSeleccionado,
@@ -154,7 +158,18 @@ const EspecialistaDashboard = ({ user, onLogout }) => {
   const handleChangeView = (view) => {
     setActiveView(view);
     setSelectedColegio(null);
+    setIsChangePasswordOpen(false);
     syncRolePath('especialista', view);
+  };
+
+  const openChangePasswordModal = () => {
+    setIsChangePasswordOpen(true);
+    syncRolePath('especialista', activeView, { modal: 'credenciales' });
+  };
+
+  const closeChangePasswordModal = () => {
+    setIsChangePasswordOpen(false);
+    syncRolePath('especialista', activeView, { replace: true });
   };
 
   const handleSelectColegio = (colegio) => {
@@ -257,7 +272,7 @@ const EspecialistaDashboard = ({ user, onLogout }) => {
         ) : activeView === 'configuracion' ? (
           <EspecialistaConfiguracionView
             user={user}
-            onOpenChangePassword={() => setIsChangePasswordOpen(true)}
+            onOpenChangePassword={openChangePasswordModal}
           />
         ) : selectedColegio ? (
           <ColegioDetalle
@@ -290,7 +305,7 @@ const EspecialistaDashboard = ({ user, onLogout }) => {
 
         <ChangePasswordModal
           isOpen={isChangePasswordOpen}
-          onClose={() => setIsChangePasswordOpen(false)}
+          onClose={closeChangePasswordModal}
           mode="optional"
         />
 
