@@ -804,7 +804,6 @@ const getInstituciones = async (req, res) => {
       SELECT
         i.id,
         ${selectInstitucionColumn(columns, 'codigo_modular')},
-        ${selectInstitucionColumn(columns, 'ruc')},
         ${selectInstitucionColumn(columns, 'numero')},
         i.nombre,
         ${selectInstitucionColumn(columns, 'nivel_educativo')},
@@ -832,7 +831,7 @@ const getInstituciones = async (req, res) => {
 
 const updateInstitucion = async (req, res) => {
   const { id } = req.params;
-  const { codigo_modular, ruc, numero, nombre, nivel_educativo, modalidad, provincia, distrito } = req.body;
+  const { codigo_modular, numero, nombre, nivel_educativo, modalidad, provincia, distrito } = req.body;
 
   if (!nombre || !nivel_educativo || !modalidad || !provincia) {
     return res.status(400).json({ success: false, message: 'Nombre, nivel, modalidad y provincia son requeridos.' });
@@ -842,7 +841,6 @@ const updateInstitucion = async (req, res) => {
     const columns = await obtenerColumnasInstituciones();
     const candidates = [
       ['codigo_modular', codigo_modular || null],
-      ['ruc', ruc || null],
       ['numero', numero || null],
       ['nombre', nombre],
       ['nivel_educativo', nivel_educativo],

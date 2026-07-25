@@ -13,7 +13,6 @@
 CREATE TABLE IF NOT EXISTS instituciones (
   id                 INT AUTO_INCREMENT PRIMARY KEY,
   codigo_modular     VARCHAR(20) DEFAULT NULL COMMENT 'Codigo MINEDU unico',
-  ruc                VARCHAR(11) DEFAULT NULL COMMENT 'RUC de la institucion educativa si corresponde',
   numero             VARCHAR(20) DEFAULT NULL COMMENT 'Numero oficial de la institucion educativa',
   nombre             VARCHAR(200) NOT NULL COMMENT 'Nombre completo de la institucion',
   nivel_educativo    ENUM('inicial', 'primaria', 'secundaria', 'tecnico', 'superior') NOT NULL,
@@ -40,6 +39,7 @@ CREATE TABLE IF NOT EXISTS directores (
   apellido_materno   VARCHAR(100) DEFAULT NULL,
   celular            VARCHAR(20) DEFAULT NULL,
   email              VARCHAR(150) NOT NULL,
+  ruc                CHAR(11) DEFAULT NULL COMMENT 'RUC registrado desde el perfil del director',
   institucion_id     INT NOT NULL COMMENT 'Institucion donde es director',
   creado_en          TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
   actualizado_en     TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

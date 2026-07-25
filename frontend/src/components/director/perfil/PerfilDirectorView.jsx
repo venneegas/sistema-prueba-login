@@ -67,7 +67,7 @@ const PerfilDirectorView = ({ director, onProfileUpdate }) => {
       dni: director?.dni || '',
       celular: director?.celular || '',
       email: director?.email || director?.correo || '',
-      ruc: director?.ruc || director?.ruc_ie || director?.institucion_ruc || '',
+      ruc: director?.ruc || '',
     });
   }, [director]);
 
@@ -132,7 +132,7 @@ const PerfilDirectorView = ({ director, onProfileUpdate }) => {
       dni: director?.dni || '',
       celular: director?.celular || '',
       email: director?.email || director?.correo || '',
-      ruc: director?.ruc || director?.ruc_ie || director?.institucion_ruc || '',
+      ruc: director?.ruc || '',
     });
     setMessage(null);
     setEditMode(false);
@@ -142,7 +142,7 @@ const PerfilDirectorView = ({ director, onProfileUpdate }) => {
     { label: 'DNI', value: director?.dni || 'No disponible' },
     { label: 'Celular', value: director?.celular || 'No disponible' },
     { label: 'Correo', value: director?.email || director?.correo || 'No disponible' },
-    { label: 'RUC', value: director?.ruc || director?.ruc_ie || director?.institucion_ruc || 'No registrado' },
+    { label: 'RUC', value: director?.ruc || 'No registrado' },
   ];
 
   return (

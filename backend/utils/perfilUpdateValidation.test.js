@@ -33,3 +33,14 @@ test('rechaza un correo inválido', () => {
 test('rechaza un RUC con longitud inválida', () => {
   assert.throws(() => validateDirectorProfileUpdate({ ruc: '123' }), /RUC/i);
 });
+
+test('acepta RUC vacio como dato opcional', () => {
+  const result = validateDirectorProfileUpdate({
+    dni: '12345678',
+    celular: '987654321',
+    email: 'director@ugel.edu.pe',
+    ruc: ''
+  });
+
+  assert.equal(result.ruc, null);
+});

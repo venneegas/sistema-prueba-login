@@ -19,6 +19,21 @@ const obtenerTieneColumnaDebeCambiarPassword = async (connection) => {
   return columns.length > 0;
 };
 
+const obtenerTieneColumnaRucDirector = async (connection) => {
+  const [columns] = await connection.execute(
+    `
+      SELECT COLUMN_NAME
+      FROM INFORMATION_SCHEMA.COLUMNS
+      WHERE TABLE_SCHEMA = DATABASE()
+        AND TABLE_NAME = 'directores'
+        AND COLUMN_NAME = 'ruc'
+      LIMIT 1
+    `
+  );
+
+  return columns.length > 0;
+};
+
 /**
  * LOGIN
  * Valida contra la tabla usuarios de MySQL usando bcrypt.
@@ -44,6 +59,7 @@ const login = async (req, res) => {
   try {
     connection = await pool.getConnection();
     const tieneColumnaDebeCambiarPassword = await obtenerTieneColumnaDebeCambiarPassword(connection);
+    const tieneColumnaRucDirector = await obtenerTieneColumnaRucDirector(connection);
 
     const [usuarios] = await connection.execute(
       `
@@ -100,6 +116,7 @@ const login = async (req, res) => {
             d.apellido_materno,
             d.celular,
             d.email,
+            ${tieneColumnaRucDirector ? 'd.ruc' : 'NULL'} AS ruc,
             d.institucion_id,
             i.numero AS numero_ie,
             i.nombre AS nombre_ie
@@ -155,6 +172,7 @@ const login = async (req, res) => {
               apellido_materno: directorData.apellido_materno,
               celular: directorData.celular,
               email: directorData.email,
+              ruc: directorData.ruc,
               school: directorData.nombre_ie,
               numero_ie: directorData.numero_ie,
               institucion_id: directorData.institucion_id

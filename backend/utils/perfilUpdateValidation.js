@@ -32,10 +32,13 @@ const validateDirectorProfileUpdate = (payload = {}) => {
 
   const ruc = normalizeOptionalString(payload.ruc);
   if (ruc !== undefined) {
-    if (!/^\d{11}$/.test(ruc)) {
+    if (ruc === '') {
+      sanitized.ruc = null;
+    } else if (!/^\d{11}$/.test(ruc)) {
       throw new Error('El RUC debe contener exactamente 11 dígitos numéricos.');
+    } else {
+      sanitized.ruc = ruc;
     }
-    sanitized.ruc = ruc;
   }
 
   return sanitized;

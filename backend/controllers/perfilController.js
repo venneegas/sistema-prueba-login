@@ -3,6 +3,17 @@ const path = require('path');
 const { pool } = require('../config/db');
 const { validateDirectorProfileUpdate } = require('../utils/perfilUpdateValidation');
 
+const obtenerColumnasDirectores = async (connection) => {
+  const [rows] = await connection.execute(
+    `SELECT COLUMN_NAME
+     FROM INFORMATION_SCHEMA.COLUMNS
+     WHERE TABLE_SCHEMA = DATABASE()
+       AND TABLE_NAME = 'directores'`
+  );
+
+  return new Set(rows.map((row) => row.COLUMN_NAME));
+};
+
 const getPerfil = async (req, res) => {
   try {
     const { directorId } = req.params;
@@ -111,7 +122,7 @@ const actualizarDatosDirector = async (req, res) => {
         return res.status(404).json({ success: false, message: 'Director no encontrado.' });
       }
 
-      const director = directores[0];
+      const columnasDirectores = await obtenerColumnasDirectores(connection);
       const camposDirectores = [];
       const valoresDirectores = [];
 
@@ -130,17 +141,23 @@ const actualizarDatosDirector = async (req, res) => {
         valoresDirectores.push(datosActualizados.email);
       }
 
+      if (Object.prototype.hasOwnProperty.call(datosActualizados, 'ruc')) {
+        if (!columnasDirectores.has('ruc')) {
+          await connection.rollback();
+          return res.status(400).json({
+            success: false,
+            message: 'Falta agregar la columna ruc en la tabla directores.',
+          });
+        }
+
+        camposDirectores.push('ruc = ?');
+        valoresDirectores.push(datosActualizados.ruc);
+      }
+
       if (camposDirectores.length > 0) {
         await connection.execute(
           `UPDATE directores SET ${camposDirectores.join(', ')} WHERE id = ?`,
           [...valoresDirectores, Number(directorId)]
-        );
-      }
-
-      if (Object.prototype.hasOwnProperty.call(datosActualizados, 'ruc')) {
-        await connection.execute(
-          'UPDATE instituciones SET ruc = ? WHERE id = ?',
-          [datosActualizados.ruc, director.institucion_id]
         );
       }
 
